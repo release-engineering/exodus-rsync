@@ -18,6 +18,8 @@ import (
 
 // Interface defines the public interface of this package.
 type Interface interface {
+	// Load will load and return configuration from the most appropriate
+	// exodus-rsync config file.
 	Load(context.Context, args.Config) (Config, error)
 }
 
@@ -98,8 +100,6 @@ func loadFromPath(path string) (Config, error) {
 	return out, nil
 }
 
-// Load will load and return configuration from the most appropriate
-// exodus-rsync config file.
 func (impl) Load(ctx context.Context, args args.Config) (Config, error) {
 	logger := log.FromContext(ctx)
 
