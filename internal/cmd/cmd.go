@@ -99,7 +99,7 @@ func Main(rawArgs []string) int {
 
 	for _, item := range items {
 		publishItems = append(publishItems, gw.ItemInput{
-			WebUri:    item.SrcPath,
+			WebURI:    item.SrcPath,
 			ObjectKey: item.Key,
 			// TODO: remove me
 			FromDate: "abc123",

@@ -9,6 +9,7 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
+// Publish represents a publish object in exodus-gw.
 type Publish struct {
 	client *Client
 	raw    struct {
@@ -19,12 +20,14 @@ type Publish struct {
 	}
 }
 
+// ItemInput is a single item accepted for publish by the AddItems method.
 type ItemInput struct {
-	WebUri    string `json:"web_uri"`
+	WebURI    string `json:"web_uri"`
 	ObjectKey string `json:"object_key"`
 	FromDate  string `json:"from_date"`
 }
 
+// NewPublish creates and returns a new publish object within exodus-gw.
 func (c *Client) NewPublish(ctx context.Context) (Publish, error) {
 	url := "/" + c.env.GwEnv + "/publish"
 
@@ -38,10 +41,13 @@ func (c *Client) NewPublish(ctx context.Context) (Publish, error) {
 	return out, nil
 }
 
+// ID is the unique identifier of a publish.
 func (p *Publish) ID() string {
 	return p.raw.ID
 }
 
+// AddItems will add all of the specified items onto this publish.
+// This may involve multiple requests to exodus-gw.
 func (p *Publish) AddItems(ctx context.Context, items []ItemInput) error {
 	// TODO: break up items into batches as needed.
 
@@ -61,6 +67,12 @@ func (p *Publish) AddItems(ctx context.Context, items []ItemInput) error {
 	return c.doJSONRequest(ctx, "PUT", url, &body, &empty)
 }
 
+// Commit will cause this publish object to become committed, making all of
+// the included content available from the CDN.
+//
+// The commit operation within exodus-gw is asynchronous. This method will
+// wait for the commit to complete fully and will return nil only if the
+// commit has succeeded.
 func (p *Publish) Commit(ctx context.Context) error {
 	var err error
 
