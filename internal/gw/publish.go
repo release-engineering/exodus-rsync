@@ -9,9 +9,8 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
-// Publish represents a publish object in exodus-gw.
-type Publish struct {
-	client *Client
+type publish struct {
+	client *client
 	raw    struct {
 		ID    string
 		Env   string
@@ -28,10 +27,10 @@ type ItemInput struct {
 }
 
 // NewPublish creates and returns a new publish object within exodus-gw.
-func (c *Client) NewPublish(ctx context.Context) (Publish, error) {
+func (c *client) NewPublish(ctx context.Context) (Publish, error) {
 	url := "/" + c.env.GwEnv + "/publish"
 
-	out := Publish{}
+	out := &publish{}
 	if err := c.doJSONRequest(ctx, "POST", url, nil, &out.raw); err != nil {
 		return out, err
 	}
@@ -41,14 +40,13 @@ func (c *Client) NewPublish(ctx context.Context) (Publish, error) {
 	return out, nil
 }
 
-// ID is the unique identifier of a publish.
-func (p *Publish) ID() string {
+func (p *publish) ID() string {
 	return p.raw.ID
 }
 
 // AddItems will add all of the specified items onto this publish.
 // This may involve multiple requests to exodus-gw.
-func (p *Publish) AddItems(ctx context.Context, items []ItemInput) error {
+func (p *publish) AddItems(ctx context.Context, items []ItemInput) error {
 	// TODO: break up items into batches as needed.
 
 	c := p.client
@@ -73,7 +71,7 @@ func (p *Publish) AddItems(ctx context.Context, items []ItemInput) error {
 // The commit operation within exodus-gw is asynchronous. This method will
 // wait for the commit to complete fully and will return nil only if the
 // commit has succeeded.
-func (p *Publish) Commit(ctx context.Context) error {
+func (p *publish) Commit(ctx context.Context) error {
 	var err error
 
 	logger := log.FromContext(ctx)
@@ -86,7 +84,7 @@ func (p *Publish) Commit(ctx context.Context) error {
 		return err
 	}
 
-	task := Task{}
+	task := task{}
 	if err := c.doJSONRequest(ctx, "POST", url, nil, &task.raw); err != nil {
 		return err
 	}

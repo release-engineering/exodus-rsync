@@ -17,9 +17,11 @@ import (
 var ext = struct {
 	conf  conf.Interface
 	rsync rsync.Interface
+	gw    gw.Interface
 }{
 	conf.Package,
 	rsync.Package,
+	gw.Package,
 }
 
 // Main is the top-level entry point to the exodus-rsync command.
@@ -58,7 +60,7 @@ func Main(rawArgs []string) int {
 		}
 	}
 
-	gwClient, err := gw.NewClient(*env)
+	gwClient, err := ext.gw.NewClient(*env)
 	if err != nil {
 		logger.F("error", err).Error("can't initialize exodus-gw client")
 		return 101
