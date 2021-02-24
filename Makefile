@@ -12,7 +12,7 @@ exodus-rsync:
 
 # Run automated tests while gathering coverage info.
 check:
-	go test -coverprofile=coverage.out ./...
+	go test -coverprofile=coverage.out -coverpkg=./... ./...
 
 # Run linter.
 lint:
