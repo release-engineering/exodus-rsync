@@ -15,4 +15,4 @@
 # vendor/
 
 # Output binary
-exodus-rsync
+/exodus-rsync
