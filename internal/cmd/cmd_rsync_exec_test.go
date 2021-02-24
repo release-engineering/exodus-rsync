@@ -10,13 +10,6 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/rsync"
 )
 
-func MockController(t *testing.T) *gomock.Controller {
-	oldExt := ext
-	t.Cleanup(func() { ext = oldExt })
-
-	return gomock.NewController(t)
-}
-
 func TestMainExecRsync(t *testing.T) {
 	ctrl := MockController(t)
 

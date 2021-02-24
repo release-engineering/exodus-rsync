@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"os"
 	"testing"
 )
 
@@ -27,14 +26,9 @@ environments:
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			dir := t.TempDir()
-			confFile := dir + "/bad.conf"
+			SetConfig(t, tt.conf)
 
-			if err := os.WriteFile(confFile, []byte(tt.conf), 0644); err != nil {
-				t.Fatal(err)
-			}
-
-			args := []string{"exodus-rsync", "-vvv", "--exodus-conf", confFile, "src", "dest"}
+			args := []string{"exodus-rsync", "-vvv", "src", "dest"}
 
 			if got := Main(args); got != 23 {
 				t.Error("unexpected exit code", got)
