@@ -21,7 +21,8 @@ func TestParseOk(t *testing.T) {
 				"--delete",
 				"x",
 				"y"},
-			want: Config{Src: "x", Dest: "y"}},
+			want: Config{Src: "x", Dest: "y",
+				IgnoredConfig: IgnoredConfig{Recursive: true, Compress: true, Delete: true}}},
 
 		"verbose": {
 			input: []string{
@@ -38,7 +39,7 @@ func TestParseOk(t *testing.T) {
 				"+ */",
 				"x",
 				"y"},
-			want: Config{Src: "x", Dest: "y"}},
+			want: Config{Src: "x", Dest: "y", Filter: "+ */"}},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
