@@ -7,12 +7,18 @@ default: exodus-rsync
 fmt-cmd = if ! test -z $$($(1) | tee /dev/stderr); then echo $(2); exit 3; fi
 
 # Build the main binary for this project.
-exodus-rsync:
+exodus-rsync: generate
 	go build ./cmd/exodus-rsync
 
 # Run automated tests while gathering coverage info.
-check:
+# Generated mocks are excluded from coverage report.
+check: generate
 	go test -coverprofile=coverage.out -coverpkg=./... ./...
+	sed -e '/\/mock.go/ d' -i coverage.out
+
+# Run generate.
+generate:
+	go generate ./...
 
 # Run linter.
 lint:
@@ -37,4 +43,4 @@ clean:
 # Target for all checks applied in CI.
 all: exodus-rsync check lint fmt imports
 
-.PHONY: check default clean exodus-rsync lint fmt imports htmlcov all
+.PHONY: check default clean generate exodus-rsync lint fmt imports htmlcov all

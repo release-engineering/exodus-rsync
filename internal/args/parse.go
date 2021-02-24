@@ -35,6 +35,13 @@ type IgnoredConfig struct {
 	Archive        bool `short:"a"`
 }
 
+// ExodusConfig defines arguments which are specific to exodus-rsync and not supported
+// by rsync. To avoid clashes with rsync, all of these are prefixed with "--exodus"
+// and there are no short flags.
+type ExodusConfig struct {
+	Conf string `help:"Force usage of this configuration file."`
+}
+
 // Config contains the subset of arguments which are returned by the parser and
 // can affect the behavior of exodus-rsync.
 type Config struct {
@@ -50,8 +57,8 @@ type Config struct {
 	// This should be parsed but not exposed
 	Filter filterArgument `short:"f" hidden:"1"`
 
-	// includes all the ignored arguments
 	IgnoredConfig `embed:"1" group:"ignored"`
+	ExodusConfig  `embed:"1" prefix:"exodus-"`
 }
 
 // Parse will parse provided command-line arguments and either return
@@ -72,6 +79,7 @@ func Parse(args []string, exit func(int)) Config {
 	kong.Parse(&out,
 		kong.Exit(exit),
 		kong.ExplicitGroups([]kong.Group{
+
 			{Key: "ignored",
 				Title: "Ignored flags:",
 				Description: "The following arguments are accepted for compatibility with rsync, " +

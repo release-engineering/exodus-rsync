@@ -12,6 +12,23 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
+//go:generate go run -modfile ../../go.tools.mod github.com/golang/mock/mockgen -package $GOPACKAGE -destination mock.go -source $GOFILE
+
+// Interface defines the public interface of this package.
+type Interface interface {
+	// Exec will prepare and execute an rsync command according to the configuration
+	// and arguments passed into exodus-rsync.
+	//
+	// Note that the command is run using the execve syscall, meaning that it
+	// *replaces* the current process. It never returns, unless an error occurs.
+	Exec(context.Context, conf.Config, args.Config) error
+}
+
+type impl struct{}
+
+// Package provides the default implementation of this package's interface.
+var Package Interface = impl{}
+
 func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []string {
 	logger := log.FromContext(ctx)
 
@@ -70,12 +87,7 @@ func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []st
 	return argv
 }
 
-// Exec will prepare and execute an rsync command according to the configuration
-// and arguments passed into exodus-rsync.
-//
-// Note that the command is run using the execve syscall, meaning that it
-// *replaces* the current process. It never returns, unless an error occurs.
-func Exec(ctx context.Context, cfg conf.Config, args args.Config) error {
+func (impl) Exec(ctx context.Context, cfg conf.Config, args args.Config) error {
 	return syscall.Exec(
 		// TODO: look up path properly, ensure we don't look up ourselves
 		"/usr/bin/rsync",

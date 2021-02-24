@@ -14,6 +14,14 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/walk"
 )
 
+var ext = struct {
+	conf  conf.Interface
+	rsync rsync.Interface
+}{
+	conf.Package,
+	rsync.Package,
+}
+
 // Main is the top-level entry point to the exodus-rsync command.
 func Main(rawArgs []string) int {
 	parsedArgs := args.Parse(rawArgs, nil)
@@ -33,7 +41,7 @@ func Main(rawArgs []string) int {
 
 	ctx = log.NewContext(ctx, &logger)
 
-	cfg, err := conf.Load(ctx)
+	cfg, err := ext.conf.Load(ctx, parsedArgs)
 	if err != nil {
 		logger.WithField("error", err).Error("can't load config")
 		return 23
@@ -44,7 +52,7 @@ func Main(rawArgs []string) int {
 	env := cfg.EnvironmentForDest(ctx, parsedArgs.Dest)
 	if env == nil {
 		// just run rsync
-		if err := rsync.Exec(ctx, cfg, parsedArgs); err != nil {
+		if err := ext.rsync.Exec(ctx, cfg, parsedArgs); err != nil {
 			logger.WithField("error", err).Error("can't exec rsync")
 			return 94
 		}
