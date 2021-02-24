@@ -7,11 +7,24 @@ import (
 	"strings"
 
 	"github.com/adrg/xdg"
+	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 	"gopkg.in/yaml.v3"
 )
 
 // TODO: make everything in Environment able to override Config
+
+//go:generate go run -modfile ../../go.tools.mod github.com/golang/mock/mockgen -package $GOPACKAGE -destination mock.go -source $GOFILE
+
+// Interface defines the public interface of this package.
+type Interface interface {
+	Load(context.Context, args.Config) (Config, error)
+}
+
+type impl struct{}
+
+// Package provides the default implementation of this package's interface.
+var Package Interface = impl{}
 
 // Environment contains configuration relevant to a single target host/environment.
 type Environment struct {
@@ -87,12 +100,15 @@ func loadFromPath(path string) (Config, error) {
 
 // Load will load and return configuration from the most appropriate
 // exodus-rsync config file.
-func Load(ctx context.Context) (Config, error) {
+func (impl) Load(ctx context.Context, args args.Config) (Config, error) {
 	logger := log.FromContext(ctx)
 
 	candidates := candidatePaths()
+	if args.Conf != "" {
+		candidates = []string{args.Conf}
+	}
 
-	for _, candidate := range candidatePaths() {
+	for _, candidate := range candidates {
 		_, err := os.Stat(candidate)
 		if err == nil {
 			logger.F("path", candidate).Debug("loading config")
