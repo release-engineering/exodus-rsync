@@ -29,11 +29,11 @@ type Client struct {
 }
 
 func (c *Client) doJSONRequest(ctx context.Context, method string, url string, body io.Reader, target interface{}) error {
-	fullUrl := c.env.Config.GwURL + url
-	req, err := http.NewRequestWithContext(ctx, method, fullUrl, body)
+	fullURL := c.env.Config.GwURL + url
+	req, err := http.NewRequestWithContext(ctx, method, fullURL, body)
 
 	if err != nil {
-		return fmt.Errorf("preparing request to %s: %w", fullUrl, err)
+		return fmt.Errorf("preparing request to %s: %w", fullURL, err)
 	}
 
 	req.Header["Accept"] = []string{"application/json"}
@@ -114,7 +114,20 @@ func (c *Client) uploadBlob(ctx context.Context, item walk.SyncItem) error {
 	return nil
 }
 
-func (c *Client) EnsureUploaded(ctx context.Context, items []walk.SyncItem, onUploaded func(walk.SyncItem) error, onPresent func(walk.SyncItem) error) error {
+// EnsureUploaded will process every given item for sync and ensure that the content
+// is present in the target exodus-gw environment.
+//
+// For each item, onUploaded is invoked if the item was uploaded during the call,
+// while onPresent is invoked if the item was already present prior to the call.
+//
+// In either case, returning from the callback with an error will cause EnsureUploaded
+// to stop and return the same error.
+func (c *Client) EnsureUploaded(
+	ctx context.Context,
+	items []walk.SyncItem,
+	onUploaded func(walk.SyncItem) error,
+	onPresent func(walk.SyncItem) error,
+) error {
 	// TODO: concurrency
 	for _, item := range items {
 		// Check if it's present
@@ -141,6 +154,8 @@ func (c *Client) EnsureUploaded(ctx context.Context, items []walk.SyncItem, onUp
 	return nil
 }
 
+// NewClient creates and returns a new exodus-gw client pointing at the
+// given Environment (from the configuration file).
 func NewClient(env conf.Environment) (*Client, error) {
 	// TODO: should support loading these from environment too.
 	cert, err := tls.LoadX509KeyPair(env.Config.GwCert, env.Config.GwKey)
@@ -179,27 +194,4 @@ func NewClient(env conf.Environment) (*Client, error) {
 
 func (c *Client) url(path string) string {
 	return c.env.Config.GwURL + "/" + path
-}
-
-func (c *Client) WhoAmI() (interface{}, error) {
-	url := c.url("whoami")
-	var resp *http.Response
-	var err error
-	if resp, err = c.httpClient.Get(url); err != nil {
-		return nil, fmt.Errorf("GET %s: %w", url, err)
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("GET %s failed: %s", url, resp.Status)
-	}
-
-	dec := json.NewDecoder(resp.Body)
-	var data interface{}
-	if err = dec.Decode(&data); err != nil {
-		return nil, fmt.Errorf("can't parse %s body: %w", url, err)
-	}
-
-	return data, err
 }

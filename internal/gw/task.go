@@ -8,11 +8,12 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
+// Task represents a single task object within exodus-gw.
 type Task struct {
 	client *Client
 	raw    struct {
 		ID        string
-		PublishId string
+		PublishID string
 		State     string
 		Links     map[string]string
 	}
@@ -31,10 +32,15 @@ func (t *Task) refresh(ctx context.Context) error {
 	return t.client.doJSONRequest(ctx, "GET", url, nil, &t.raw)
 }
 
+// ID is the unique ID of this task.
 func (t *Task) ID() string {
 	return t.raw.ID
 }
 
+// Await will repeatedly refresh the state of this task from exodus-gw
+// and return once the task has reached a terminal state.
+//
+// The return value will be nil if and only if the task succeeded.
 func (t *Task) Await(ctx context.Context) error {
 	logger := log.FromContext(ctx)
 

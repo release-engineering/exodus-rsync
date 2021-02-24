@@ -104,6 +104,8 @@ func Load(ctx context.Context) (Config, error) {
 	return Config{}, fmt.Errorf("no existing config file in: %s", strings.Join(candidates, ", "))
 }
 
+// EnvironmentForDest finds and returns an Environment matching the specified rsync
+// destination, or nil if no Environment matches.
 func (c *Config) EnvironmentForDest(ctx context.Context, dest string) *Environment {
 	logger := log.FromContext(ctx)
 

@@ -14,6 +14,10 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/syncutil"
 )
 
+// SyncItemHandler is a callback invoked on each sync item as discovered while
+// walking the source tree for publish.
+//
+// If it returns an error, the walk process is stopped.
 type SyncItemHandler func(item SyncItem) error
 
 type walkItem struct {
@@ -153,6 +157,8 @@ func getSyncItems(ctx context.Context, path string) <-chan syncItemPrivate {
 	return c
 }
 
+// Walk will walk the directory tree at the given path and invoke a handler
+// for every discovered item eligible for sync.
 func Walk(ctx context.Context, path string, handler SyncItemHandler) error {
 	logger := log.FromContext(ctx)
 
