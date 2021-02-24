@@ -16,7 +16,7 @@ check:
 
 # Run linter.
 lint:
-	golint -set_exit_status ./...
+	go run -modfile=go.tools.mod golang.org/x/lint/golint -set_exit_status ./...
 
 # Reformat code, failing if any code was rewritten.
 fmt:
@@ -24,7 +24,7 @@ fmt:
 
 # Tidy imports, failing if any code was rewritten.
 imports:
-	@$(call fmt-cmd, goimports -l -w ., files were rewritten by goimports)
+	@$(call fmt-cmd, go run -modfile=go.tools.mod golang.org/x/tools/cmd/goimports -l -w ., files were rewritten by goimports)
 
 # Run tests and open coverage report in browser.
 htmlcov: check
