@@ -23,7 +23,6 @@ type publish struct {
 type ItemInput struct {
 	WebURI    string `json:"web_uri"`
 	ObjectKey string `json:"object_key"`
-	FromDate  string `json:"from_date"`
 }
 
 // NewPublish creates and returns a new publish object within exodus-gw.

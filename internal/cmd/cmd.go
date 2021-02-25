@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
+	"strings"
 
 	"github.com/apex/log/handlers/cli"
 	"github.com/release-engineering/exodus-rsync/internal/args"
@@ -22,6 +24,14 @@ var ext = struct {
 	conf.Package,
 	rsync.Package,
 	gw.Package,
+}
+
+func webURI(srcPath string, srcTree string, destTree string) string {
+	// TODO: handle the different behaviors when / is or is not given for src/dest
+	cleanSrcPath := path.Clean(srcPath)
+	cleanSrcTree := path.Clean(srcTree)
+	relPath := strings.TrimPrefix(cleanSrcPath, cleanSrcTree+"/")
+	return path.Join(destTree, relPath)
 }
 
 // Main is the top-level entry point to the exodus-rsync command.
@@ -109,10 +119,8 @@ func Main(rawArgs []string) int {
 
 	for _, item := range items {
 		publishItems = append(publishItems, gw.ItemInput{
-			WebURI:    item.SrcPath,
+			WebURI:    webURI(item.SrcPath, parsedArgs.Src, parsedArgs.DestPath()),
 			ObjectKey: item.Key,
-			// TODO: remove me
-			FromDate: "abc123",
 		})
 	}
 
