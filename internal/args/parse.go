@@ -3,6 +3,7 @@ package args
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/alecthomas/kong"
 )
@@ -59,6 +60,17 @@ type Config struct {
 
 	IgnoredConfig `embed:"1" group:"ignored"`
 	ExodusConfig  `embed:"1" prefix:"exodus-"`
+}
+
+// DestPath returns only the path portion of the destination argument passed
+// on the command-line.
+// For example, if invoked with user@host.example.com:/some/dir,
+// this will return "/some/dir".
+func (c *Config) DestPath() string {
+	if strings.Contains(c.Dest, ":") {
+		return strings.SplitN(c.Dest, ":", 2)[1]
+	}
+	return ""
 }
 
 // Parse will parse provided command-line arguments and either return
