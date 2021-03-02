@@ -63,7 +63,7 @@ func candidatePaths() []string {
 func loadFromPath(path string) (Config, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return Config{}, fmt.Errorf("can't open %s: %w", path, err)
+		return Config{}, err
 	}
 	defer file.Close()
 
