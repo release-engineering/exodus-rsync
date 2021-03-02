@@ -161,7 +161,7 @@ func (impl) NewClient(env conf.Environment) (Client, error) {
 	}
 	out.httpClient = &http.Client{Transport: &transport}
 
-	sess, err := session.NewSessionWithOptions(session.Options{
+	sess, err := ext.awsSessionProvider(session.Options{
 		SharedConfigState: session.SharedConfigDisable,
 		Config: aws.Config{
 			Endpoint:         aws.String(env.Config.GwURL + "/upload"),
