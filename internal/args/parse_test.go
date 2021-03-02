@@ -74,3 +74,22 @@ func TestParseErrors(t *testing.T) {
 		})
 	}
 }
+
+func TestDestPath(t *testing.T) {
+	tests := []struct {
+		name string
+		dest string
+		want string
+	}{
+		{"no : in dest", "some-dest", ""},
+		{": in dest", "user@somehost:/some/rsync/path", "/some/rsync/path"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := Config{Dest: tt.dest}
+			if got := c.DestPath(); got != tt.want {
+				t.Errorf("Config.DestPath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
