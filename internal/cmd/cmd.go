@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"path"
 	"strings"
 
@@ -102,7 +101,7 @@ func Main(rawArgs []string) int {
 
 	publish, err := gwClient.NewPublish(ctx)
 	if err != nil {
-		fmt.Printf("Can't create a publish: %s\n", err)
+		logger.F("error", err).Error("can't create publish")
 		return 62
 	}
 	logger.F("publish", publish.ID()).Info("Created publish")
@@ -118,7 +117,7 @@ func Main(rawArgs []string) int {
 
 	err = publish.AddItems(ctx, publishItems)
 	if err != nil {
-		fmt.Printf("Failed to add items to publish: %v\n", err)
+		logger.F("error", err).Error("can't add items to publish")
 		return 51
 	}
 
@@ -126,7 +125,7 @@ func Main(rawArgs []string) int {
 
 	err = publish.Commit(ctx)
 	if err != nil {
-		fmt.Printf("Failed to commit publish: %v\n", err)
+		logger.F("error", err).Error("can't commit publish")
 		return 71
 	}
 
