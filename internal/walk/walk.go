@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"hash"
 	"io"
 	"io/fs"
 	"os"
@@ -58,19 +59,18 @@ func walkRawItems(ctx context.Context, path string, handler func(walkItem)) erro
 	return filepath.WalkDir(path, walkFunc)
 }
 
-func fileSha256Sum(path string) (string, error) {
+func fileHash(path string, hasher hash.Hash) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return "", fmt.Errorf("open %s: %w", path, err)
+		return "", err
 	}
 	defer file.Close()
 
-	h := sha256.New()
-	if _, err := io.Copy(h, file); err != nil {
+	if _, err := io.Copy(hasher, file); err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%x", h.Sum(nil)), nil
+	return fmt.Sprintf("%x", hasher.Sum(nil)), nil
 }
 
 func fillItem(ctx context.Context, c chan<- syncItemPrivate, w walkItem) error {
@@ -86,7 +86,7 @@ func fillItem(ctx context.Context, c chan<- syncItemPrivate, w walkItem) error {
 		return nil
 	}
 
-	key, err := fileSha256Sum(w.SrcPath)
+	key, err := fileHash(w.SrcPath, sha256.New())
 	if err != nil {
 		return fmt.Errorf("checksum %s: %w", w.SrcPath, err)
 	}
@@ -165,6 +165,9 @@ func Walk(ctx context.Context, path string, handler SyncItemHandler) error {
 	for item := range getSyncItems(ctx, path) {
 		logger.F("item", item).Debug("got item")
 
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
 		if item.Error != nil {
 			return item.Error
 		}
