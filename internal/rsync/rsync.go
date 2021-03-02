@@ -29,6 +29,13 @@ type impl struct{}
 // Package provides the default implementation of this package's interface.
 var Package Interface = impl{}
 
+// Externals which may be swapped out during tests.
+var ext = struct {
+	exec func(string, []string, []string) error
+}{
+	syscall.Exec,
+}
+
 func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []string {
 	logger := log.FromContext(ctx)
 
@@ -88,7 +95,7 @@ func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []st
 }
 
 func (impl) Exec(ctx context.Context, cfg conf.Config, args args.Config) error {
-	return syscall.Exec(
+	return ext.exec(
 		// TODO: look up path properly, ensure we don't look up ourselves
 		"/usr/bin/rsync",
 		rsyncArguments(ctx, cfg, args),
