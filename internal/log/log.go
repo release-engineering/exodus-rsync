@@ -2,12 +2,30 @@ package log
 
 import (
 	"context"
+	"os"
 
+	"github.com/apex/log"
 	apexLog "github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
+	"github.com/release-engineering/exodus-rsync/internal/args"
 )
 
 // This package thinly wraps apex/log with some helpers to make logger
 // usage a little less cumbersome.
+
+//go:generate go run -modfile ../../go.tools.mod github.com/golang/mock/mockgen -package $GOPACKAGE -destination mock.go -source $GOFILE
+
+// Interface defines the public interface of this package.
+type Interface interface {
+	// NewLogger will construct and return a logger appropriately configured to
+	// serve as the primary logger throughout exodus-rsync.
+	NewLogger(args.Config) *Logger
+}
+
+type impl struct{}
+
+// Package provides the default implementation of this package's interface.
+var Package Interface = impl{}
 
 // InfoLevel is appropriate for messages which should be
 // visible by default to users of exodus-rsync.
@@ -24,11 +42,15 @@ func NewContext(ctx context.Context, v apexLog.Interface) context.Context {
 }
 
 // FromContext returns the logger within a context previously created via
-// NewContext.
+// NewContext, or nil if unset.
 //
 // Throughout exodus-gw, this should be the primary method of obtaining a logger.
 func FromContext(ctx context.Context) *Logger {
-	return apexLog.FromContext(ctx).(*Logger)
+	out, castOk := apexLog.FromContext(ctx).(*Logger)
+	if !castOk {
+		return nil
+	}
+	return out
 }
 
 // Logger wraps an apex logger with additional utilities.
@@ -57,4 +79,18 @@ func (l *Logger) F(v ...interface{}) *apexLog.Entry {
 	}
 
 	return l.WithFields(fields)
+}
+
+func (impl) NewLogger(args args.Config) *Logger {
+	logger := Logger{}
+
+	// TODO: use conf.Config for something?
+	logger.Handler = cli.New(os.Stdout)
+	logger.Level = log.InfoLevel
+	if args.Verbose >= 1 {
+		// TODO: think we need more loggers.
+		logger.Level = log.DebugLevel
+	}
+
+	return &logger
 }

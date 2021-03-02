@@ -3,11 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"path"
 	"strings"
 
-	"github.com/apex/log/handlers/cli"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
@@ -20,10 +18,12 @@ var ext = struct {
 	conf  conf.Interface
 	rsync rsync.Interface
 	gw    gw.Interface
+	log   log.Interface
 }{
 	conf.Package,
 	rsync.Package,
 	gw.Package,
+	log.Package,
 }
 
 func webURI(srcPath string, srcTree string, destTree string) string {
@@ -38,20 +38,12 @@ func webURI(srcPath string, srcTree string, destTree string) string {
 func Main(rawArgs []string) int {
 	parsedArgs := args.Parse(rawArgs, nil)
 
-	logger := log.Logger{}
-
-	// TODO: configurable logging
-	logger.Handler = cli.New(os.Stdout)
-	logger.Level = log.InfoLevel
-	if parsedArgs.Verbose >= 1 {
-		// TODO: think we need more loggers.
-		logger.Level = log.DebugLevel
-	}
+	logger := ext.log.NewLogger(parsedArgs)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	ctx = log.NewContext(ctx, &logger)
+	ctx = log.NewContext(ctx, logger)
 
 	cfg, err := ext.conf.Load(ctx, parsedArgs)
 	if err != nil {
