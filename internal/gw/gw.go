@@ -3,6 +3,7 @@ package gw
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/walk"
 )
@@ -20,6 +21,13 @@ type impl struct{}
 
 // Package provides the default implementation of this package's interface.
 var Package Interface = impl{}
+
+// External dependencies which may be overridden from tests.
+var ext = struct {
+	awsSessionProvider func(session.Options) (*session.Session, error)
+}{
+	session.NewSessionWithOptions,
+}
 
 // Client provides a high-level interface to the exodus-gw HTTP API.
 type Client interface {
