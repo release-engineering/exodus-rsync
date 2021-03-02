@@ -14,7 +14,7 @@ exodus-rsync: generate
 # Generated mocks are excluded from coverage report.
 check: generate
 	go test -coverprofile=coverage.out -coverpkg=./... ./...
-	sed -e '/\/mock.go/ d' -i coverage.out
+	sed -e '/[\/_]mock.go/ d' -i coverage.out
 
 # Run generate.
 generate:
