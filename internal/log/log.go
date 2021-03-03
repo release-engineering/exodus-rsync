@@ -92,5 +92,7 @@ func (impl) NewLogger(args args.Config) *Logger {
 		logger.Level = log.DebugLevel
 	}
 
+	// TODO: enable debug logs from AWS SDK if verbose is high enough.
+
 	return &logger
 }
