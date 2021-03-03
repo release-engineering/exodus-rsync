@@ -40,7 +40,7 @@ func (c *client) doJSONRequest(ctx context.Context, method string, url string, b
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("%s %s: %w", req.Method, req.URL, err)
+		return err
 	}
 
 	defer resp.Body.Close()
@@ -180,8 +180,4 @@ func (impl) NewClient(env conf.Environment) (Client, error) {
 	out.uploader = s3manager.NewUploaderWithClient(out.s3)
 
 	return out, nil
-}
-
-func (c *client) url(path string) string {
-	return c.env.Config.GwURL + "/" + path
 }

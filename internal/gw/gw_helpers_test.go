@@ -19,6 +19,12 @@ type fakeGw struct {
 
 	// Existing publish objects
 	publishes publishMap
+
+	// If non-nil, forces next HTTP request to return this error.
+	nextHTTPError error
+
+	// If non-nil, forces next HTTP request to return this response
+	nextHTTPResponse *http.Response
 }
 
 type publishMap map[string]*fakePublish
@@ -42,6 +48,18 @@ func (p *fakePublish) nextState() string {
 func (f *fakeGw) RoundTrip(r *http.Request) (*http.Response, error) {
 	if r.Body != nil {
 		defer r.Body.Close()
+	}
+
+	if f.nextHTTPError != nil {
+		err := f.nextHTTPError
+		f.nextHTTPError = nil
+		return nil, err
+	}
+
+	if f.nextHTTPResponse != nil {
+		out := f.nextHTTPResponse
+		f.nextHTTPResponse = nil
+		return out, nil
 	}
 
 	out := &http.Response{}
