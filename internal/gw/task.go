@@ -37,6 +37,7 @@ func (t *task) ID() string {
 
 func (t *task) Await(ctx context.Context) error {
 	logger := log.FromContext(ctx)
+	pollDuration := time.Millisecond * time.Duration(t.client.env.Config.GwPollInterval)
 
 	for {
 		if t.raw.State == "COMPLETE" {
@@ -54,8 +55,7 @@ func (t *task) Await(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		// TODO: make duration configurable
-		case <-time.After(time.Second * 5):
+		case <-time.After(pollDuration):
 		}
 
 		if err := t.refresh(ctx); err != nil {

@@ -48,6 +48,9 @@ type Config struct {
 	// Base URL of exodus-gw service in use.
 	GwURL string
 
+	// How often to poll for task updates, in milliseconds.
+	GwPollInterval int
+
 	// Configuration for each environment.
 	Environments []Environment
 }
@@ -68,7 +71,7 @@ func loadFromPath(path string) (Config, error) {
 	defer file.Close()
 
 	dec := yaml.NewDecoder(file)
-	out := Config{}
+	out := Config{GwPollInterval: 5000}
 	err = dec.Decode(&out)
 	if err != nil {
 		return Config{}, fmt.Errorf("can't parse %s: %w", path, err)
