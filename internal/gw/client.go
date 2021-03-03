@@ -1,6 +1,7 @@
 package gw
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
@@ -27,9 +28,21 @@ type client struct {
 	uploader   *s3manager.Uploader
 }
 
-func (c *client) doJSONRequest(ctx context.Context, method string, url string, body io.Reader, target interface{}) error {
+func (c *client) doJSONRequest(ctx context.Context, method string, url string, body interface{}, target interface{}) error {
+	var bodyReader io.Reader
+	if body == nil {
+		bodyReader = nil
+	} else {
+		buf := bytes.Buffer{}
+		enc := json.NewEncoder(&buf)
+		if err := enc.Encode(body); err != nil {
+			return fmt.Errorf("encoding request body: %w", err)
+		}
+		bodyReader = &buf
+	}
+
 	fullURL := c.env.Config.GwURL + url
-	req, err := http.NewRequestWithContext(ctx, method, fullURL, body)
+	req, err := http.NewRequestWithContext(ctx, method, fullURL, bodyReader)
 
 	if err != nil {
 		return fmt.Errorf("preparing request to %s: %w", fullURL, err)

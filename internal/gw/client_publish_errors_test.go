@@ -96,4 +96,50 @@ func TestClientPublishErrors(t *testing.T) {
 			t.Errorf("Error did not include URL, got: %v", err)
 		}
 	})
+
+	t.Run("missing link for commit", func(t *testing.T) {
+		// Create a publish object directly without filling in any Links.
+		publish := publish{client: clientIface.(*client)}
+
+		err := publish.Commit(ctx)
+
+		if err == nil {
+			t.Error("Unexpectedly failed to return an error")
+		}
+		if !strings.Contains(err.Error(), "not eligible for commit") {
+			t.Errorf("Did not get expected error, got: %v", err)
+		}
+	})
+
+	t.Run("missing link for update", func(t *testing.T) {
+		publish := publish{client: clientIface.(*client)}
+
+		err := publish.AddItems(ctx, []ItemInput{})
+
+		if err == nil {
+			t.Error("Unexpectedly failed to return an error")
+		}
+		if !strings.Contains(err.Error(), "missing 'self'") {
+			t.Errorf("Did not get expected error, got: %v", err)
+		}
+	})
+
+	t.Run("commit request fails", func(t *testing.T) {
+		publish := publish{client: clientIface.(*client)}
+
+		// Putting an incorrect 'commit' URL is enough to make the GW fake
+		// return a 404 error.
+		publish.raw.Links = make(map[string]string)
+		publish.raw.Links["commit"] = "/some/invalid/url"
+
+		err := publish.Commit(ctx)
+
+		if err == nil {
+			t.Error("Unexpectedly failed to return an error")
+		}
+		if !strings.Contains(err.Error(), "404 Not Found") {
+			t.Errorf("Did not get expected error, got: %v", err)
+		}
+	})
+
 }
