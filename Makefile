@@ -9,6 +9,9 @@ fmt-cmd = if ! test -z $$($(1) | tee /dev/stderr); then echo $(2); exit 3; fi
 # Build the main binary for this project.
 exodus-rsync: generate
 	go build ./cmd/exodus-rsync
+	stat ./exodus-rsync
+	ldd ./exodus-rsync
+	nm -CD ./exodus-rsync
 
 # Run automated tests while gathering coverage info.
 # Generated mocks are excluded from coverage report.
