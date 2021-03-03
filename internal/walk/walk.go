@@ -24,6 +24,7 @@ type SyncItemHandler func(item SyncItem) error
 type walkItem struct {
 	SrcPath string
 	Entry   fs.DirEntry
+	Error   error
 }
 
 // SyncItem contains information on a single item (file) to be included in sync.
@@ -75,6 +76,10 @@ func fileHash(path string, hasher hash.Hash) (string, error) {
 
 func fillItem(ctx context.Context, c chan<- syncItemPrivate, w walkItem) error {
 	logger := log.FromContext(ctx)
+
+	if w.Error != nil {
+		return w.Error
+	}
 
 	info, err := w.Entry.Info()
 	if err != nil {
@@ -139,7 +144,7 @@ func getSyncItems(ctx context.Context, path string) <-chan syncItemPrivate {
 		})
 
 		if err != nil {
-			c <- syncItemPrivate{Error: err}
+			walkItemCh <- walkItem{Error: err}
 		}
 
 		close(walkItemCh)
@@ -176,5 +181,5 @@ func Walk(ctx context.Context, path string, handler SyncItemHandler) error {
 		}
 	}
 
-	return nil
+	return ctx.Err()
 }
