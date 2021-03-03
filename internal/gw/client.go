@@ -94,7 +94,7 @@ func (c *client) uploadBlob(ctx context.Context, item walk.SyncItem) error {
 
 	file, err := os.Open(item.SrcPath)
 	if err != nil {
-		return fmt.Errorf("upload (open) %s: %w", item.SrcPath, err)
+		return err
 	}
 	defer file.Close()
 
@@ -105,7 +105,7 @@ func (c *client) uploadBlob(ctx context.Context, item walk.SyncItem) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("upload (s3) %s: %w", item.SrcPath, err)
+		return fmt.Errorf("upload %s: %w", item.SrcPath, err)
 	}
 
 	logger.F("location", res.Location).Debug("uploaded blob")
