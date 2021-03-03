@@ -1,9 +1,7 @@
 package gw
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/release-engineering/exodus-rsync/internal/log"
@@ -54,14 +52,8 @@ func (p *publish) AddItems(ctx context.Context, items []ItemInput) error {
 		return fmt.Errorf("publish object is missing 'self' link: %+v", p.raw)
 	}
 
-	body := bytes.Buffer{}
-	enc := json.NewEncoder(&body)
-	if err := enc.Encode(items); err != nil {
-		return fmt.Errorf("encoding items as JSON: %w", err)
-	}
-
 	empty := struct{}{}
-	return c.doJSONRequest(ctx, "PUT", url, &body, &empty)
+	return c.doJSONRequest(ctx, "PUT", url, items, &empty)
 }
 
 // Commit will cause this publish object to become committed, making all of

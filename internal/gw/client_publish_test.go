@@ -59,6 +59,21 @@ func TestClientPublish(t *testing.T) {
 		t.Errorf("publish state incorrect after adding items, have items: %v", gotItems)
 	}
 
+	// If task transitions to FAILED...
+	gw.publishes[publish.ID()].taskStates = []string{"NOT_STARTED", "IN_PROGRESS", "FAILED"}
+
+	// ...then a request to commit should return an error
+	err = publish.Commit(ctx)
+	if err == nil {
+		t.Errorf("unexpectedly failed to get an error from commit")
+	}
+	if err.Error() != "publish task task-abc-123-456 failed" {
+		t.Errorf("got unexpected error = %v", err)
+	}
+
+	// While if it transitions to COMPLETE...
+	gw.publishes[publish.ID()].taskStates = []string{"NOT_STARTED", "IN_PROGRESS", "COMPLETE"}
+
 	// We should be able to commit the result
 	err = publish.Commit(ctx)
 	if err != nil {
