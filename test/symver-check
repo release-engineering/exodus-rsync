@@ -1,0 +1,36 @@
+#!/bin/bash
+# A test script to ensure portability of exodus-rsync binary.
+#
+# If exodus-rsync is built on a platform with a sufficiently new glibc,
+# it'll end up dynamically linked against versioned symbols not available
+# on older versions, making the binary not portable to older distributions.
+# This script aims to detect such situations, and exits with a non-zero
+# exit code if found.
+set -e
+set -o pipefail
+
+# glibc 2.12 is the version on RHEL6
+GLIBC2_MAXVER=12
+
+SUBJECT=exodus-rsync
+
+glibc_symvers_present(){
+  nm -uD $SUBJECT | { egrep --only-matching 'GLIBC_2\.[0-9.]+' || :; } | sort | uniq
+}
+
+check_glibc_symver(){
+  # Get minor component only
+  ver=$(echo $1 | sed -r -e 's|^GLIBC_2\.([0-9]+).*|\1|')
+  ver_ok=$(expr $ver '<=' $GLIBC2_MAXVER || :)
+
+  if test $ver_ok != 1; then
+    echo "ERROR: $SUBJECT is linked against too new glibc symbols:" 1>&2
+    # Output the symbols to make it clearer
+    nm -uD $SUBJECT | fgrep "GLIBC_2.$ver" 1>&2
+    exit 5
+  fi
+}
+
+glibc_symvers_present | while read symver; do
+  check_glibc_symver $symver
+done

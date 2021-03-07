@@ -32,6 +32,10 @@ fmt:
 imports:
 	@$(call fmt-cmd, go run -modfile=go.tools.mod golang.org/x/tools/cmd/goimports -l -w ., files were rewritten by goimports)
 
+# Check for glibc symbol versioning problems.
+symver-check: exodus-rsync
+	test/symver-check
+
 # Run tests and open coverage report in browser.
 htmlcov: check
 	go tool cover -html=coverage.out
@@ -41,6 +45,6 @@ clean:
 	rm -f exodus-rsync coverage.out
 
 # Target for all checks applied in CI.
-all: exodus-rsync check lint fmt imports
+all: exodus-rsync check lint fmt imports symver-check
 
-.PHONY: check default clean generate exodus-rsync lint fmt imports htmlcov all
+.PHONY: check default clean generate exodus-rsync lint fmt imports symver-check htmlcov all
