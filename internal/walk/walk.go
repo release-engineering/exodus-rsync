@@ -8,7 +8,6 @@ import (
 	"io"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"runtime"
 
 	"github.com/release-engineering/exodus-rsync/internal/log"
@@ -37,27 +36,6 @@ type SyncItem struct {
 type syncItemPrivate struct {
 	SyncItem
 	Error error
-}
-
-func walkRawItems(ctx context.Context, path string, handler func(walkItem)) error {
-	logger := log.FromContext(ctx)
-
-	logger.F("path", path).Debug("start walking src tree")
-
-	var walkFunc fs.WalkDirFunc = func(path string, d fs.DirEntry, err error) error {
-		if ctx.Err() != nil {
-			return ctx.Err()
-		}
-
-		if err != nil {
-			return err
-		}
-
-		handler(walkItem{SrcPath: path, Entry: d})
-		return nil
-	}
-
-	return filepath.WalkDir(path, walkFunc)
 }
 
 func fileHash(path string, hasher hash.Hash) (string, error) {
@@ -139,8 +117,12 @@ func getSyncItems(ctx context.Context, path string) <-chan syncItemPrivate {
 	walkItemCh := make(chan walkItem, 10)
 
 	go func() {
-		err := walkRawItems(ctx, path, func(wi walkItem) {
-			walkItemCh <- wi
+		err := walkDirWithLinks(ctx, path, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			walkItemCh <- walkItem{SrcPath: path, Entry: d}
+			return nil
 		})
 
 		if err != nil {
