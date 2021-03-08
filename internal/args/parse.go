@@ -49,15 +49,8 @@ type Config struct {
 	// Adjust verbosity.
 	Verbose int `short:"v" type:"counter" help:"Increase verbosity; can be provided multiple times."`
 
-	// TODO: fail if publish contains any files.
-	// Note: the story with this is that some tools use an approach like this to implement
-	// a "remote mkdir":
-	// mkdir -p root/empty-dir
-	// rsync --ignore-existing root host:/dest/some/dir/which/should/be/created
-	// Since directories don't actually exist in exodus, that should be a no-op which
-	// successfully does nothing.  But any *other* attempted usage of --ignore-existing
-	// should be an error (we don't have the capability to skip content which is
-	// already present).
+	// Mostly ignored, but causes a failure if publish contains any files.
+	// See comments where the argument is checked for the explanation why.
 	IgnoreExisting bool `hidden:"1"`
 
 	// TODO: --dry-run, -n

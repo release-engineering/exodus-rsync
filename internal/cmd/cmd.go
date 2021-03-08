@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"path"
 	"strings"
 
@@ -70,6 +71,26 @@ func Main(rawArgs []string) int {
 	var items []walk.SyncItem
 
 	err = walk.Walk(ctx, parsedArgs.Src, func(item walk.SyncItem) error {
+		if parsedArgs.IgnoreExisting {
+			// This argument is not (properly) supported, so bail out.
+			//
+			// We only check the argument here (after we've found an item) because we want
+			// the argument to be accepted if we're running over a directory tree with no
+			// files.
+			//
+			// The story with this is that some tools use an approach somewhat like this
+			// to implement a "remote mkdir":
+			//
+			//   mkdir empty
+			//   rsync --ignore-existing empty host:/dest/some/dir/which/should/be/created
+			//
+			// Since directories don't actually exist in exodus and there is no need to
+			// create a directory before writing to a particular path, this should be a
+			// no-op which successfully does nothing.  But any *other* attempted usage of
+			// --ignore-existing would be dangerous to ignore, as we can't actually deliver
+			// the requested semantics, so make it an error.
+			return fmt.Errorf("--ignore-existing is not supported")
+		}
 		items = append(items, item)
 		return nil
 	})
