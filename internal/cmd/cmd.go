@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/release-engineering/exodus-rsync/internal/args"
@@ -27,10 +28,17 @@ var ext = struct {
 }
 
 func webURI(srcPath string, srcTree string, destTree string) string {
-	// TODO: handle the different behaviors when / is or is not given for src/dest
 	cleanSrcPath := path.Clean(srcPath)
 	cleanSrcTree := path.Clean(srcTree)
 	relPath := strings.TrimPrefix(cleanSrcPath, cleanSrcTree+"/")
+
+	// Presence of trailing slash changes the behavior when assembling
+	// destination paths, see "man rsync" and search for "trailing".
+	if srcTree != "." && !strings.HasSuffix(srcTree, "/") {
+		srcBase := filepath.Base(srcTree)
+		return path.Join(destTree, srcBase, relPath)
+	}
+
 	return path.Join(destTree, relPath)
 }
 
