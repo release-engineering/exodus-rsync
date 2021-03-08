@@ -31,6 +31,7 @@ gwenv: global-env
 gwurl: https://exodus-gw.example.com
 gwcert: global-cert
 gwkey: global-key
+gwbatchsize: 100
 
 environments:
 - prefix: dest
@@ -90,6 +91,7 @@ environments:
 	// For values which are NOT overridden, they should be equal to global.
 	assertEqual("env gwurl", env.GwURL(), cfg.GwURL())
 	assertEqual("env gwcert", env.GwCert(), cfg.GwCert())
+	assertEqual("env gwbatchsize", env.GwBatchSize(), cfg.GwBatchSize())
 }
 
 func TestDefaultsFromParent(t *testing.T) {

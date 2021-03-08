@@ -35,6 +35,7 @@ func testConfig(t *testing.T) conf.Config {
 	cfg.EXPECT().GwURL().AnyTimes().Return("https://exodus-gw.example.com")
 	cfg.EXPECT().GwPollInterval().AnyTimes().Return(1)
 	cfg.EXPECT().GwEnv().AnyTimes().Return("env")
+	cfg.EXPECT().GwBatchSize().AnyTimes().Return(3)
 
 	return cfg
 }

@@ -117,6 +117,27 @@ func TestClientPublishErrors(t *testing.T) {
 		}
 	})
 
+	t.Run("HTTP error during AddItems", func(t *testing.T) {
+		publish := publish{client: clientIface.(*client)}
+		publish.raw.Links = make(map[string]string)
+		publish.raw.Links["self"] = "/publish/1234"
+
+		gw.nextHTTPResponse = &http.Response{
+			Status:     "418 I'm a teapot",
+			StatusCode: 418,
+			Body:       io.NopCloser(strings.NewReader("")),
+		}
+
+		err := publish.AddItems(ctx, []ItemInput{{"/some/uri", "abc123"}})
+
+		if err == nil {
+			t.Error("Unexpectedly failed to return an error")
+		}
+		if !strings.Contains(err.Error(), "I'm a teapot") {
+			t.Errorf("Did not get expected error, got: %v", err)
+		}
+	})
+
 	t.Run("commit request fails", func(t *testing.T) {
 		publish := publish{client: clientIface.(*client)}
 
