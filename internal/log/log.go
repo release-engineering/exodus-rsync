@@ -35,6 +35,9 @@ const InfoLevel = apexLog.InfoLevel
 // of exodus-rsync to diagnose issues.
 const DebugLevel = apexLog.DebugLevel
 
+// WarnLevel is appropriate for messages which might indicate a problem.
+const WarnLevel = apexLog.WarnLevel
+
 // NewContext returns a context containing the given logger, which can later
 // be accessed via FromContext.
 func NewContext(ctx context.Context, v apexLog.Interface) context.Context {

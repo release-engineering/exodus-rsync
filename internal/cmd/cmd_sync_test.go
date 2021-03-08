@@ -17,6 +17,10 @@ const CONFIG string = `
 environments:
 - prefix: exodus
   gwenv: best-env
+
+- prefix: exodus-mixed
+  gwenv: best-env
+  rsyncmode: mixed
 `
 
 type EnvMatcher struct {

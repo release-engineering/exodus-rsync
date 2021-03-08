@@ -38,6 +38,7 @@ environments:
   gwenv: one-env
   gwkey: override-key
   gwpollinterval: 123
+  rsyncmode: mixed
 
 `), 0755)
 
@@ -82,11 +83,13 @@ environments:
 	assertEqual("global gwkey", cfg.GwKey(), "global-key")
 	assertEqual("global gwenv", cfg.GwEnv(), "global-env")
 	assertEqual("global gwpollinterval", cfg.GwPollInterval(), 5000)
+	assertEqual("global rsyncmode", cfg.RsyncMode(), "exodus")
 
 	// Values can be overridden in environment.
 	assertEqual("env gwenv", env.GwEnv(), "one-env")
 	assertEqual("env gwkey", env.GwKey(), "override-key")
 	assertEqual("env gwpollinterval", env.GwPollInterval(), 123)
+	assertEqual("env rsyncmode", env.RsyncMode(), "mixed")
 
 	// For values which are NOT overridden, they should be equal to global.
 	assertEqual("env gwurl", env.GwURL(), cfg.GwURL())

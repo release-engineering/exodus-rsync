@@ -7,6 +7,7 @@ type sharedConfig struct {
 	GwURLRaw          string `yaml:"gwurl"`
 	GwPollIntervalRaw int    `yaml:"gwpollinterval"`
 	GwBatchSizeRaw    int    `yaml:"gwbatchsize"`
+	RsyncModeRaw      string `yaml:"rsyncmode"`
 }
 
 type environment struct {
@@ -41,11 +42,11 @@ func (g *globalConfig) GwEnv() string {
 }
 
 func (g *globalConfig) GwPollInterval() int {
-	return g.GwPollIntervalRaw
+	return nonEmptyInt(g.GwPollIntervalRaw, 5000)
 }
 
 func (g *globalConfig) GwBatchSize() int {
-	return g.GwBatchSizeRaw
+	return nonEmptyInt(g.GwBatchSizeRaw, 10000)
 }
 
 func nonEmptyString(a, b string) string {
@@ -62,28 +63,36 @@ func nonEmptyInt(a, b int) int {
 	return b
 }
 
+func (g *globalConfig) RsyncMode() string {
+	return nonEmptyString(g.RsyncModeRaw, "exodus")
+}
+
 func (e *environment) GwCert() string {
-	return nonEmptyString(e.GwCertRaw, e.parent.GwCertRaw)
+	return nonEmptyString(e.GwCertRaw, e.parent.GwCert())
 }
 
 func (e *environment) GwKey() string {
-	return nonEmptyString(e.GwKeyRaw, e.parent.GwKeyRaw)
+	return nonEmptyString(e.GwKeyRaw, e.parent.GwKey())
 }
 
 func (e *environment) GwURL() string {
-	return nonEmptyString(e.GwURLRaw, e.parent.GwURLRaw)
+	return nonEmptyString(e.GwURLRaw, e.parent.GwURL())
 }
 
 func (e *environment) GwEnv() string {
-	return nonEmptyString(e.GwEnvRaw, e.parent.GwEnvRaw)
+	return nonEmptyString(e.GwEnvRaw, e.parent.GwEnv())
 }
 
 func (e *environment) GwPollInterval() int {
-	return nonEmptyInt(e.GwPollIntervalRaw, e.parent.GwPollIntervalRaw)
+	return nonEmptyInt(e.GwPollIntervalRaw, e.parent.GwPollInterval())
 }
 
 func (e *environment) GwBatchSize() int {
-	return nonEmptyInt(e.GwBatchSizeRaw, e.parent.GwBatchSizeRaw)
+	return nonEmptyInt(e.GwBatchSizeRaw, e.parent.GwBatchSize())
+}
+
+func (e *environment) RsyncMode() string {
+	return nonEmptyString(e.RsyncModeRaw, e.parent.RsyncMode())
 }
 
 func (e *environment) Prefix() string {

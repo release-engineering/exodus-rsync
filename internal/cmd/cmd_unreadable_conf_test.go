@@ -20,6 +20,8 @@ func setupUnreadableFile(_ *[]string) {
 }
 
 func TestMainUnreadableConf(t *testing.T) {
+	RestoreWd(t)
+
 	type args struct {
 		rawArgs []string
 	}
