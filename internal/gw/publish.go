@@ -48,16 +48,38 @@ func (p *publish) ID() string {
 // AddItems will add all of the specified items onto this publish.
 // This may involve multiple requests to exodus-gw.
 func (p *publish) AddItems(ctx context.Context, items []ItemInput) error {
-	// TODO: break up items into batches as needed.
-
 	c := p.client
 	url, ok := p.raw.Links["self"]
 	if !ok {
 		return fmt.Errorf("publish object is missing 'self' link: %+v", p.raw)
 	}
 
+	logger := log.FromContext(ctx)
+
+	var batch []ItemInput
+	batchSize := p.client.cfg.GwBatchSize()
+
+	nextBatch := func() {
+		if batchSize > len(items) {
+			batchSize = len(items)
+		}
+		batch = items[0:batchSize]
+		items = items[batchSize:]
+	}
+
+	count := 0
 	empty := struct{}{}
-	return c.doJSONRequest(ctx, "PUT", url, items, &empty)
+
+	for nextBatch(); len(batch) > 0; nextBatch() {
+		count++
+		logger.F("count", count).Debug("Putting batch")
+		err := c.doJSONRequest(ctx, "PUT", url, batch, &empty)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Commit will cause this publish object to become committed, making all of

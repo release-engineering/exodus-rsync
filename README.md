@@ -54,6 +54,10 @@ The configuration file is written in YAML. The available config keys
 are documented in the example below:
 
 ```yaml
+###############################################################################
+# exodus-gw environment settings
+###############################################################################
+#
 # X509 PEM-format certificate and key for authentication to exodus-gw.
 # Environment variables may be used with these paths.
 gwcert: $HOME/certs/$USER.crt
@@ -71,7 +75,9 @@ gwurl: https://exodus-gw.example.com
 # this environment, such as `prod-blob-uploader`, `prod-publisher`.
 gwenv: prod
 
-# Configuration per target prefix.
+###############################################################################
+# Environment configuration
+###############################################################################
 #
 # When exodus-rsync is run as 'rsync' it will inspect the target
 # user@host component of the command-line.
@@ -100,6 +106,23 @@ environments:
   # for example, to use a different exodus-gw service & environment:
   gwurl: https://other-exodus-gw.example.com/
   gwenv: stage
+
+###############################################################################
+# Tuning
+###############################################################################
+#
+# The following fields, all optional, may affect the performance of
+# exodus-rsync.
+#
+# They are listed here along with their default values.
+
+# When awaiting an exodus-gw publish task, how long (in milliseconds) should
+# we wait between each poll of the task status.
+gwpollinterval: 5000
+
+# When adding items onto an exodus-gw publish, what is the maximum number of
+# items we'll include in a single HTTP request.
+gwbatchsize: 10000
 ```
 
 In order to publish to exodus CDN it is necessary to configure all of the

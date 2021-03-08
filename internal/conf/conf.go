@@ -36,6 +36,9 @@ type Config interface {
 
 	// How often to poll for task updates, in milliseconds.
 	GwPollInterval() int
+
+	// Max number of items to include in a single HTTP request to exodus-gw.
+	GwBatchSize() int
 }
 
 // EnvironmentConfig provides configuration specific to one environment.

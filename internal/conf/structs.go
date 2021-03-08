@@ -6,6 +6,7 @@ type sharedConfig struct {
 	GwKeyRaw          string `yaml:"gwkey"`
 	GwURLRaw          string `yaml:"gwurl"`
 	GwPollIntervalRaw int    `yaml:"gwpollinterval"`
+	GwBatchSizeRaw    int    `yaml:"gwbatchsize"`
 }
 
 type environment struct {
@@ -27,24 +28,24 @@ func (g *globalConfig) GwCert() string {
 	return g.GwCertRaw
 }
 
-// Path to private key used to authenticate with exodus-gw.
 func (g *globalConfig) GwKey() string {
 	return g.GwKeyRaw
 }
 
-// Base URL of exodus-gw service in use.
 func (g *globalConfig) GwURL() string {
 	return g.GwURLRaw
 }
 
-// exodus-gw environment in use (e.g. "prod").
 func (g *globalConfig) GwEnv() string {
 	return g.GwEnvRaw
 }
 
-// How often to poll for task updates, in milliseconds.
 func (g *globalConfig) GwPollInterval() int {
 	return g.GwPollIntervalRaw
+}
+
+func (g *globalConfig) GwBatchSize() int {
+	return g.GwBatchSizeRaw
 }
 
 func nonEmptyString(a, b string) string {
@@ -79,6 +80,10 @@ func (e *environment) GwEnv() string {
 
 func (e *environment) GwPollInterval() int {
 	return nonEmptyInt(e.GwPollIntervalRaw, e.parent.GwPollIntervalRaw)
+}
+
+func (e *environment) GwBatchSize() int {
+	return nonEmptyInt(e.GwBatchSizeRaw, e.parent.GwBatchSizeRaw)
 }
 
 func (e *environment) Prefix() string {

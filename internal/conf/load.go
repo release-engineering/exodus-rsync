@@ -27,7 +27,10 @@ func loadFromPath(path string) (*globalConfig, error) {
 	}
 	defer file.Close()
 
-	defaults := sharedConfig{GwPollIntervalRaw: 5000}
+	defaults := sharedConfig{
+		GwPollIntervalRaw: 5000,
+		GwBatchSizeRaw:    10000,
+	}
 
 	dec := yaml.NewDecoder(file)
 	out := &globalConfig{}

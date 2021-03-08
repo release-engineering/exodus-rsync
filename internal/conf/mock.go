@@ -73,6 +73,20 @@ func (m *MockConfig) EXPECT() *MockConfigMockRecorder {
 	return m.recorder
 }
 
+// GwBatchSize mocks base method.
+func (m *MockConfig) GwBatchSize() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwBatchSize")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwBatchSize indicates an expected call of GwBatchSize.
+func (mr *MockConfigMockRecorder) GwBatchSize() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwBatchSize", reflect.TypeOf((*MockConfig)(nil).GwBatchSize))
+}
+
 // GwCert mocks base method.
 func (m *MockConfig) GwCert() string {
 	m.ctrl.T.Helper()
@@ -164,6 +178,20 @@ func NewMockEnvironmentConfig(ctrl *gomock.Controller) *MockEnvironmentConfig {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockEnvironmentConfig) EXPECT() *MockEnvironmentConfigMockRecorder {
 	return m.recorder
+}
+
+// GwBatchSize mocks base method.
+func (m *MockEnvironmentConfig) GwBatchSize() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwBatchSize")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwBatchSize indicates an expected call of GwBatchSize.
+func (mr *MockEnvironmentConfigMockRecorder) GwBatchSize() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwBatchSize", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwBatchSize))
 }
 
 // GwCert mocks base method.
@@ -285,6 +313,20 @@ func (m *MockGlobalConfig) EnvironmentForDest(arg0 context.Context, arg1 string)
 func (mr *MockGlobalConfigMockRecorder) EnvironmentForDest(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnvironmentForDest", reflect.TypeOf((*MockGlobalConfig)(nil).EnvironmentForDest), arg0, arg1)
+}
+
+// GwBatchSize mocks base method.
+func (m *MockGlobalConfig) GwBatchSize() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwBatchSize")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwBatchSize indicates an expected call of GwBatchSize.
+func (mr *MockGlobalConfigMockRecorder) GwBatchSize() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwBatchSize", reflect.TypeOf((*MockGlobalConfig)(nil).GwBatchSize))
 }
 
 // GwCert mocks base method.
