@@ -74,7 +74,7 @@ func Main(rawArgs []string) int {
 	if parsedArgs.DryRun {
 		clientCtor = ext.gw.NewDryRunClient
 	}
-	gwClient, err := clientCtor(*env)
+	gwClient, err := clientCtor(env)
 	if err != nil {
 		logger.F("error", err).Error("can't initialize exodus-gw client")
 		return 101

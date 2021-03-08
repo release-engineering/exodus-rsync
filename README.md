@@ -62,6 +62,15 @@ gwkey: $HOME/certs/$USER.key
 # Base URL of the exodus-gw service to be used.
 gwurl: https://exodus-gw.example.com
 
+# Defines the exodus-gw "environment" for use.
+#
+# This value must match one of the environments configured on that service, see:
+# https://release-engineering.github.io/exodus-gw/deployment.html#settings
+#
+# Additionally, the `gwcert` in use must grant the necessary roles for writing to
+# this environment, such as `prod-blob-uploader`, `prod-publisher`.
+gwenv: prod
+
 # Configuration per target prefix.
 #
 # When exodus-rsync is run as 'rsync' it will inspect the target
@@ -77,16 +86,8 @@ environments:
   #
   #   rsync /my/src/tree exodus:/my/dest
   #
+  # "prefix" is the only mandatory key here.
 - prefix: exodus
-
-  # Defines the exodus-gw "environment" for use.
-  #
-  # This value must match one of the environments configured on that service, see:
-  # https://release-engineering.github.io/exodus-gw/deployment.html#settings
-  #
-  # Additionally, the `gwcert` in use must grant the necessary roles for writing to
-  # this environment, such as `prod-blob-uploader`, `prod-publisher`.
-  gwenv: prod
 
   # Defining a prefix like this enables overriding publishes to existing non-exodus
   # targets and diverting them instead to exodus CDN, as in example:
@@ -94,12 +95,15 @@ environments:
   #   rsync /my/src/tree upload@example.com:/my/dest
   #
 - prefix: upload@example.com
+
+  # All top-level configuration keys can also be overridden per environment;
+  # for example, to use a different exodus-gw service & environment:
+  gwurl: https://other-exodus-gw.example.com/
   gwenv: stage
 ```
 
-In order to publish to exodus CDN it is necessary to configure at least the
-`gwcert`, `gwkey` and `gwurl` configuration items, and at least one entry under
-`environments`.
+In order to publish to exodus CDN it is necessary to configure all of the
+`gw*` configuration items, and add at least one entry under `environments`.
 
 (TODO) If the configuration file is absent, exodus-rsync will pass through all commands
 to rsync without any usage of exodus-gw.

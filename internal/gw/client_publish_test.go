@@ -6,20 +6,13 @@ import (
 	"testing"
 
 	"github.com/release-engineering/exodus-rsync/internal/args"
-	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
 func TestClientPublish(t *testing.T) {
-	cfg := conf.Config{
-		GwURL:          "https://exodus-gw.example.com",
-		GwCert:         "../../test/data/service.pem",
-		GwKey:          "../../test/data/service-key.pem",
-		GwPollInterval: 1,
-	}
-	env := conf.Environment{Config: &cfg, GwEnv: "env"}
+	cfg := testConfig(t)
 
-	clientIface, err := Package.NewClient(env)
+	clientIface, err := Package.NewClient(cfg)
 	if clientIface == nil {
 		t.Errorf("failed to create client, err = %v", err)
 	}

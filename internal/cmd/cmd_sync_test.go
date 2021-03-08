@@ -24,11 +24,11 @@ type EnvMatcher struct {
 }
 
 func (m EnvMatcher) Matches(x interface{}) bool {
-	env, ok := x.(conf.Environment)
+	env, ok := x.(conf.EnvironmentConfig)
 	if !ok {
 		return false
 	}
-	return env.GwEnv == m.name
+	return env.GwEnv() == m.name
 }
 
 func (m EnvMatcher) String() string {

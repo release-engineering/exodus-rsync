@@ -6,12 +6,16 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
 func TestExec(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	conf := conf.NewMockConfig(ctrl)
+
 	tests := []struct {
 		name         string
 		args         args.Config
@@ -66,8 +70,6 @@ func TestExec(t *testing.T) {
 				return fmt.Errorf("simulated error")
 			}
 			defer func() { ext.exec = oldExec }()
-
-			conf := conf.Config{}
 
 			ctx := context.Background()
 			ctx = log.NewContext(ctx, log.Package.NewLogger(tt.args))

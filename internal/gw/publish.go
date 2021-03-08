@@ -29,7 +29,7 @@ func (c *client) NewPublish(ctx context.Context) (Publish, error) {
 		return &dryRunPublish{}, nil
 	}
 
-	url := "/" + c.env.GwEnv + "/publish"
+	url := "/" + c.cfg.GwEnv() + "/publish"
 
 	out := &publish{}
 	if err := c.doJSONRequest(ctx, "POST", url, nil, &out.raw); err != nil {

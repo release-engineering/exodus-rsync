@@ -31,7 +31,7 @@ environments:
 	mockGw.EXPECT().NewClient(gomock.Any()).Return(nil, fmt.Errorf("client error"))
 
 	got := Main([]string{
-		"exodus-rsync", ".", "some-dest:/foo/bar",
+		"exodus-rsync", "-vvv", ".", "some-dest:/foo/bar",
 	})
 
 	// It should exit.
