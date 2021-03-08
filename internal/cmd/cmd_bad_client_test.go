@@ -10,6 +10,8 @@ import (
 
 // Command fails if exodus-gw client can't be initialized.
 func TestMainBadClient(t *testing.T) {
+	logs := CaptureLogger(t)
+
 	ctrl := MockController(t)
 
 	mockGw := gw.NewMockInterface(ctrl)
@@ -37,5 +39,13 @@ environments:
 		t.Error("returned incorrect exit code", got)
 	}
 
-	// TODO: test log entries.
+	// It should tell us why.
+	entry := FindEntry(logs, "can't initialize exodus-gw client")
+	if entry == nil {
+		t.Errorf("Missing expected log message")
+	}
+
+	if entry.Fields["error"].(error).Error() != "client error" {
+		t.Errorf("Did not get expected error, got: %v", entry.Fields["error"])
+	}
 }
