@@ -15,6 +15,10 @@ type Interface interface {
 	// NewClient creates and returns a new exodus-gw client pointing at the
 	// given Environment (from the configuration file).
 	NewClient(env conf.Environment) (Client, error)
+
+	// NewDryRunClient creates and returns a new exodus-gw client in dry-run
+	// mode. This client replaces any write operations with stubs.
+	NewDryRunClient(env conf.Environment) (Client, error)
 }
 
 type impl struct{}

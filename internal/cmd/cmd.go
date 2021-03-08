@@ -70,7 +70,11 @@ func Main(rawArgs []string) int {
 		}
 	}
 
-	gwClient, err := ext.gw.NewClient(*env)
+	clientCtor := ext.gw.NewClient
+	if parsedArgs.DryRun {
+		clientCtor = ext.gw.NewDryRunClient
+	}
+	gwClient, err := clientCtor(*env)
 	if err != nil {
 		logger.F("error", err).Error("can't initialize exodus-gw client")
 		return 101
@@ -158,7 +162,11 @@ func Main(rawArgs []string) int {
 		return 71
 	}
 
-	logger.Info("Completed successfully!")
+	msg := "Completed successfully!"
+	if parsedArgs.DryRun {
+		msg = "Completed successfully (in dry-run mode - no changes written)"
+	}
+	logger.Info(msg)
 
 	return 0
 }

@@ -53,7 +53,7 @@ type Config struct {
 	// See comments where the argument is checked for the explanation why.
 	IgnoreExisting bool `hidden:"1"`
 
-	// TODO: --dry-run, -n
+	DryRun bool `short:"n" help:"Perform a trial run with no changes made"`
 
 	Src  string `arg:"1" placeholder:"SRC" help:"Local path to a file or directory for sync"`
 	Dest string `arg:"1" placeholder:"[USER@]HOST:DEST" help:"Remote destination for sync"`

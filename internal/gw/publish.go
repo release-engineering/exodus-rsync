@@ -25,6 +25,10 @@ type ItemInput struct {
 
 // NewPublish creates and returns a new publish object within exodus-gw.
 func (c *client) NewPublish(ctx context.Context) (Publish, error) {
+	if c.dryRun {
+		return &dryRunPublish{}, nil
+	}
+
 	url := "/" + c.env.GwEnv + "/publish"
 
 	out := &publish{}
