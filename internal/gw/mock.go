@@ -51,6 +51,21 @@ func (mr *MockInterfaceMockRecorder) NewClient(env interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewClient", reflect.TypeOf((*MockInterface)(nil).NewClient), env)
 }
 
+// NewDryRunClient mocks base method.
+func (m *MockInterface) NewDryRunClient(env conf.Environment) (Client, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NewDryRunClient", env)
+	ret0, _ := ret[0].(Client)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NewDryRunClient indicates an expected call of NewDryRunClient.
+func (mr *MockInterfaceMockRecorder) NewDryRunClient(env interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewDryRunClient", reflect.TypeOf((*MockInterface)(nil).NewDryRunClient), env)
+}
+
 // MockClient is a mock of Client interface.
 type MockClient struct {
 	ctrl     *gomock.Controller

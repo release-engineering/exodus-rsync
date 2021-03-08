@@ -26,6 +26,7 @@ type client struct {
 	httpClient *http.Client
 	s3         *s3.S3
 	uploader   *s3manager.Uploader
+	dryRun     bool
 }
 
 func (c *client) doJSONRequest(ctx context.Context, method string, url string, body interface{}, target interface{}) error {
@@ -105,6 +106,10 @@ func (c *client) uploadBlob(ctx context.Context, item walk.SyncItem) error {
 	var err error
 
 	defer logger.F("src", item.SrcPath, "key", item.Key).Trace("Uploading").Stop(&err)
+
+	if c.dryRun {
+		return nil
+	}
 
 	file, err := os.Open(item.SrcPath)
 	if err != nil {

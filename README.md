@@ -142,6 +142,7 @@ is a summary of the differences:
   | Argument | Notes |
   | -------- | ----- |
   | -v, --verbose | increase log verbosity |
+  | -n, --dry-run | dry-run mode, don't upload or publish anything |
   | -r, --recursive | ignored; exodus-rsync is always recursive |
   | -t, --times | ignored |
   | --delete | ignored; deleting content is not supported |
