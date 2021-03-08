@@ -36,10 +36,10 @@ func (m *MockInterface) EXPECT() *MockInterfaceMockRecorder {
 }
 
 // Load mocks base method.
-func (m *MockInterface) Load(arg0 context.Context, arg1 args.Config) (Config, error) {
+func (m *MockInterface) Load(arg0 context.Context, arg1 args.Config) (GlobalConfig, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Load", arg0, arg1)
-	ret0, _ := ret[0].(Config)
+	ret0, _ := ret[0].(GlobalConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -48,4 +48,311 @@ func (m *MockInterface) Load(arg0 context.Context, arg1 args.Config) (Config, er
 func (mr *MockInterfaceMockRecorder) Load(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Load", reflect.TypeOf((*MockInterface)(nil).Load), arg0, arg1)
+}
+
+// MockConfig is a mock of Config interface.
+type MockConfig struct {
+	ctrl     *gomock.Controller
+	recorder *MockConfigMockRecorder
+}
+
+// MockConfigMockRecorder is the mock recorder for MockConfig.
+type MockConfigMockRecorder struct {
+	mock *MockConfig
+}
+
+// NewMockConfig creates a new mock instance.
+func NewMockConfig(ctrl *gomock.Controller) *MockConfig {
+	mock := &MockConfig{ctrl: ctrl}
+	mock.recorder = &MockConfigMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockConfig) EXPECT() *MockConfigMockRecorder {
+	return m.recorder
+}
+
+// GwCert mocks base method.
+func (m *MockConfig) GwCert() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwCert")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwCert indicates an expected call of GwCert.
+func (mr *MockConfigMockRecorder) GwCert() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwCert", reflect.TypeOf((*MockConfig)(nil).GwCert))
+}
+
+// GwEnv mocks base method.
+func (m *MockConfig) GwEnv() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwEnv")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwEnv indicates an expected call of GwEnv.
+func (mr *MockConfigMockRecorder) GwEnv() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwEnv", reflect.TypeOf((*MockConfig)(nil).GwEnv))
+}
+
+// GwKey mocks base method.
+func (m *MockConfig) GwKey() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwKey")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwKey indicates an expected call of GwKey.
+func (mr *MockConfigMockRecorder) GwKey() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwKey", reflect.TypeOf((*MockConfig)(nil).GwKey))
+}
+
+// GwPollInterval mocks base method.
+func (m *MockConfig) GwPollInterval() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwPollInterval")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwPollInterval indicates an expected call of GwPollInterval.
+func (mr *MockConfigMockRecorder) GwPollInterval() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwPollInterval", reflect.TypeOf((*MockConfig)(nil).GwPollInterval))
+}
+
+// GwURL mocks base method.
+func (m *MockConfig) GwURL() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwURL")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwURL indicates an expected call of GwURL.
+func (mr *MockConfigMockRecorder) GwURL() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwURL", reflect.TypeOf((*MockConfig)(nil).GwURL))
+}
+
+// MockEnvironmentConfig is a mock of EnvironmentConfig interface.
+type MockEnvironmentConfig struct {
+	ctrl     *gomock.Controller
+	recorder *MockEnvironmentConfigMockRecorder
+}
+
+// MockEnvironmentConfigMockRecorder is the mock recorder for MockEnvironmentConfig.
+type MockEnvironmentConfigMockRecorder struct {
+	mock *MockEnvironmentConfig
+}
+
+// NewMockEnvironmentConfig creates a new mock instance.
+func NewMockEnvironmentConfig(ctrl *gomock.Controller) *MockEnvironmentConfig {
+	mock := &MockEnvironmentConfig{ctrl: ctrl}
+	mock.recorder = &MockEnvironmentConfigMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockEnvironmentConfig) EXPECT() *MockEnvironmentConfigMockRecorder {
+	return m.recorder
+}
+
+// GwCert mocks base method.
+func (m *MockEnvironmentConfig) GwCert() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwCert")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwCert indicates an expected call of GwCert.
+func (mr *MockEnvironmentConfigMockRecorder) GwCert() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwCert", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwCert))
+}
+
+// GwEnv mocks base method.
+func (m *MockEnvironmentConfig) GwEnv() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwEnv")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwEnv indicates an expected call of GwEnv.
+func (mr *MockEnvironmentConfigMockRecorder) GwEnv() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwEnv", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwEnv))
+}
+
+// GwKey mocks base method.
+func (m *MockEnvironmentConfig) GwKey() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwKey")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwKey indicates an expected call of GwKey.
+func (mr *MockEnvironmentConfigMockRecorder) GwKey() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwKey", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwKey))
+}
+
+// GwPollInterval mocks base method.
+func (m *MockEnvironmentConfig) GwPollInterval() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwPollInterval")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwPollInterval indicates an expected call of GwPollInterval.
+func (mr *MockEnvironmentConfigMockRecorder) GwPollInterval() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwPollInterval", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwPollInterval))
+}
+
+// GwURL mocks base method.
+func (m *MockEnvironmentConfig) GwURL() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwURL")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwURL indicates an expected call of GwURL.
+func (mr *MockEnvironmentConfigMockRecorder) GwURL() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwURL", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwURL))
+}
+
+// Prefix mocks base method.
+func (m *MockEnvironmentConfig) Prefix() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Prefix")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Prefix indicates an expected call of Prefix.
+func (mr *MockEnvironmentConfigMockRecorder) Prefix() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Prefix", reflect.TypeOf((*MockEnvironmentConfig)(nil).Prefix))
+}
+
+// MockGlobalConfig is a mock of GlobalConfig interface.
+type MockGlobalConfig struct {
+	ctrl     *gomock.Controller
+	recorder *MockGlobalConfigMockRecorder
+}
+
+// MockGlobalConfigMockRecorder is the mock recorder for MockGlobalConfig.
+type MockGlobalConfigMockRecorder struct {
+	mock *MockGlobalConfig
+}
+
+// NewMockGlobalConfig creates a new mock instance.
+func NewMockGlobalConfig(ctrl *gomock.Controller) *MockGlobalConfig {
+	mock := &MockGlobalConfig{ctrl: ctrl}
+	mock.recorder = &MockGlobalConfigMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockGlobalConfig) EXPECT() *MockGlobalConfigMockRecorder {
+	return m.recorder
+}
+
+// EnvironmentForDest mocks base method.
+func (m *MockGlobalConfig) EnvironmentForDest(arg0 context.Context, arg1 string) EnvironmentConfig {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnvironmentForDest", arg0, arg1)
+	ret0, _ := ret[0].(EnvironmentConfig)
+	return ret0
+}
+
+// EnvironmentForDest indicates an expected call of EnvironmentForDest.
+func (mr *MockGlobalConfigMockRecorder) EnvironmentForDest(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnvironmentForDest", reflect.TypeOf((*MockGlobalConfig)(nil).EnvironmentForDest), arg0, arg1)
+}
+
+// GwCert mocks base method.
+func (m *MockGlobalConfig) GwCert() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwCert")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwCert indicates an expected call of GwCert.
+func (mr *MockGlobalConfigMockRecorder) GwCert() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwCert", reflect.TypeOf((*MockGlobalConfig)(nil).GwCert))
+}
+
+// GwEnv mocks base method.
+func (m *MockGlobalConfig) GwEnv() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwEnv")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwEnv indicates an expected call of GwEnv.
+func (mr *MockGlobalConfigMockRecorder) GwEnv() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwEnv", reflect.TypeOf((*MockGlobalConfig)(nil).GwEnv))
+}
+
+// GwKey mocks base method.
+func (m *MockGlobalConfig) GwKey() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwKey")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwKey indicates an expected call of GwKey.
+func (mr *MockGlobalConfigMockRecorder) GwKey() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwKey", reflect.TypeOf((*MockGlobalConfig)(nil).GwKey))
+}
+
+// GwPollInterval mocks base method.
+func (m *MockGlobalConfig) GwPollInterval() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwPollInterval")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwPollInterval indicates an expected call of GwPollInterval.
+func (mr *MockGlobalConfigMockRecorder) GwPollInterval() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwPollInterval", reflect.TypeOf((*MockGlobalConfig)(nil).GwPollInterval))
+}
+
+// GwURL mocks base method.
+func (m *MockGlobalConfig) GwURL() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwURL")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwURL indicates an expected call of GwURL.
+func (mr *MockGlobalConfigMockRecorder) GwURL() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwURL", reflect.TypeOf((*MockGlobalConfig)(nil).GwURL))
 }

@@ -6,17 +6,18 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 )
 
 func TestNewClientCertError(t *testing.T) {
-	cfg := conf.Config{
-		GwCert: "cert-does-not-exist",
-		GwKey:  "key-does-not-exist",
-	}
-	env := conf.Environment{Config: &cfg}
+	ctrl := gomock.NewController(t)
+	cfg := conf.NewMockConfig(ctrl)
 
-	_, err := Package.NewClient(env)
+	cfg.EXPECT().GwCert().Return("cert-does-not-exist")
+	cfg.EXPECT().GwKey().Return("key-does-not-exist")
+
+	_, err := Package.NewClient(cfg)
 
 	// Should have given us this error
 	if !strings.Contains(fmt.Sprint(err), "can't load cert/key") {
@@ -25,11 +26,7 @@ func TestNewClientCertError(t *testing.T) {
 }
 
 func TestNewClientSessionError(t *testing.T) {
-	cfg := conf.Config{
-		GwCert: "../../test/data/service.pem",
-		GwKey:  "../../test/data/service-key.pem",
-	}
-	env := conf.Environment{Config: &cfg}
+	cfg := testConfig(t)
 
 	oldProvider := ext.awsSessionProvider
 	defer func() { ext.awsSessionProvider = oldProvider }()
@@ -38,7 +35,7 @@ func TestNewClientSessionError(t *testing.T) {
 		return nil, fmt.Errorf("simulated error")
 	}
 
-	_, err := Package.NewClient(env)
+	_, err := Package.NewClient(cfg)
 
 	// Should have given us this error
 	if err.Error() != "create AWS session: simulated error" {
@@ -47,13 +44,9 @@ func TestNewClientSessionError(t *testing.T) {
 }
 
 func TestNewClientOk(t *testing.T) {
-	cfg := conf.Config{
-		GwCert: "../../test/data/service.pem",
-		GwKey:  "../../test/data/service-key.pem",
-	}
-	env := conf.Environment{Config: &cfg}
+	cfg := testConfig(t)
 
-	client, err := Package.NewClient(env)
+	client, err := Package.NewClient(cfg)
 
 	// Should have succeeded
 	if client == nil || err != nil {

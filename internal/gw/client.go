@@ -22,7 +22,7 @@ import (
 )
 
 type client struct {
-	env        conf.Environment
+	cfg        conf.Config
 	httpClient *http.Client
 	s3         *s3.S3
 	uploader   *s3manager.Uploader
@@ -42,7 +42,7 @@ func (c *client) doJSONRequest(ctx context.Context, method string, url string, b
 		bodyReader = &buf
 	}
 
-	fullURL := c.env.Config.GwURL + url
+	fullURL := c.cfg.GwURL() + url
 	req, err := http.NewRequestWithContext(ctx, method, fullURL, bodyReader)
 
 	if err != nil {
@@ -77,7 +77,7 @@ func (c *client) haveBlob(ctx context.Context, item walk.SyncItem) (bool, error)
 	logger := log.FromContext(ctx)
 
 	_, err := c.s3.HeadObject(&s3.HeadObjectInput{
-		Bucket: aws.String(c.env.GwEnv),
+		Bucket: aws.String(c.cfg.GwEnv()),
 		Key:    aws.String(item.Key),
 	})
 
@@ -118,7 +118,7 @@ func (c *client) uploadBlob(ctx context.Context, item walk.SyncItem) error {
 	defer file.Close()
 
 	res, err := c.uploader.UploadWithContext(ctx, &s3manager.UploadInput{
-		Bucket: &c.env.GwEnv,
+		Bucket: aws.String(c.cfg.GwEnv()),
 		Key:    &item.Key,
 		Body:   file,
 	})
@@ -164,14 +164,13 @@ func (c *client) EnsureUploaded(
 	return nil
 }
 
-func (impl) NewClient(env conf.Environment) (Client, error) {
-	// TODO: should support loading these from environment too.
-	cert, err := tls.LoadX509KeyPair(env.Config.GwCert, env.Config.GwKey)
+func (impl) NewClient(cfg conf.Config) (Client, error) {
+	cert, err := tls.LoadX509KeyPair(cfg.GwCert(), cfg.GwKey())
 	if err != nil {
 		return nil, fmt.Errorf("can't load cert/key: %w", err)
 	}
 
-	out := &client{env: env}
+	out := &client{cfg: cfg}
 
 	transport := http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -183,7 +182,7 @@ func (impl) NewClient(env conf.Environment) (Client, error) {
 	sess, err := ext.awsSessionProvider(session.Options{
 		SharedConfigState: session.SharedConfigDisable,
 		Config: aws.Config{
-			Endpoint:         aws.String(env.Config.GwURL + "/upload"),
+			Endpoint:         aws.String(cfg.GwURL() + "/upload"),
 			S3ForcePathStyle: aws.Bool(true),
 
 			Region:      aws.String("us-east-1"),

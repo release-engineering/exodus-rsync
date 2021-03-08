@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/release-engineering/exodus-rsync/internal/args"
-	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 	"github.com/release-engineering/exodus-rsync/internal/walk"
 )
@@ -51,13 +50,9 @@ func TestDryRunPublish(t *testing.T) {
 }
 
 func TestNewDryRunClientOk(t *testing.T) {
-	cfg := conf.Config{
-		GwCert: "../../test/data/service.pem",
-		GwKey:  "../../test/data/service-key.pem",
-	}
-	env := conf.Environment{Config: &cfg}
+	cfg := testConfig(t)
 
-	clientIface, err := Package.NewDryRunClient(env)
+	clientIface, err := Package.NewDryRunClient(cfg)
 
 	// Should have succeeded
 	if clientIface == nil || err != nil {

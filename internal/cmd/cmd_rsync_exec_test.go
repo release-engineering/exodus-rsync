@@ -18,10 +18,11 @@ func TestMainExecRsync(t *testing.T) {
 	ext.conf = mockConf
 	ext.rsync = mockRsync
 
-	emptyConfig := conf.Config{}
+	emptyConfig := conf.NewMockGlobalConfig(ctrl)
 
-	// Make it return an empty Config - this means no environment will match.
+	// Make it return an empty Config with no environments
 	mockConf.EXPECT().Load(gomock.Any(), gomock.Any()).Return(emptyConfig, nil)
+	emptyConfig.EXPECT().EnvironmentForDest(gomock.Any(), gomock.Any()).Return(nil)
 
 	// Since no environment matches, we expect it to run rsync and it should pass
 	// through whatever arguments we're giving it.

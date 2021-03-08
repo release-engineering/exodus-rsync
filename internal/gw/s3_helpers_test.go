@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/release-engineering/exodus-rsync/internal/conf"
 )
 
 type blobMap map[string][]error
@@ -103,14 +102,9 @@ func (f *fakeS3) putObject(r *request.Request, input *s3.PutObjectInput) {
 }
 
 func newClientWithFakeS3(t *testing.T) (*client, *fakeS3) {
-	cfg := conf.Config{
-		GwCert: "../../test/data/service.pem",
-		GwKey:  "../../test/data/service-key.pem",
-		GwURL:  "https://exodus-gw.example.com/",
-	}
-	env := conf.Environment{Config: &cfg, GwEnv: "env"}
+	cfg := testConfig(t)
 
-	iface, err := Package.NewClient(env)
+	iface, err := Package.NewClient(cfg)
 	if err != nil {
 		t.Fatal("creating client:", err)
 	}

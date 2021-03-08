@@ -37,7 +37,7 @@ func (t *task) ID() string {
 
 func (t *task) Await(ctx context.Context) error {
 	logger := log.FromContext(ctx)
-	pollDuration := time.Millisecond * time.Duration(t.client.env.Config.GwPollInterval)
+	pollDuration := time.Millisecond * time.Duration(t.client.cfg.GwPollInterval())
 
 	for {
 		if t.raw.State == "COMPLETE" {
