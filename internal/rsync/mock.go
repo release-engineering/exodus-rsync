@@ -6,6 +6,7 @@ package rsync
 
 import (
 	context "context"
+	exec "os/exec"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -34,6 +35,20 @@ func NewMockInterface(ctrl *gomock.Controller) *MockInterface {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockInterface) EXPECT() *MockInterfaceMockRecorder {
 	return m.recorder
+}
+
+// Command mocks base method.
+func (m *MockInterface) Command(arg0 context.Context, arg1 conf.Config, arg2 args.Config) *exec.Cmd {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Command", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*exec.Cmd)
+	return ret0
+}
+
+// Command indicates an expected call of Command.
+func (mr *MockInterfaceMockRecorder) Command(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Command", reflect.TypeOf((*MockInterface)(nil).Command), arg0, arg1, arg2)
 }
 
 // Exec mocks base method.

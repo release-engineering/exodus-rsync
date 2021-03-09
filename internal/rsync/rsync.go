@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"syscall"
 
@@ -22,6 +23,12 @@ type Interface interface {
 	// Note that the command is run using the execve syscall, meaning that it
 	// *replaces* the current process. It never returns, unless an error occurs.
 	Exec(context.Context, conf.Config, args.Config) error
+
+	// Command will prepare and return an os.exec Cmd struct for invoking rsync.
+	//
+	// Only Path and Args are filled in. Other elements such as stdout, stderr
+	// can be set up by the caller prior to invoking the command.
+	Command(context.Context, conf.Config, args.Config) *exec.Cmd
 }
 
 type impl struct{}
@@ -94,11 +101,16 @@ func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []st
 	return argv
 }
 
-func (impl) Exec(ctx context.Context, cfg conf.Config, args args.Config) error {
+func (i impl) Exec(ctx context.Context, cfg conf.Config, args args.Config) error {
+	cmd := i.Command(ctx, cfg, args)
 	return ext.exec(
-		// TODO: look up path properly, ensure we don't look up ourselves
-		"/usr/bin/rsync",
-		rsyncArguments(ctx, cfg, args),
+		cmd.Path,
+		cmd.Args[1:],
 		os.Environ(),
 	)
+}
+
+func (impl) Command(ctx context.Context, cfg conf.Config, args args.Config) *exec.Cmd {
+	// TODO: look up path properly, ensure we don't look up ourselves
+	return exec.CommandContext(ctx, "/usr/bin/rsync", rsyncArguments(ctx, cfg, args)...)
 }

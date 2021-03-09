@@ -39,6 +39,9 @@ type Config interface {
 
 	// Max number of items to include in a single HTTP request to exodus-gw.
 	GwBatchSize() int
+
+	// Execution mode for rsync.
+	RsyncMode() string
 }
 
 // EnvironmentConfig provides configuration specific to one environment.

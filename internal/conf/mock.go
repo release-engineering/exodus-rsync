@@ -157,6 +157,20 @@ func (mr *MockConfigMockRecorder) GwURL() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwURL", reflect.TypeOf((*MockConfig)(nil).GwURL))
 }
 
+// RsyncMode mocks base method.
+func (m *MockConfig) RsyncMode() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RsyncMode")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// RsyncMode indicates an expected call of RsyncMode.
+func (mr *MockConfigMockRecorder) RsyncMode() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RsyncMode", reflect.TypeOf((*MockConfig)(nil).RsyncMode))
+}
+
 // MockEnvironmentConfig is a mock of EnvironmentConfig interface.
 type MockEnvironmentConfig struct {
 	ctrl     *gomock.Controller
@@ -278,6 +292,20 @@ func (mr *MockEnvironmentConfigMockRecorder) Prefix() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Prefix", reflect.TypeOf((*MockEnvironmentConfig)(nil).Prefix))
 }
 
+// RsyncMode mocks base method.
+func (m *MockEnvironmentConfig) RsyncMode() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RsyncMode")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// RsyncMode indicates an expected call of RsyncMode.
+func (mr *MockEnvironmentConfigMockRecorder) RsyncMode() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RsyncMode", reflect.TypeOf((*MockEnvironmentConfig)(nil).RsyncMode))
+}
+
 // MockGlobalConfig is a mock of GlobalConfig interface.
 type MockGlobalConfig struct {
 	ctrl     *gomock.Controller
@@ -397,4 +425,18 @@ func (m *MockGlobalConfig) GwURL() string {
 func (mr *MockGlobalConfigMockRecorder) GwURL() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwURL", reflect.TypeOf((*MockGlobalConfig)(nil).GwURL))
+}
+
+// RsyncMode mocks base method.
+func (m *MockGlobalConfig) RsyncMode() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RsyncMode")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// RsyncMode indicates an expected call of RsyncMode.
+func (mr *MockGlobalConfigMockRecorder) RsyncMode() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RsyncMode", reflect.TypeOf((*MockGlobalConfig)(nil).RsyncMode))
 }

@@ -108,6 +108,25 @@ environments:
   gwenv: stage
 
 ###############################################################################
+# Rsync configuration
+###############################################################################
+#
+# Defines mode of operation for invoking rsync:
+#
+# - If "exodus", exodus-rsync only publishes to exodus CDN and does not invoke
+#   rsync
+#
+# - If "rsync", exodus-rsync does not publish to exodus CDN and only invokes rsync
+#
+# - If "mixed", exodus-rsync both publishes to exodus CDN and also invokes rsync,
+#   only exiting successfully if both succeed. Beware of the implications on
+#   atomicity (e.g. it is possible for one of these to succeed and the other fail).
+#
+# - Mode is always forced to "rsync" when no environment is matched.
+#
+rsyncmode: exodus
+
+###############################################################################
 # Tuning
 ###############################################################################
 #

@@ -36,3 +36,18 @@ environments:
 		})
 	}
 }
+
+func TestMainBadRsyncMode(t *testing.T) {
+	SetConfig(t, `
+rsyncmode: invalid
+
+environments:
+- prefix: dest
+`)
+
+	args := []string{"exodus-rsync", "-vvv", "src", "dest:/quux"}
+
+	if got := Main(args); got != 95 {
+		t.Error("unexpected exit code", got)
+	}
+}
