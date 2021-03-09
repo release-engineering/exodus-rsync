@@ -1,6 +1,7 @@
 package gw
 
 import (
+	"context"
 	"sync"
 	"testing"
 
@@ -104,7 +105,7 @@ func (f *fakeS3) putObject(r *request.Request, input *s3.PutObjectInput) {
 func newClientWithFakeS3(t *testing.T) (*client, *fakeS3) {
 	cfg := testConfig(t)
 
-	iface, err := Package.NewClient(cfg)
+	iface, err := Package.NewClient(context.Background(), cfg)
 	if err != nil {
 		t.Fatal("creating client:", err)
 	}

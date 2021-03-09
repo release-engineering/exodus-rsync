@@ -1,6 +1,7 @@
 package gw
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -17,7 +18,7 @@ func TestNewClientCertError(t *testing.T) {
 	cfg.EXPECT().GwCert().Return("cert-does-not-exist")
 	cfg.EXPECT().GwKey().Return("key-does-not-exist")
 
-	_, err := Package.NewClient(cfg)
+	_, err := Package.NewClient(context.Background(), cfg)
 
 	// Should have given us this error
 	if !strings.Contains(fmt.Sprint(err), "can't load cert/key") {
@@ -35,7 +36,7 @@ func TestNewClientSessionError(t *testing.T) {
 		return nil, fmt.Errorf("simulated error")
 	}
 
-	_, err := Package.NewClient(cfg)
+	_, err := Package.NewClient(context.Background(), cfg)
 
 	// Should have given us this error
 	if err.Error() != "create AWS session: simulated error" {
@@ -46,7 +47,7 @@ func TestNewClientSessionError(t *testing.T) {
 func TestNewClientOk(t *testing.T) {
 	cfg := testConfig(t)
 
-	client, err := Package.NewClient(cfg)
+	client, err := Package.NewClient(context.Background(), cfg)
 
 	// Should have succeeded
 	if client == nil || err != nil {

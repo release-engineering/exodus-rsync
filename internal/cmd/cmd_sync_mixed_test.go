@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
@@ -53,7 +54,7 @@ func TestMainSyncMixedOk(t *testing.T) {
 	// Make it just run "echo" instead of real rsync, thus forcing rsync
 	// to "succeed". Sleep is to get predictable timing, with exodus publish
 	// finishing first - assists in reaching 100% coverage.
-	rsync.prefix = []string{"/bin/sh", "-c", "sleep 1; echo FAKE RSYNC", "--"}
+	rsync.prefix = []string{"/bin/sh", "-c", "sleep 2; echo FAKE RSYNC", "--"}
 
 	SetConfig(t, CONFIG)
 	ctrl := MockController(t)
@@ -66,7 +67,7 @@ func TestMainSyncMixedOk(t *testing.T) {
 	ext.rsync = rsync
 
 	client := FakeClient{blobs: make(map[string]string)}
-	mockGw.EXPECT().NewClient(EnvMatcher{"best-env"}).Return(&client, nil)
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
 	srcPath := path.Clean(wd + "/../../test/data/srctrees/links")
 

@@ -164,7 +164,7 @@ func (c *client) EnsureUploaded(
 	return nil
 }
 
-func (impl) NewClient(cfg conf.Config) (Client, error) {
+func (impl) NewClient(_ context.Context, cfg conf.Config) (Client, error) {
 	cert, err := tls.LoadX509KeyPair(cfg.GwCert(), cfg.GwKey())
 	if err != nil {
 		return nil, fmt.Errorf("can't load cert/key: %w", err)

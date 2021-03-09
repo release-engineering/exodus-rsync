@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 	"github.com/release-engineering/exodus-rsync/internal/walk"
@@ -106,7 +107,7 @@ func TestMainTypicalSync(t *testing.T) {
 	ext.gw = mockGw
 
 	client := FakeClient{blobs: make(map[string]string)}
-	mockGw.EXPECT().NewClient(EnvMatcher{"best-env"}).Return(&client, nil)
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
 	srcPath := path.Clean(wd + "/../../test/data/srctrees/just-files")
 
@@ -184,7 +185,7 @@ func TestMainSyncFollowsLinks(t *testing.T) {
 	ext.gw = mockGw
 
 	client := FakeClient{blobs: make(map[string]string)}
-	mockGw.EXPECT().NewClient(EnvMatcher{"best-env"}).Return(&client, nil)
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
 	srcPath := path.Clean(wd + "/../../test/data/srctrees/links")
 
@@ -254,7 +255,7 @@ func TestMainSyncNoSlash(t *testing.T) {
 	ext.gw = mockGw
 
 	client := FakeClient{blobs: make(map[string]string)}
-	mockGw.EXPECT().NewClient(EnvMatcher{"best-env"}).Return(&client, nil)
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
 	srcPath := path.Clean(wd + "/../../test/data/srctrees/just-files")
 

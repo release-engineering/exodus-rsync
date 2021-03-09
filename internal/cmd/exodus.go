@@ -36,7 +36,7 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	if args.DryRun {
 		clientCtor = ext.gw.NewDryRunClient
 	}
-	gwClient, err := clientCtor(cfg)
+	gwClient, err := clientCtor(ctx, cfg)
 	if err != nil {
 		logger.F("error", err).Error("can't initialize exodus-gw client")
 		return 101

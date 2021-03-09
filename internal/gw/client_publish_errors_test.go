@@ -15,7 +15,7 @@ import (
 func TestClientPublishErrors(t *testing.T) {
 	cfg := testConfig(t)
 
-	clientIface, err := Package.NewClient(cfg)
+	clientIface, err := Package.NewClient(context.Background(), cfg)
 	if clientIface == nil {
 		t.Errorf("failed to create client, err = %v", err)
 	}
