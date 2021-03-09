@@ -128,6 +128,7 @@ func doRsyncCommand(ctx context.Context, cmd *exec.Cmd) int {
 
 	go piper(outScanner, entry.Info)
 	go piper(errScanner, entry.Warn)
+	wg.Wait()
 
 	err = cmd.Wait()
 	if err != nil {
