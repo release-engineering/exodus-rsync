@@ -8,8 +8,8 @@ import (
 
 type dryRunPublish struct{}
 
-func (i impl) NewDryRunClient(cfg conf.Config) (Client, error) {
-	clientIface, err := i.NewClient(cfg)
+func (i impl) NewDryRunClient(ctx context.Context, cfg conf.Config) (Client, error) {
+	clientIface, err := i.NewClient(ctx, cfg)
 	clientIface.(*client).dryRun = true
 	return clientIface, err
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 )
 
@@ -25,7 +26,7 @@ func TestMainSyncUnreadableFile(t *testing.T) {
 	ext.gw = mockGw
 
 	client := FakeClient{blobs: make(map[string]string)}
-	mockGw.EXPECT().NewClient(EnvMatcher{"best-env"}).Return(&client, nil)
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
 	args := []string{"rsync", "src", "exodus:/some/target"}
 
@@ -63,7 +64,7 @@ func TestMainSyncUnreadableDir(t *testing.T) {
 	ext.gw = mockGw
 
 	client := FakeClient{blobs: make(map[string]string)}
-	mockGw.EXPECT().NewClient(EnvMatcher{"best-env"}).Return(&client, nil)
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
 	args := []string{"rsync", "src", "exodus:/some/target"}
 

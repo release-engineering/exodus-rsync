@@ -100,7 +100,7 @@ environments:
   gwenv: test
 `)
 
-			mockGw.EXPECT().NewClient(gomock.Any()).Return(mockClient, nil)
+			mockGw.EXPECT().NewClient(gomock.Any(), gomock.Any()).Return(mockClient, nil)
 
 			tt.setupMock(ctrl, mockClient)
 

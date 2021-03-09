@@ -28,7 +28,7 @@ environments:
   gwenv: test
 `)
 
-	mockGw.EXPECT().NewClient(gomock.Any()).Return(nil, fmt.Errorf("client error"))
+	mockGw.EXPECT().NewClient(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("client error"))
 
 	got := Main([]string{
 		"exodus-rsync", "-vvv", ".", "some-dest:/foo/bar",

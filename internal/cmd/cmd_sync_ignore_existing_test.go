@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 )
 
@@ -27,7 +28,7 @@ func TestMainSyncIgnoreExisting(t *testing.T) {
 
 		args := []string{"rsync", "--ignore-existing", "nofiles", "exodus:/some/target"}
 
-		mockGw.EXPECT().NewClient(EnvMatcher{"best-env"}).Return(&client, nil)
+		mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 		got := Main(args)
 
 		// It should succeed, though not actually do anything.
@@ -42,7 +43,7 @@ func TestMainSyncIgnoreExisting(t *testing.T) {
 
 		args := []string{"rsync", "--ignore-existing", "files", "exodus:/some/target"}
 
-		mockGw.EXPECT().NewClient(EnvMatcher{"best-env"}).Return(&client, nil)
+		mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 		got := Main(args)
 
 		// It should fail

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -52,7 +53,7 @@ func TestExodusFailsLater(t *testing.T) {
 	// Force exodus publish to fail by setting up broken cert/key path,
 	// and also make it a little slower than rsync.
 	cfg.EXPECT().GwCert().DoAndReturn(func() string {
-		time.Sleep(time.Millisecond * 500)
+		time.Sleep(time.Second * 1)
 		return "/not/exist/cert"
 	})
 
@@ -89,10 +90,13 @@ func TestRsyncFailsFirst(t *testing.T) {
 	logs := CaptureLogger(t)
 	ctx := testContext()
 
-	mockGw.EXPECT().NewClient(gomock.Any()).Do(func(_ ...interface{}) {
-		// Make creating a new client slow to be sure that rsync fails first.
-		time.Sleep(time.Millisecond * 500)
-	})
+	mockGw.EXPECT().NewClient(gomock.Any(), gomock.Any()).Do(
+		func(ctx context.Context, _ ...interface{}) {
+			// Here we ensure that we won't return until context is cancelled
+			// (which happens because rsync failed)
+			<-ctx.Done()
+		},
+	)
 
 	// Force rsync to fail.
 	rsync := &fakeRsync{delegate: ext.rsync}

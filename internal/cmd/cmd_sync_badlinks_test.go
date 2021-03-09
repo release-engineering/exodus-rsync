@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 )
 
@@ -30,7 +31,7 @@ func TestMainSyncBadLinks(t *testing.T) {
 
 		args := []string{"rsync", "-vvv", "broken-link", "exodus:/some/target"}
 
-		mockGw.EXPECT().NewClient(EnvMatcher{"best-env"}).Return(&client, nil)
+		mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 		got := Main(args)
 
 		// It should fail

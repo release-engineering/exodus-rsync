@@ -52,7 +52,7 @@ func TestDryRunPublish(t *testing.T) {
 func TestNewDryRunClientOk(t *testing.T) {
 	cfg := testConfig(t)
 
-	clientIface, err := Package.NewDryRunClient(cfg)
+	clientIface, err := Package.NewDryRunClient(context.Background(), cfg)
 
 	// Should have succeeded
 	if clientIface == nil || err != nil {

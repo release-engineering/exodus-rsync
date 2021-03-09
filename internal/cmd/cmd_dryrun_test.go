@@ -5,6 +5,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 )
 
@@ -21,7 +22,7 @@ func TestMainDryRunSync(t *testing.T) {
 	ext.gw = mockGw
 
 	client := FakeClient{blobs: make(map[string]string)}
-	mockGw.EXPECT().NewDryRunClient(EnvMatcher{"best-env"}).Return(&client, nil)
+	mockGw.EXPECT().NewDryRunClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
 	srcPath := path.Clean(wd + "/../../test/data/srctrees/just-files")
 

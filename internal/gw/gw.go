@@ -14,11 +14,11 @@ import (
 type Interface interface {
 	// NewClient creates and returns a new exodus-gw client with the given
 	// configuration.
-	NewClient(conf.Config) (Client, error)
+	NewClient(context.Context, conf.Config) (Client, error)
 
 	// NewDryRunClient creates and returns a new exodus-gw client in dry-run
 	// mode. This client replaces any write operations with stubs.
-	NewDryRunClient(conf.Config) (Client, error)
+	NewDryRunClient(context.Context, conf.Config) (Client, error)
 }
 
 type impl struct{}
