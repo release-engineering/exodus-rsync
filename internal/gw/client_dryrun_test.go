@@ -29,23 +29,46 @@ func TestDryRunPublish(t *testing.T) {
 
 	c := client{dryRun: true}
 
-	// It should be able to create a publish
-	p, err := c.NewPublish(ctx)
-	if err != nil {
-		t.Errorf("NewPublish failed in dry-run mode, err = %v", err)
+	type publishGetter func(t *testing.T) Publish
+
+	cases := []struct {
+		name   string
+		getter publishGetter
+	}{
+		{"new publish",
+			func(t *testing.T) Publish {
+				p, err := c.NewPublish(ctx)
+				if err != nil {
+					t.Fatalf("NewPublish failed in dry-run mode, err = %v", err)
+				}
+				return p
+			},
+		},
+
+		{"get publish",
+			func(t *testing.T) Publish {
+				return c.GetPublish("whatever-id")
+			},
+		},
 	}
 
-	// Publish object should "work" but not really do anything.
-	t.Logf("Created publish %s", p.ID())
+	for _, testcase := range cases {
+		t.Run(testcase.name, func(t *testing.T) {
+			p := testcase.getter(t)
 
-	err = p.AddItems(ctx, []ItemInput{})
-	if err != nil {
-		t.Errorf("AddItems failed in dry-run mode, err = %v", err)
-	}
+			// Publish object should "work" but not really do anything.
+			t.Logf("Got publish %s", p.ID())
 
-	err = p.Commit(ctx)
-	if err != nil {
-		t.Errorf("Commit failed in dry-run mode, err = %v", err)
+			err := p.AddItems(ctx, []ItemInput{})
+			if err != nil {
+				t.Errorf("AddItems failed in dry-run mode, err = %v", err)
+			}
+
+			err = p.Commit(ctx)
+			if err != nil {
+				t.Errorf("Commit failed in dry-run mode, err = %v", err)
+			}
+		})
 	}
 }
 

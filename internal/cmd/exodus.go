@@ -94,12 +94,20 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 
 	logger.F("uploaded", uploadCount, "existing", existingCount).Info("Completed uploads")
 
-	publish, err := gwClient.NewPublish(ctx)
-	if err != nil {
-		logger.F("error", err).Error("can't create publish")
-		return 62
+	var publish gw.Publish
+
+	if args.Publish == "" {
+		// No publish provided, then create a new one.
+		publish, err = gwClient.NewPublish(ctx)
+		if err != nil {
+			logger.F("error", err).Error("can't create publish")
+			return 62
+		}
+		logger.F("publish", publish.ID()).Info("Created publish")
+	} else {
+		publish = gwClient.GetPublish(args.Publish)
+		logger.F("publish", publish.ID()).Info("Joining publish")
 	}
-	logger.F("publish", publish.ID()).Info("Created publish")
 
 	publishItems := []gw.ItemInput{}
 
@@ -118,10 +126,13 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 
 	logger.F("publish", publish.ID(), "items", len(publishItems)).Info("Added publish items")
 
-	err = publish.Commit(ctx)
-	if err != nil {
-		logger.F("error", err).Error("can't commit publish")
-		return 71
+	if args.Publish == "" {
+		// We created the publish, then we should commit it.
+		err = publish.Commit(ctx)
+		if err != nil {
+			logger.F("error", err).Error("can't commit publish")
+			return 71
+		}
 	}
 
 	msg := "Completed successfully!"

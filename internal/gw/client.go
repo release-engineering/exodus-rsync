@@ -187,6 +187,7 @@ func (impl) NewClient(_ context.Context, cfg conf.Config) (Client, error) {
 
 			Region:      aws.String("us-east-1"),
 			Credentials: credentials.AnonymousCredentials,
+			HTTPClient:  out.httpClient,
 		},
 	})
 	if err != nil {
