@@ -103,6 +103,20 @@ func (mr *MockClientMockRecorder) EnsureUploaded(ctx, items, onUploaded, onPrese
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnsureUploaded", reflect.TypeOf((*MockClient)(nil).EnsureUploaded), ctx, items, onUploaded, onPresent)
 }
 
+// GetPublish mocks base method.
+func (m *MockClient) GetPublish(arg0 string) Publish {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPublish", arg0)
+	ret0, _ := ret[0].(Publish)
+	return ret0
+}
+
+// GetPublish indicates an expected call of GetPublish.
+func (mr *MockClientMockRecorder) GetPublish(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublish", reflect.TypeOf((*MockClient)(nil).GetPublish), arg0)
+}
+
 // NewPublish mocks base method.
 func (m *MockClient) NewPublish(arg0 context.Context) (Publish, error) {
 	m.ctrl.T.Helper()

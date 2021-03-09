@@ -73,3 +73,44 @@ func TestClientPublish(t *testing.T) {
 		t.Errorf("unexpected error from commit: %v", err)
 	}
 }
+
+func TestClientGetPublish(t *testing.T) {
+	cfg := testConfig(t)
+
+	clientIface, err := Package.NewClient(context.Background(), cfg)
+	if clientIface == nil {
+		t.Errorf("failed to create client, err = %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = log.NewContext(ctx, log.Package.NewLogger(args.Config{}))
+
+	gw := newFakeGw(t, clientIface.(*client))
+	gw.publishes["some-id"] = &fakePublish{id: "some-id"}
+
+	// It should be able to get a publish
+	p := clientIface.GetPublish("some-id")
+
+	// It should have an ID
+	id := p.ID()
+	if id != "some-id" {
+		t.Errorf("got unexpected id %s", id)
+	}
+
+	// It should be able to add some items
+	addItems := []ItemInput{
+		{"/some/path", "1234"},
+		{"/other/path", "223344"},
+	}
+	err = p.AddItems(ctx, addItems)
+	if err != nil {
+		t.Errorf("failed to add items to publish, err = %v", err)
+	}
+
+	// Those items should have made it in
+	gotItems := gw.publishes[p.ID()].items
+	if !reflect.DeepEqual(gotItems, addItems) {
+		t.Errorf("publish state incorrect after adding items, have items: %v", gotItems)
+	}
+
+}

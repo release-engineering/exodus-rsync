@@ -41,6 +41,29 @@ func (c *client) NewPublish(ctx context.Context) (Publish, error) {
 	return out, nil
 }
 
+func (c *client) GetPublish(id string) Publish {
+	if c.dryRun {
+		return &dryRunPublish{}
+	}
+
+	url := "/" + c.cfg.GwEnv() + "/publish/" + id
+
+	out := &publish{}
+	out.client = c
+
+	// Make up the content of the publish object as we expect
+	// exodus-gw would have returned it. We do not actually know
+	// whether this is valid - we'll find out later when we try to
+	// use it.
+	out.raw.ID = id
+	out.raw.Env = c.cfg.GwEnv()
+	out.raw.Links = make(map[string]string)
+	out.raw.Links["self"] = url
+	out.raw.Links["commit"] = url + "/commit"
+
+	return out
+}
+
 func (p *publish) ID() string {
 	return p.raw.ID
 }
@@ -55,6 +78,8 @@ func (p *publish) AddItems(ctx context.Context, items []ItemInput) error {
 	}
 
 	logger := log.FromContext(ctx)
+
+	logger.F("url", url, "count", len(items)).Debug("Adding to publish object")
 
 	var batch []ItemInput
 	batchSize := p.client.cfg.GwBatchSize()

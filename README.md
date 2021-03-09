@@ -182,6 +182,12 @@ is a summary of the differences:
 - exodus-rsync supports a few additional arguments not supported by rsync. All of these are
   prefixed with `--exodus-` to avoid any clashes.
 
+  | Argument | Notes |
+  | -------- | ----- |
+  | --exodus-conf=PATH | use this configuration file |
+  | --exodus-publish=ID | join content to an existing publish (see "Publish modes") |
+
+
 - exodus-rsync supports only the following rsync arguments, most of which do not have any
   effect.
 
@@ -202,6 +208,68 @@ is a summary of the differences:
   | --timeout=INT | ignored |
   | -a, --archive | ignored |
 
+
+### Publish modes
+
+exodus-rsync supports two different modes of publishing to exodus CDN.
+
+#### Standalone publish
+
+This is the default mode.
+
+exodus-rsync will create a new "publish" object within exodus-gw, add content to it,
+and commit it.
+
+In this mode, each individual execution of exodus-rsync will have atomic semantics,
+but a sequence of publishes will not be atomic. For example, if we run commands
+in sequence:
+
+```
+$ exodus-rsync src1 exodus:/dest1
+$ exodus-rsync src2 exodus:/dest2
+$ exodus-rsync src3 exodus:/dest3
+```
+
+... each of dest1, dest2 and dest3 will either be fully exposed on the CDN
+or not exposed at all, but if interrupted part way through, it is possible that
+(for example) dest1 and dest2 are published but dest3 is not.
+
+#### Joined publish
+
+This mode is activated by calling exodus-rsync with the `--exodus-publish=<publish_id>`
+argument.
+
+The given publish ID must have been created in exodus-gw prior to calling exodus-rsync.
+exodus-rsync will add content onto the publish, but will not commit it.
+
+In this mode, it is possible to achieve atomic behavior covering a group of exodus-rsync
+commands, as in example:
+
+```
+# Create a publish.
+$ curl [...] -X POST https://exodus-gw.example.com/prod/publish
+{"id":"4e59c1a0", ...}
+
+# Let several syncs join this publish.
+$ exodus-rsync --exodus-publish 4e59c1a0 src1 exodus:/dest1
+$ exodus-rsync --exodus-publish 4e59c1a0 src2 exodus:/dest2
+$ exodus-rsync --exodus-publish 4e59c1a0 src3 exodus:/dest3
+
+# Commit the publish
+$ curl [...] -X POST https://exodus-gw.example.com/prod/publish/4e59c1a0/commit
+{"id":"fa9c4b26", ...}
+
+# (...and we should wait for task fa9c4b26 to complete as well)
+```
+
+In the above example, it is ensured that either *all* of dest1, dest2 and dest3 are fully
+exposed from the CDN or that *none* of them are exposed at all, even if we are interrupted
+in the middle of publishing.  None of the published content becomes visible from the CDN until
+the "commit" operation occurs, which exposes all content at once.
+
+See [the exodus-gw documentation](https://release-engineering.github.io/exodus-gw/api.html#section/Atomicity)
+for more information on the atomicity guarantees when publishing with
+exodus-rsync and exodus-gw.
 
 License
 -------

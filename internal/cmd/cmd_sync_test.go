@@ -51,6 +51,10 @@ type FakePublish struct {
 	id        string
 }
 
+type BrokenPublish struct {
+	id string
+}
+
 func (c *FakeClient) EnsureUploaded(ctx context.Context, items []walk.SyncItem,
 	onUploaded func(walk.SyncItem) error,
 	onExisting func(walk.SyncItem) error,
@@ -77,6 +81,16 @@ func (c *FakeClient) NewPublish(ctx context.Context) (gw.Publish, error) {
 	return &c.publishes[len(c.publishes)-1], nil
 }
 
+func (c *FakeClient) GetPublish(id string) gw.Publish {
+	for idx := range c.publishes {
+		if c.publishes[idx].id == id {
+			return &c.publishes[idx]
+		}
+	}
+	// Didn't find any, then return a broken one
+	return &BrokenPublish{id: id}
+}
+
 func (p *FakePublish) AddItems(ctx context.Context, items []gw.ItemInput) error {
 	if p.committed != 0 {
 		return fmt.Errorf("attempted to modify committed publish")
@@ -85,12 +99,24 @@ func (p *FakePublish) AddItems(ctx context.Context, items []gw.ItemInput) error 
 	return nil
 }
 
+func (p *BrokenPublish) AddItems(_ context.Context, _ []gw.ItemInput) error {
+	return fmt.Errorf("invalid publish")
+}
+
+func (p *BrokenPublish) Commit(_ context.Context) error {
+	return fmt.Errorf("invalid publish")
+}
+
 func (p *FakePublish) Commit(ctx context.Context) error {
 	p.committed++
 	return nil
 }
 
 func (p *FakePublish) ID() string {
+	return p.id
+}
+
+func (p *BrokenPublish) ID() string {
 	return p.id
 }
 
@@ -303,5 +329,73 @@ func TestMainSyncNoSlash(t *testing.T) {
 	// It should have committed the publish (once)
 	if p.committed != 1 {
 		t.Error("expected to commit publish (once), instead p.committed ==", p.committed)
+	}
+}
+
+func TestMainSyncJoinPublish(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	SetConfig(t, CONFIG)
+	ctrl := MockController(t)
+
+	mockGw := gw.NewMockInterface(ctrl)
+	ext.gw = mockGw
+
+	client := FakeClient{blobs: make(map[string]string)}
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
+
+	// Set up that this publish already exists.
+	client.publishes = []FakePublish{{items: make([]gw.ItemInput, 0), id: "abc123"}}
+
+	srcPath := path.Clean(wd + "/../../test/data/srctrees/just-files")
+
+	args := []string{
+		"rsync",
+		"-vvv",
+		"--exodus-publish", "abc123",
+		srcPath,
+		"exodus:/dest",
+	}
+
+	got := Main(args)
+
+	// It should complete successfully.
+	if got != 0 {
+		t.Error("returned incorrect exit code", got)
+	}
+
+	// It should have left the one publish there without creating any more
+	if len(client.publishes) != 1 {
+		t.Error("should have used 1 existing publish, instead have", len(client.publishes))
+	}
+
+	p := client.publishes[0]
+
+	// It should NOT have committed the publish since it already existed
+	if p.committed != 0 {
+		t.Error("publish committed unexpectedly? p.committed ==", p.committed)
+	}
+
+	// Build up a URI => Key mapping of what was published
+	itemMap := make(map[string]string)
+	for _, item := range p.items {
+		if _, ok := itemMap[item.WebURI]; ok {
+			t.Error("tried to publish this URI more than once:", item.WebURI)
+		}
+		itemMap[item.WebURI] = item.ObjectKey
+	}
+
+	// It should have added these items to the publish, as normal
+	expectedItems := map[string]string{
+		"/dest/just-files/hello-copy-one":     "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+		"/dest/just-files/hello-copy-two":     "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+		"/dest/just-files/subdir/some-binary": "c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6",
+	}
+
+	if !reflect.DeepEqual(itemMap, expectedItems) {
+		t.Error("did not publish expected items, published:", itemMap)
 	}
 }

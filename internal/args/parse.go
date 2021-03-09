@@ -41,6 +41,8 @@ type IgnoredConfig struct {
 // and there are no short flags.
 type ExodusConfig struct {
 	Conf string `help:"Force usage of this configuration file."`
+
+	Publish string `help:"ID of existing exodus-gw publish to."`
 }
 
 // Config contains the subset of arguments which are returned by the parser and
