@@ -48,8 +48,6 @@ func Main(rawArgs []string) int {
 		return 23
 	}
 
-	// TODO: "join publish" mode
-
 	var env conf.Config = cfg.EnvironmentForDest(ctx, parsedArgs.Dest)
 	var main mainFunc = invalidMain
 
