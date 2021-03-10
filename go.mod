@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/adrg/xdg v0.3.2
-	github.com/alecthomas/kong v0.2.15
+	github.com/alecthomas/kong v0.2.16
 	github.com/apex/log v1.9.0
 	github.com/aws/aws-sdk-go v1.37.28
 	github.com/coreos/go-systemd/v22 v22.2.0
