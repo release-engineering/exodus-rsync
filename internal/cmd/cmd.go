@@ -22,6 +22,9 @@ var ext = struct {
 	log.Package,
 }
 
+// This version should be written at build time, see Makefile.
+var version string = "(unknown version)"
+
 type mainFunc func(context.Context, conf.Config, args.Config) int
 
 func invalidMain(ctx context.Context, cfg conf.Config, _ args.Config) int {
@@ -33,7 +36,7 @@ func invalidMain(ctx context.Context, cfg conf.Config, _ args.Config) int {
 
 // Main is the top-level entry point to the exodus-rsync command.
 func Main(rawArgs []string) int {
-	parsedArgs := args.Parse(rawArgs, nil)
+	parsedArgs := args.Parse(rawArgs, version, nil)
 
 	logger := ext.log.NewLogger(parsedArgs)
 

@@ -8,6 +8,8 @@ import (
 	"github.com/alecthomas/kong"
 )
 
+const docsURL = "https://github.com/release-engineering/exodus-rsync"
+
 type filterArgument string
 
 func (f filterArgument) Validate() error {
@@ -81,7 +83,7 @@ func (c *Config) DestPath() string {
 // Parse will parse provided command-line arguments and either return
 // a valid Config object, or call the exit function with a non-zero
 // exit code.
-func Parse(args []string, exit func(int)) Config {
+func Parse(args []string, version string, exit func(int)) Config {
 	oldArgs := os.Args
 	defer func() {
 		os.Args = oldArgs
@@ -95,6 +97,11 @@ func Parse(args []string, exit func(int)) Config {
 	out := Config{}
 	kong.Parse(&out,
 		kong.Exit(exit),
+		kong.Description(
+			fmt.Sprintf(
+				"exodus-rsync %s, an exodus-aware rsync replacement.\n\nSee also: %s",
+				version, docsURL)),
+
 		kong.ExplicitGroups([]kong.Group{
 
 			{Key: "ignored",

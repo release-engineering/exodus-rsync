@@ -6,9 +6,11 @@ default: exodus-rsync
 # since a bare failing "test -z" might be undecipherable to some
 fmt-cmd = if ! test -z $$($(1) | tee /dev/stderr); then echo $(2); exit 3; fi
 
+BUILDFLAGS := -ldflags "-X github.com/release-engineering/exodus-rsync/internal/cmd.version=$$(git describe HEAD)"
+
 # Build the main binary for this project.
 exodus-rsync: generate
-	go build ./cmd/exodus-rsync
+	go build $(BUILDFLAGS) ./cmd/exodus-rsync
 
 # Run automated tests while gathering coverage info.
 # Generated mocks are excluded from coverage report.

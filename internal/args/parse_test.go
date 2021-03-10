@@ -43,7 +43,7 @@ func TestParseOk(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := Parse(tc.input, nil)
+			got := Parse(tc.input, "", nil)
 			if !reflect.DeepEqual(tc.want, got) {
 				t.Fatalf("expected: %v, got: %v", tc.want, got)
 			}
@@ -64,7 +64,7 @@ func TestParseErrors(t *testing.T) {
 		exitcode := 0
 
 		t.Run(name, func(t *testing.T) {
-			Parse(tc.input, func(code int) {
+			Parse(tc.input, "", func(code int) {
 				exitcode = code
 			})
 
