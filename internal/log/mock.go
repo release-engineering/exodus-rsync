@@ -47,3 +47,54 @@ func (mr *MockInterfaceMockRecorder) NewLogger(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewLogger", reflect.TypeOf((*MockInterface)(nil).NewLogger), arg0)
 }
+
+// MockConfigProvider is a mock of ConfigProvider interface.
+type MockConfigProvider struct {
+	ctrl     *gomock.Controller
+	recorder *MockConfigProviderMockRecorder
+}
+
+// MockConfigProviderMockRecorder is the mock recorder for MockConfigProvider.
+type MockConfigProviderMockRecorder struct {
+	mock *MockConfigProvider
+}
+
+// NewMockConfigProvider creates a new mock instance.
+func NewMockConfigProvider(ctrl *gomock.Controller) *MockConfigProvider {
+	mock := &MockConfigProvider{ctrl: ctrl}
+	mock.recorder = &MockConfigProviderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockConfigProvider) EXPECT() *MockConfigProviderMockRecorder {
+	return m.recorder
+}
+
+// LogLevel mocks base method.
+func (m *MockConfigProvider) LogLevel() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogLevel")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// LogLevel indicates an expected call of LogLevel.
+func (mr *MockConfigProviderMockRecorder) LogLevel() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogLevel", reflect.TypeOf((*MockConfigProvider)(nil).LogLevel))
+}
+
+// Logger mocks base method.
+func (m *MockConfigProvider) Logger() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Logger")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Logger indicates an expected call of Logger.
+func (mr *MockConfigProviderMockRecorder) Logger() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logger", reflect.TypeOf((*MockConfigProvider)(nil).Logger))
+}

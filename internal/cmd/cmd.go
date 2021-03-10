@@ -66,5 +66,7 @@ func Main(rawArgs []string) int {
 		env = cfg
 	}
 
+	logger.StartPlatformLogger(env)
+
 	return main(ctx, env, parsedArgs)
 }

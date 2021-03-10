@@ -127,6 +127,33 @@ environments:
 rsyncmode: exodus
 
 ###############################################################################
+# Logging
+###############################################################################
+#
+# Sets the minimum log level for logs sent to the local system log
+# (journald or syslog). One of:
+#
+# "none"   - no logging
+# "debug"  - for debugging exodus-rsync, very verbose
+# "info"   - outputs messages mostly when writes occur; default, and recommended.
+# "warn"   - outputs messages when possible issues are encountered
+# "error"  - outputs messages when errors occur
+#
+# Note that this log level is set independently from the level of verbosity
+# sent to stdout/stderr, which is only controlled by the "-v" argument.
+#
+loglevel: info
+
+#
+# Force usage of a specific logger backend.
+#
+# "journald"       - use journald. Recommended, fully supports structured logging.
+# "syslog"         - use syslog. Structured logs are embedded as JSON.
+# "auto" or absent - autodetect best logger
+#
+logger: auto
+
+###############################################################################
 # Tuning
 ###############################################################################
 #

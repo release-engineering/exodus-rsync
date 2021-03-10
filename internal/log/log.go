@@ -7,6 +7,9 @@ import (
 	"github.com/apex/log"
 	apexLog "github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
+	"github.com/apex/log/handlers/level"
+	"github.com/apex/log/handlers/multi"
+	"github.com/coreos/go-systemd/v22/journal"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 )
 
@@ -20,6 +23,16 @@ type Interface interface {
 	// NewLogger will construct and return a logger appropriately configured to
 	// serve as the primary logger throughout exodus-rsync.
 	NewLogger(args.Config) *Logger
+}
+
+// ConfigProvider is an interface for any kind of object able to
+// provide logger configuration.
+type ConfigProvider interface {
+	// Minimum log level.
+	LogLevel() string
+
+	// "journald" or "syslog" to force specific logging backend.
+	Logger() string
 }
 
 type impl struct{}
@@ -87,7 +100,6 @@ func (l *Logger) F(v ...interface{}) *apexLog.Entry {
 func (impl) NewLogger(args args.Config) *Logger {
 	logger := Logger{}
 
-	// TODO: use conf.Config for something?
 	logger.Handler = cli.New(os.Stdout)
 	logger.Level = log.InfoLevel
 	if args.Verbose >= 1 {
@@ -95,7 +107,45 @@ func (impl) NewLogger(args args.Config) *Logger {
 		logger.Level = log.DebugLevel
 	}
 
-	// TODO: enable debug logs from AWS SDK if verbose is high enough.
-
 	return &logger
+}
+
+func loggerBackend(cfg ConfigProvider, haveJournal bool) func() apexLog.Handler {
+	logger := cfg.Logger()
+	if logger == "journald" {
+		return newJournalHandler
+	}
+	if logger == "syslog" {
+		return newSyslogHandler
+	}
+	if haveJournal {
+		return newJournalHandler
+	}
+	return newSyslogHandler
+}
+
+// StartPlatformLogger will enable (or not) the platform native logging,
+// such as journald or syslog, according to the config.
+func (l *Logger) StartPlatformLogger(cfg ConfigProvider) {
+	if cfg.LogLevel() == "none" {
+		return
+	}
+
+	lvl, err := apexLog.ParseLevel(cfg.LogLevel())
+	if err != nil {
+		l.Warnf("Invalid loglevel '%v' in config, defaulting to 'info'", cfg.LogLevel())
+		lvl = apexLog.InfoLevel
+	}
+
+	ctor := loggerBackend(cfg, journal.Enabled())
+	handler := ctor()
+
+	// platform logger only logs messages at lvl and higher.
+	handler = level.New(handler, lvl)
+
+	// logger object writes to CLI *and* to platform logger.
+	l.Handler = multi.New(
+		l.Handler,
+		handler,
+	)
 }
