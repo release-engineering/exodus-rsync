@@ -8,26 +8,18 @@ import (
 	apexLog "github.com/apex/log"
 )
 
-type syslogEntry struct {
-	message string
-	level   apexLog.Level
-}
-
 type syslogHandler struct {
-	writer  *syslog.Writer
-	channel chan syslogEntry
+	writer *syslog.Writer
 }
 
 type writeFunc func(string) error
 
 func newSyslogHandler() apexLog.Handler {
 	out := syslogHandler{}
-	out.channel = make(chan syslogEntry, 100)
 
 	writer, err := syslog.New(syslog.LOG_INFO, "")
 	if err == nil {
 		out.writer = writer
-		go out.sender(out.channel)
 	}
 
 	return &out
@@ -46,12 +38,6 @@ func (h *syslogHandler) writerForLevel(l apexLog.Level) writeFunc {
 	return h.writer.Debug
 }
 
-func (h *syslogHandler) sender(entries <-chan syslogEntry) {
-	for e := range entries {
-		h.writerForLevel(e.level)(e.message)
-	}
-}
-
 func (h *syslogHandler) HandleLog(e *apexLog.Entry) error {
 	bld := strings.Builder{}
 	bld.WriteString(e.Message + " ")
@@ -59,7 +45,5 @@ func (h *syslogHandler) HandleLog(e *apexLog.Entry) error {
 	enc := json.NewEncoder(&bld)
 	enc.Encode(e.Fields)
 
-	h.channel <- syslogEntry{bld.String(), e.Level}
-
-	return nil
+	return h.writerForLevel(e.Level)(bld.String())
 }

@@ -8,29 +8,10 @@ import (
 	"github.com/coreos/go-systemd/v22/journal"
 )
 
-type journalHandler struct {
-	channel chan journalEntry
-}
-
-type journalEntry struct {
-	message  string
-	priority journal.Priority
-	vars     map[string]string
-}
+type journalHandler struct{}
 
 func newJournalHandler() apexLog.Handler {
-	out := journalHandler{}
-	out.channel = make(chan journalEntry, 100)
-	go sender(out.channel)
-	return &out
-}
-
-func sender(entries <-chan journalEntry) {
-	for e := range entries {
-		// It is possible for journal.Send to fail, but if so,
-		// it's not clear that we could do anything useful here.
-		journal.Send(e.message, e.priority, e.vars)
-	}
+	return &journalHandler{}
 }
 
 func priority(e *apexLog.Entry) journal.Priority {
@@ -63,7 +44,5 @@ func (h *journalHandler) HandleLog(e *apexLog.Entry) error {
 	pri := priority(e)
 	fields := fields(e)
 
-	h.channel <- journalEntry{msg, pri, fields}
-
-	return nil
+	return journal.Send(msg, pri, fields)
 }
