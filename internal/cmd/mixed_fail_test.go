@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apex/log"
 	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
@@ -114,8 +115,16 @@ func TestRsyncFailsFirst(t *testing.T) {
 		t.Error("missing exodus cancel log")
 	}
 
+	// Filter out debug messages
+	entries := make([]*log.Entry, 0)
+	for _, entry := range logs.Entries {
+		if entry.Level >= log.InfoLevel {
+			entries = append(entries, entry)
+		}
+	}
+
 	// Very last message should explain that it was the rsync publish which failed
-	last := logs.Entries[len(logs.Entries)-1]
+	last := entries[len(entries)-1]
 	if last.Message != "Publish via rsync failed" {
 		t.Errorf("unexpected final message: %v", last.Message)
 	}
