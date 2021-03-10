@@ -8,6 +8,8 @@ type sharedConfig struct {
 	GwPollIntervalRaw int    `yaml:"gwpollinterval"`
 	GwBatchSizeRaw    int    `yaml:"gwbatchsize"`
 	RsyncModeRaw      string `yaml:"rsyncmode"`
+	LogLevelRaw       string `yaml:"loglevel"`
+	LoggerRaw         string `yaml:"logger"`
 }
 
 type environment struct {
@@ -67,6 +69,14 @@ func (g *globalConfig) RsyncMode() string {
 	return nonEmptyString(g.RsyncModeRaw, "exodus")
 }
 
+func (g *globalConfig) LogLevel() string {
+	return nonEmptyString(g.LogLevelRaw, "info")
+}
+
+func (g *globalConfig) Logger() string {
+	return nonEmptyString(g.LoggerRaw, "auto")
+}
+
 func (e *environment) GwCert() string {
 	return nonEmptyString(e.GwCertRaw, e.parent.GwCert())
 }
@@ -93,6 +103,14 @@ func (e *environment) GwBatchSize() int {
 
 func (e *environment) RsyncMode() string {
 	return nonEmptyString(e.RsyncModeRaw, e.parent.RsyncMode())
+}
+
+func (e *environment) LogLevel() string {
+	return nonEmptyString(e.LogLevelRaw, e.parent.LogLevel())
+}
+
+func (e *environment) Logger() string {
+	return nonEmptyString(e.LoggerRaw, e.parent.Logger())
 }
 
 func (e *environment) Prefix() string {

@@ -157,6 +157,34 @@ func (mr *MockConfigMockRecorder) GwURL() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwURL", reflect.TypeOf((*MockConfig)(nil).GwURL))
 }
 
+// LogLevel mocks base method.
+func (m *MockConfig) LogLevel() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogLevel")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// LogLevel indicates an expected call of LogLevel.
+func (mr *MockConfigMockRecorder) LogLevel() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogLevel", reflect.TypeOf((*MockConfig)(nil).LogLevel))
+}
+
+// Logger mocks base method.
+func (m *MockConfig) Logger() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Logger")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Logger indicates an expected call of Logger.
+func (mr *MockConfigMockRecorder) Logger() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logger", reflect.TypeOf((*MockConfig)(nil).Logger))
+}
+
 // RsyncMode mocks base method.
 func (m *MockConfig) RsyncMode() string {
 	m.ctrl.T.Helper()
@@ -276,6 +304,34 @@ func (m *MockEnvironmentConfig) GwURL() string {
 func (mr *MockEnvironmentConfigMockRecorder) GwURL() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwURL", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwURL))
+}
+
+// LogLevel mocks base method.
+func (m *MockEnvironmentConfig) LogLevel() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogLevel")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// LogLevel indicates an expected call of LogLevel.
+func (mr *MockEnvironmentConfigMockRecorder) LogLevel() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogLevel", reflect.TypeOf((*MockEnvironmentConfig)(nil).LogLevel))
+}
+
+// Logger mocks base method.
+func (m *MockEnvironmentConfig) Logger() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Logger")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Logger indicates an expected call of Logger.
+func (mr *MockEnvironmentConfigMockRecorder) Logger() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logger", reflect.TypeOf((*MockEnvironmentConfig)(nil).Logger))
 }
 
 // Prefix mocks base method.
@@ -425,6 +481,34 @@ func (m *MockGlobalConfig) GwURL() string {
 func (mr *MockGlobalConfigMockRecorder) GwURL() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwURL", reflect.TypeOf((*MockGlobalConfig)(nil).GwURL))
+}
+
+// LogLevel mocks base method.
+func (m *MockGlobalConfig) LogLevel() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogLevel")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// LogLevel indicates an expected call of LogLevel.
+func (mr *MockGlobalConfigMockRecorder) LogLevel() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogLevel", reflect.TypeOf((*MockGlobalConfig)(nil).LogLevel))
+}
+
+// Logger mocks base method.
+func (m *MockGlobalConfig) Logger() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Logger")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Logger indicates an expected call of Logger.
+func (mr *MockGlobalConfigMockRecorder) Logger() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logger", reflect.TypeOf((*MockGlobalConfig)(nil).Logger))
 }
 
 // RsyncMode mocks base method.

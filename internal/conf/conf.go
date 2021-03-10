@@ -42,6 +42,12 @@ type Config interface {
 
 	// Execution mode for rsync.
 	RsyncMode() string
+
+	// Minimum log level for platform logger.
+	LogLevel() string
+
+	// Specific logger backend (journald or syslog).
+	Logger() string
 }
 
 // EnvironmentConfig provides configuration specific to one environment.
