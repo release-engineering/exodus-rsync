@@ -1,0 +1,6 @@
+#!/bin/sh
+# Fake rsync to put into PATH during some tests.
+EXITCODE=${RSYNC_EXITCODE:-0}
+
+echo rsync: "$@"
+exit $EXITCODE

@@ -105,12 +105,21 @@ func (i impl) Exec(ctx context.Context, cfg conf.Config, args args.Config) error
 	cmd := i.Command(ctx, cfg, args)
 	return ext.exec(
 		cmd.Path,
-		cmd.Args[1:],
+		cmd.Args,
 		os.Environ(),
 	)
 }
 
 func (impl) Command(ctx context.Context, cfg conf.Config, args args.Config) *exec.Cmd {
-	// TODO: look up path properly, ensure we don't look up ourselves
-	return exec.CommandContext(ctx, "/usr/bin/rsync", rsyncArguments(ctx, cfg, args)...)
+	logger := log.FromContext(ctx)
+
+	rsync, err := lookupTrueRsync(ctx)
+	if err != nil {
+		logger.F("error", err).Warn("Failed to look up rsync, fallback to /usr/bin/rsync")
+		rsync = "/usr/bin/rsync"
+	} else {
+		logger.F("path", rsync).Debug("Located rsync")
+	}
+
+	return exec.CommandContext(ctx, rsync, rsyncArguments(ctx, cfg, args)...)
 }
