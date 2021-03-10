@@ -1,13 +1,24 @@
-exodus-rsync
-============
+# exodus-rsync
 
 exodus-aware drop-in replacement for rsync.
 
 [![Coverage Status](https://coveralls.io/repos/github/release-engineering/exodus-rsync/badge.svg?branch=main)](https://coveralls.io/github/release-engineering/exodus-rsync?branch=main)
 
+<!-- TOC -->
 
-Overview
---------
+- [Overview](#overview)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+  - [Differences from rsync](#differences-from-rsync)
+  - [Publish modes](#publish-modes)
+    - [Standalone publish](#standalone-publish)
+    - [Joined publish](#joined-publish)
+- [License](#license)
+
+<!-- /TOC -->
+
+## Overview
 
 exodus-rsync is a command-line file transfer tool which is partially compatible with
 [rsync](https://rsync.samba.org/).
@@ -20,8 +31,7 @@ for more information on how exodus-rsync works together with other projects in t
 Exodus CDN family of projects.
 
 
-Installation
-------------
+## Installation
 
 exodus-rsync is a standalone linux-amd64 binary which may be downloaded from the
 [repository releases](https://github.com/release-engineering/exodus-rsync/releases).
@@ -40,8 +50,7 @@ In order for exodus-rsync to do anything useful, it's necessary to first deploy 
 configuration file; see the next section.
 
 
-Configuration
--------------
+## Configuration
 
 exodus-rsync uses a configuration file found at either:
 
@@ -178,8 +187,7 @@ In order to publish to exodus CDN it is necessary to configure all of the
 to rsync without any usage of exodus-gw.
 
 
-Usage
------
+## Usage
 
 exodus-rsync provides an interface partially compatible with this form of the rsync
 command:
@@ -298,8 +306,7 @@ See [the exodus-gw documentation](https://release-engineering.github.io/exodus-g
 for more information on the atomicity guarantees when publishing with
 exodus-rsync and exodus-gw.
 
-License
--------
+## License
 
 This program is free software: you can redistribute it and/or modify it under the terms
 of the GNU General Public License as published by the Free Software Foundation,
