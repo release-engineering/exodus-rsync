@@ -3,6 +3,7 @@ package rsync
 import (
 	"context"
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -12,9 +13,24 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
+func addTestBinPath(t *testing.T) {
+	oldPath := os.Getenv("PATH")
+	newPath := "../../test/bin:" + oldPath
+
+	t.Cleanup(func() {
+		os.Setenv("PATH", oldPath)
+	})
+	err := os.Setenv("PATH", newPath)
+	if err != nil {
+		t.Fatalf("could not set PATH, err = %v", err)
+	}
+}
+
 func TestExec(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	conf := conf.NewMockConfig(ctrl)
+
+	addTestBinPath(t)
 
 	tests := []struct {
 		name         string
@@ -26,7 +42,7 @@ func TestExec(t *testing.T) {
 				Src:  "some-src",
 				Dest: "some-dest",
 			},
-			[]string{"some-src", "some-dest"},
+			[]string{"../../test/bin/rsync", "some-src", "some-dest"},
 		},
 
 		{"all args",
@@ -52,6 +68,7 @@ func TestExec(t *testing.T) {
 				Filter:         "some-filter",
 			},
 			[]string{
+				"../../test/bin/rsync",
 				"--recursive", "--times", "--delete", "--keep-dirlinks", "--omit-dir-times",
 				"--compress", "--itemize-changes", "--rsh", "some-rsh", "--copy-links",
 				"--stats", "--timeout", "1234", "--archive", "-vvv", "--ignore-existing",
@@ -79,8 +96,7 @@ func TestExec(t *testing.T) {
 				t.Error("error not propagated from exec, got =", err)
 			}
 
-			// TODO: update this when rsync lookup behavior is implemented
-			if gotArgv0 != "/usr/bin/rsync" {
+			if gotArgv0 != "../../test/bin/rsync" {
 				t.Error("invoked unexpected rsync command", gotArgv0)
 			}
 
