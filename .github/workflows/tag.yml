@@ -1,0 +1,20 @@
+name: Make tag
+
+on:
+  push:
+    paths:
+    - "CHANGELOG.md"
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: jaliborc/action-general-autotag@1.0.0
+      with:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        source_file: "CHANGELOG.md"
+        extraction_regex: "^## ([\\d\\.]+) -"
+        tag_format: "v{version}"
