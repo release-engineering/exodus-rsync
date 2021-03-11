@@ -6,7 +6,8 @@ default: exodus-rsync
 # since a bare failing "test -z" might be undecipherable to some
 fmt-cmd = if ! test -z $$($(1) | tee /dev/stderr); then echo $(2); exit 3; fi
 
-BUILDFLAGS := -ldflags "-X github.com/release-engineering/exodus-rsync/internal/cmd.version=$$(git describe HEAD)"
+BUILDVERSION := $$(git describe HEAD)
+BUILDFLAGS := -ldflags "-X github.com/release-engineering/exodus-rsync/internal/cmd.version=$(BUILDVERSION)"
 
 # Build the main binary for this project.
 exodus-rsync: generate
