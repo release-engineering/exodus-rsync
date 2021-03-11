@@ -236,7 +236,7 @@ is a summary of the differences:
   | -K, --keep-dirlinks | ignored; there are no directories on exodus CDN |
   | -O, --omit-dir-times | ignored; there are no directories on exodus CDN |
   | -z, --compress | ignored |
-  | -i, --itemize-changes | (TODO) ignored |
+  | -i, --itemize-changes | ignored |
   | -e, --rsh=STRING | ignored; ssh is not used |
   | -L, --copy-links | ignored; exodus-rsync always follows links |
   | --stats | ignored |
