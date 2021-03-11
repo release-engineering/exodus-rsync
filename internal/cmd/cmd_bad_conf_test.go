@@ -28,7 +28,7 @@ environments:
 		t.Run(tt.name, func(t *testing.T) {
 			SetConfig(t, tt.conf)
 
-			args := []string{"exodus-rsync", "-vvv", "src", "dest"}
+			args := []string{"exodus-rsync", "-v", "src", "dest"}
 
 			if got := Main(args); got != 23 {
 				t.Error("unexpected exit code", got)

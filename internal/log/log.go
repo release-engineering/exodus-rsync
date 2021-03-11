@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 
-	"github.com/apex/log"
 	apexLog "github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/apex/log/handlers/level"
@@ -100,12 +99,17 @@ func (l *Logger) F(v ...interface{}) *apexLog.Entry {
 func (impl) NewLogger(args args.Config) *Logger {
 	logger := Logger{}
 
-	logger.Handler = cli.New(os.Stdout)
-	logger.Level = log.InfoLevel
-	if args.Verbose >= 1 {
-		// TODO: think we need more loggers.
-		logger.Level = log.DebugLevel
+	cliLevel := WarnLevel
+	if args.Verbose == 1 {
+		cliLevel = InfoLevel
+	} else if args.Verbose >= 2 {
+		cliLevel = DebugLevel
 	}
+
+	logger.Handler = level.New(
+		cli.New(os.Stdout),
+		cliLevel,
+	)
 
 	return &logger
 }
