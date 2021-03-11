@@ -8,13 +8,20 @@ on:
     - main
 
 jobs:
-  build:
+  tag:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: jaliborc/action-general-autotag@1.0.0
+
+    - name: Get version from changelog
+      run: sed -r -n -e '/^## [0-9.]+/ { s|^## ([0-9.]+).*|::set-output name=version::\1|p; q }' CHANGELOG.md
+      id: get_version
+
+    - name: Ensure tag exists
+      id: tag_version
+      uses: mathieudutour/github-tag-action@v5.3
       with:
-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        source_file: "CHANGELOG.md"
-        extraction_regex: "^## ([\\d\\.]+) -"
-        tag_format: "v{version}"
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        custom_tag: v${{ steps.get_version.outputs.version }}
+        create_annotated_tag: true
+        dry_run: true
