@@ -25,4 +25,3 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         custom_tag: ${{ steps.get_version.outputs.version }}
         create_annotated_tag: true
-        dry_run: true
