@@ -19,6 +19,8 @@ github.com/aws/aws-sdk-go v1.37.29 h1:OlePDQg2idesIZKPy8egpN51RIF3DHhtREnvgNpTZh
 github.com/aws/aws-sdk-go v1.37.29/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-sdk-go v1.37.30 h1:fZeVg3QuTkWE/dEvPQbK6AL32+3G9ofJfGFSPS1XLH0=
 github.com/aws/aws-sdk-go v1.37.30/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
+github.com/aws/aws-sdk-go v1.37.31 h1:eK7hgg1H4xivwopAbnzfQ7ZBbDb9cEkGDivd9rUMnJs=
+github.com/aws/aws-sdk-go v1.37.31/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aybabtme/rgbterm v0.0.0-20170906152045-cc83f3b3ce59/go.mod h1:q/89r3U2H7sSsE2t6Kca0lfwTK8JdoNGS/yzM/4iH5I=
 github.com/coreos/go-systemd/v22 v22.2.0 h1:BBmbNtSc5PuUM3Byxs7yE5rLdxQO4/FMoEXY5Rle4GA=
 github.com/coreos/go-systemd/v22 v22.2.0/go.mod h1:xO0FLkIi5MaZafQlIrOotqXZ90ih+1atmu1JpKERPPk=
