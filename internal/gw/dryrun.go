@@ -10,6 +10,10 @@ type dryRunPublish struct{}
 
 func (i impl) NewDryRunClient(ctx context.Context, cfg conf.Config) (Client, error) {
 	clientIface, err := i.NewClient(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	clientIface.(*client).dryRun = true
 	return clientIface, err
 }
