@@ -3,7 +3,7 @@ module github.com/release-engineering/exodus-rsync
 go 1.16
 
 require (
-	github.com/adrg/xdg v0.3.2
+	github.com/adrg/xdg v0.3.3
 	github.com/alecthomas/kong v0.2.16
 	github.com/apex/log v1.9.0
 	github.com/aws/aws-sdk-go v1.38.25
