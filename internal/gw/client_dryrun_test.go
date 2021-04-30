@@ -2,12 +2,32 @@ package gw
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"testing"
 
+	"github.com/golang/mock/gomock"
+
 	"github.com/release-engineering/exodus-rsync/internal/args"
+	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 	"github.com/release-engineering/exodus-rsync/internal/walk"
 )
+
+func TestNewDryRunClientCertError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	cfg := conf.NewMockConfig(ctrl)
+
+	cfg.EXPECT().GwCert().Return("cert-does-not-exist")
+	cfg.EXPECT().GwKey().Return("key-does-not-exist")
+
+	_, err := Package.NewDryRunClient(context.Background(), cfg)
+
+	// Should have given us this error
+	if !strings.Contains(fmt.Sprint(err), "can't load cert/key") {
+		t.Error("did not get expected error, err =", err)
+	}
+}
 
 func TestDryRunUpload(t *testing.T) {
 	ctx := context.Background()

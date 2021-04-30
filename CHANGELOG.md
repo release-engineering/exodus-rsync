@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- n/a
+- Fix: panic in dry-run mode when missing cert/key.
 
 ## 1.0.0 - 2021-03-11
 
