@@ -78,7 +78,7 @@ func (impl) Load(ctx context.Context, args args.Config) (GlobalConfig, error) {
 		logger.F("path", candidate, "error", err).Debug("config file not usable")
 	}
 
-	return nil, fmt.Errorf("no existing config file in: %s", strings.Join(candidates, ", "))
+	return nil, &MissingConfigFile{candidates: candidates}
 }
 
 // EnvironmentForDest finds and returns an Environment matching the specified rsync
