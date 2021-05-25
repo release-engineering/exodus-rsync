@@ -1,5 +1,10 @@
 package conf
 
+import (
+	"fmt"
+	"strings"
+)
+
 type sharedConfig struct {
 	GwEnvRaw          string `yaml:"gwenv"`
 	GwCertRaw         string `yaml:"gwcert"`
@@ -25,6 +30,16 @@ type globalConfig struct {
 
 	// Configuration for each environment.
 	EnvironmentsRaw []environment `yaml:"environments"`
+}
+
+// MissingConfigFile is an error type for cases in which no config file is found.
+type MissingConfigFile struct {
+	// Configuration file paths that were checked.
+	candidates []string
+}
+
+func (m *MissingConfigFile) Error() string {
+	return fmt.Sprintf("no existing config file in: %s", strings.Join(m.candidates, ", "))
 }
 
 func (g *globalConfig) GwCert() string {

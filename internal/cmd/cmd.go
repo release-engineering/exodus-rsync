@@ -47,6 +47,11 @@ func Main(rawArgs []string) int {
 
 	cfg, err := ext.conf.Load(ctx, parsedArgs)
 	if err != nil {
+		if _, ok := err.(*conf.MissingConfigFile); ok {
+			// Failed to find any config files, fallback to rsync
+			logger.WithField("error", err).Debug("setting rsyncmode to 'rsync'")
+			return rsyncMain(ctx, nil, parsedArgs)
+		}
 		logger.WithField("error", err).Error("can't load config")
 		return 23
 	}
