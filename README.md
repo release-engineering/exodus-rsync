@@ -228,20 +228,33 @@ is a summary of the differences:
 
   | Argument | Notes |
   | -------- | ----- |
-  | -v, --verbose | increase log verbosity |
-  | -n, --dry-run | dry-run mode, don't upload or publish anything |
-  | -r, --recursive | ignored; exodus-rsync is always recursive |
-  | -t, --times | ignored |
+  | --verbose, -v | increase log verbosity |
+  | --archive, -a | ignored |
+  | --recursive, -r | ignored; exodus-rsync is always recursive |
+  | --copy-links, -L | ignored; exodus-rsync always follows links |
+  | --keep-dirlinks, -K | ignored; there are no directories on exodus CDN |
+  | --hard-links, -H | ignored; exodus-rsync always follows links |
+  | --perms, -p | ignored |
+  | --executability, -E | ignored |
+  | --acls, -A | ignored |
+  | --xattrs, -X | ignored |
+  | --owner, -o | ignored |
+  | --group, -g | ignored |
+  | --devices | ignored |
+  | --specials | ignored |
+  | -D | ignored; same as --devices and --specials |
+  | --times, -t | ignored |
+  | --atimes, -U | ignored |
+  | --crtimes, -N | ignored |
+  | --omit-dir-times, -O | ignored; there are no directories on exodus CDN |
+  | --dry-run, -n | dry-run mode, don't upload or publish anything |
+  | --rsh, -e | ignored; ssh is not used |
+  | --ignore-existing | ignored; exodus-rsync always skips existing files |
   | --delete | ignored; deleting content is not supported |
-  | -K, --keep-dirlinks | ignored; there are no directories on exodus CDN |
-  | -O, --omit-dir-times | ignored; there are no directories on exodus CDN |
-  | -z, --compress | ignored |
-  | -i, --itemize-changes | ignored |
-  | -e, --rsh=STRING | ignored; ssh is not used |
-  | -L, --copy-links | ignored; exodus-rsync always follows links |
+  | --timeout | ignored |
+  | --compress, -z | ignored |
   | --stats | ignored |
-  | --timeout=INT | ignored |
-  | -a, --archive | ignored |
+  | --itemize-changes, -i | ignored |
 
 
 ### Publish modes

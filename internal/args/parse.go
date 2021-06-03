@@ -24,18 +24,30 @@ func (f filterArgument) Validate() error {
 // IgnoredConfig defines arguments which can be accepted for compatibility with rsync,
 // but are ignored by exodus-rsync.
 type IgnoredConfig struct {
-	Recursive      bool `short:"r"`
-	Times          bool `short:"t"`
-	Delete         bool
-	KeepDirlinks   bool   `short:"K"`
-	OmitDirTimes   bool   `short:"O"`
-	Compress       bool   `short:"z"`
-	ItemizeChanges bool   `short:"i"`
-	Rsh            string `short:"e"`
-	CopyLinks      bool   `short:"L"`
-	Stats          bool
-	Timeout        int
-	Archive        bool `short:"a"`
+	Archive         bool `short:"a"`
+	Recursive       bool `short:"r"`
+	CopyLinks       bool `short:"L"`
+	KeepDirlinks    bool `short:"K"`
+	HardLinks       bool `short:"H"`
+	Perms           bool `short:"p"`
+	Executability   bool `short:"E"`
+	Acls            bool `short:"A"`
+	Xattrs          bool `short:"X"`
+	Owner           bool `short:"o"`
+	Group           bool `short:"g"`
+	Devices         bool
+	Specials        bool
+	DevicesSpecials bool   `short:"D"`
+	Times           bool   `short:"t"`
+	ATimes          bool   `short:"U"`
+	CrTimes         bool   `short:"N"`
+	OmitDirTimes    bool   `short:"O"`
+	Rsh             string `short:"e"`
+	Delete          bool
+	Timeout         int
+	Compress        bool `short:"z"`
+	Stats           bool
+	ItemizeChanges  bool `short:"i"`
 }
 
 // ExodusConfig defines arguments which are specific to exodus-rsync and not supported
@@ -111,6 +123,12 @@ func Parse(args []string, version string, exit func(int)) Config {
 			},
 		}),
 	)
+
+	// DevicesSpecials (-D) enables both --devices and --specials.
+	if out.DevicesSpecials {
+		out.Devices = true
+		out.Specials = true
+	}
 
 	return out
 }

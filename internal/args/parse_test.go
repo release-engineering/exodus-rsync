@@ -19,10 +19,12 @@ func TestParseOk(t *testing.T) {
 				"--recursive",
 				"-z",
 				"--delete",
+				"-D",
 				"x",
 				"y"},
 			want: Config{Src: "x", Dest: "y",
-				IgnoredConfig: IgnoredConfig{Recursive: true, Compress: true, Delete: true}}},
+				// -D should enable DevicesSpecials which enables Devices and Specials
+				IgnoredConfig: IgnoredConfig{Recursive: true, Devices: true, Specials: true, DevicesSpecials: true, Delete: true, Compress: true}}},
 
 		"verbose": {
 			input: []string{

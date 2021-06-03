@@ -48,47 +48,80 @@ func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []st
 
 	argv := []string{}
 
-	if args.Recursive {
-		argv = append(argv, "--recursive")
-	}
-	if args.Times {
-		argv = append(argv, "--times")
-	}
-	if args.Delete {
-		argv = append(argv, "--delete")
-	}
-	if args.KeepDirlinks {
-		argv = append(argv, "--keep-dirlinks")
-	}
-	if args.OmitDirTimes {
-		argv = append(argv, "--omit-dir-times")
-	}
-	if args.Compress {
-		argv = append(argv, "--compress")
-	}
-	if args.ItemizeChanges {
-		argv = append(argv, "--itemize-changes")
-	}
-	if args.Rsh != "" {
-		argv = append(argv, "--rsh", args.Rsh)
-	}
-	if args.CopyLinks {
-		argv = append(argv, "--copy-links")
-	}
-	if args.Stats {
-		argv = append(argv, "--stats")
-	}
-	if args.Timeout != 0 {
-		argv = append(argv, "--timeout", fmt.Sprint(args.Timeout))
+	if args.Verbose != 0 {
+		argv = append(argv, "-"+strings.Repeat("v", args.Verbose))
 	}
 	if args.Archive {
 		argv = append(argv, "--archive")
 	}
-	if args.Verbose != 0 {
-		argv = append(argv, "-"+strings.Repeat("v", args.Verbose))
+	if args.Recursive {
+		argv = append(argv, "--recursive")
+	}
+	if args.CopyLinks {
+		argv = append(argv, "--copy-links")
+	}
+	if args.KeepDirlinks {
+		argv = append(argv, "--keep-dirlinks")
+	}
+	if args.HardLinks {
+		argv = append(argv, "--hard-links")
+	}
+	if args.Perms {
+		argv = append(argv, "--perms")
+	}
+	if args.Executability {
+		argv = append(argv, "--executability")
+	}
+	if args.Acls {
+		argv = append(argv, "--acls")
+	}
+	if args.Xattrs {
+		argv = append(argv, "--xattrs")
+	}
+	if args.Owner {
+		argv = append(argv, "--owner")
+	}
+	if args.Group {
+		argv = append(argv, "--group")
+	}
+	if args.Devices {
+		argv = append(argv, "--devices")
+	}
+	if args.Specials {
+		argv = append(argv, "--specials")
+	}
+	if args.Times {
+		argv = append(argv, "--times")
+	}
+	if args.ATimes {
+		argv = append(argv, "--atimes")
+	}
+	if args.CrTimes {
+		argv = append(argv, "--crtimes")
+	}
+	if args.OmitDirTimes {
+		argv = append(argv, "--omit-dir-times")
+	}
+	if args.Rsh != "" {
+		argv = append(argv, "--rsh", args.Rsh)
 	}
 	if args.IgnoreExisting {
 		argv = append(argv, "--ignore-existing")
+	}
+	if args.Delete {
+		argv = append(argv, "--delete")
+	}
+	if args.Timeout != 0 {
+		argv = append(argv, "--timeout", fmt.Sprint(args.Timeout))
+	}
+	if args.Compress {
+		argv = append(argv, "--compress")
+	}
+	if args.Stats {
+		argv = append(argv, "--stats")
+	}
+	if args.ItemizeChanges {
+		argv = append(argv, "--itemize-changes")
 	}
 	if args.Filter != "" {
 		argv = append(argv, "--filter", fmt.Sprint(args.Filter))
