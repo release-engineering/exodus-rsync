@@ -123,9 +123,11 @@ func TestClientPublishErrors(t *testing.T) {
 		publish.raw.Links["self"] = "/publish/1234"
 
 		gw.nextHTTPResponse = &http.Response{
-			Status:     "418 I'm a teapot",
-			StatusCode: 418,
-			Body:       io.NopCloser(strings.NewReader("")),
+			Status:     "409 Conflict",
+			StatusCode: 409,
+			Body: io.NopCloser(strings.NewReader(
+				"{\"detail\": \"Publish in unexpected state\"}",
+			)),
 		}
 
 		err := publish.AddItems(ctx, []ItemInput{{"/some/uri", "abc123"}})
@@ -133,7 +135,7 @@ func TestClientPublishErrors(t *testing.T) {
 		if err == nil {
 			t.Error("Unexpectedly failed to return an error")
 		}
-		if !strings.Contains(err.Error(), "I'm a teapot") {
+		if !strings.Contains(err.Error(), "Publish in unexpected state") {
 			t.Errorf("Did not get expected error, got: %v", err)
 		}
 	})
