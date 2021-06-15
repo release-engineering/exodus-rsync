@@ -199,6 +199,20 @@ func (mr *MockConfigMockRecorder) RsyncMode() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RsyncMode", reflect.TypeOf((*MockConfig)(nil).RsyncMode))
 }
 
+// Verbosity mocks base method.
+func (m *MockConfig) Verbosity() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Verbosity")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// Verbosity indicates an expected call of Verbosity.
+func (mr *MockConfigMockRecorder) Verbosity() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verbosity", reflect.TypeOf((*MockConfig)(nil).Verbosity))
+}
+
 // MockEnvironmentConfig is a mock of EnvironmentConfig interface.
 type MockEnvironmentConfig struct {
 	ctrl     *gomock.Controller
@@ -362,6 +376,20 @@ func (mr *MockEnvironmentConfigMockRecorder) RsyncMode() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RsyncMode", reflect.TypeOf((*MockEnvironmentConfig)(nil).RsyncMode))
 }
 
+// Verbosity mocks base method.
+func (m *MockEnvironmentConfig) Verbosity() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Verbosity")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// Verbosity indicates an expected call of Verbosity.
+func (mr *MockEnvironmentConfigMockRecorder) Verbosity() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verbosity", reflect.TypeOf((*MockEnvironmentConfig)(nil).Verbosity))
+}
+
 // MockGlobalConfig is a mock of GlobalConfig interface.
 type MockGlobalConfig struct {
 	ctrl     *gomock.Controller
@@ -523,4 +551,18 @@ func (m *MockGlobalConfig) RsyncMode() string {
 func (mr *MockGlobalConfigMockRecorder) RsyncMode() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RsyncMode", reflect.TypeOf((*MockGlobalConfig)(nil).RsyncMode))
+}
+
+// Verbosity mocks base method.
+func (m *MockGlobalConfig) Verbosity() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Verbosity")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// Verbosity indicates an expected call of Verbosity.
+func (mr *MockGlobalConfigMockRecorder) Verbosity() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verbosity", reflect.TypeOf((*MockGlobalConfig)(nil).Verbosity))
 }

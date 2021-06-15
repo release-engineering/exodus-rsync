@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	apexLog "github.com/apex/log"
@@ -131,13 +132,17 @@ func loggerBackend(cfg ConfigProvider, haveJournal bool) func() apexLog.Handler 
 // StartPlatformLogger will enable (or not) the platform native logging,
 // such as journald or syslog, according to the config.
 func (l *Logger) StartPlatformLogger(cfg ConfigProvider) {
-	if cfg.LogLevel() == "none" {
+	logLevel := cfg.LogLevel()
+
+	if logLevel == "none" {
 		return
+	} else if logLevel == "trace" {
+		logLevel = "debug"
 	}
 
-	lvl, err := apexLog.ParseLevel(cfg.LogLevel())
+	lvl, err := apexLog.ParseLevel(logLevel)
 	if err != nil {
-		l.Warnf("Invalid loglevel '%v' in config, defaulting to 'info'", cfg.LogLevel())
+		l.Warnf("Invalid loglevel '%v' in config, defaulting to 'info'", logLevel)
 		lvl = apexLog.InfoLevel
 	}
 
@@ -152,4 +157,10 @@ func (l *Logger) StartPlatformLogger(cfg ConfigProvider) {
 		l.Handler,
 		handler,
 	)
+}
+
+// Log is intended for use by the AWS SDK logger and is necessary for
+// compatiblity with said package. Will log messages at debug level.
+func (l *Logger) Log(v ...interface{}) {
+	l.F("aws", 1).Debug(fmt.Sprint(v...))
 }

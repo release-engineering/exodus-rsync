@@ -172,7 +172,7 @@ func (c *client) EnsureUploaded(
 	return nil
 }
 
-func (impl) NewClient(_ context.Context, cfg conf.Config) (Client, error) {
+func (impl) NewClient(ctx context.Context, cfg conf.Config) (Client, error) {
 	cert, err := tls.LoadX509KeyPair(cfg.GwCert(), cfg.GwKey())
 	if err != nil {
 		return nil, fmt.Errorf("can't load cert/key: %w", err)
@@ -187,15 +187,21 @@ func (impl) NewClient(_ context.Context, cfg conf.Config) (Client, error) {
 	}
 	out.httpClient = &http.Client{Transport: &transport}
 
+	awsLogLevel := aws.LogOff
+	if cfg.Verbosity() > 2 || cfg.LogLevel() == "trace" {
+		awsLogLevel = aws.LogDebug
+	}
+
 	sess, err := ext.awsSessionProvider(session.Options{
 		SharedConfigState: session.SharedConfigDisable,
 		Config: aws.Config{
 			Endpoint:         aws.String(cfg.GwURL() + "/upload"),
 			S3ForcePathStyle: aws.Bool(true),
-
-			Region:      aws.String("us-east-1"),
-			Credentials: credentials.AnonymousCredentials,
-			HTTPClient:  out.httpClient,
+			Region:           aws.String("us-east-1"),
+			Credentials:      credentials.AnonymousCredentials,
+			HTTPClient:       out.httpClient,
+			Logger:           log.FromContext(ctx),
+			LogLevel:         aws.LogLevel(awsLogLevel),
 		},
 	})
 	if err != nil {
