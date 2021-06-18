@@ -3,7 +3,10 @@ package log
 import (
 	"testing"
 
+	apexLog "github.com/apex/log"
+	"github.com/apex/log/handlers/memory"
 	"github.com/release-engineering/exodus-rsync/internal/args"
+	"github.com/stretchr/testify/assert"
 )
 
 type testcase struct {
@@ -27,6 +30,7 @@ func TestPlatformLoggers(t *testing.T) {
 		{"debug", "syslog"},
 		{"none", "auto"},
 		{"invalid", "auto"},
+		{"trace", "auto"},
 	}
 
 	for _, tc := range cases {
@@ -65,4 +69,17 @@ func TestPlatformAutoLoggers(t *testing.T) {
 	if handler2 == nil {
 		t.Error("auto with haveJournal=true did not return journald handler")
 	}
+}
+
+func TestLogFunc(t *testing.T) {
+	// Ensure Log can be used and contains the "aws" field.
+	h := memory.New()
+	logger := Package.NewLogger(args.Config{})
+	logger.Handler = h
+
+	logger.Log("hello")
+
+	e := h.Entries[0]
+	assert.Equal(t, e.Message, "hello")
+	assert.Equal(t, apexLog.Fields{"aws": 1}, e.Fields)
 }

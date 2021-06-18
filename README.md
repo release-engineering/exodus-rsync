@@ -144,6 +144,7 @@ rsyncmode: exodus
 #
 # "none"   - no logging
 # "debug"  - for debugging exodus-rsync, very verbose
+# "trace"  - sets debug level for exodus-rsync and the AWS SDK
 # "info"   - outputs messages mostly when writes occur; default, and recommended.
 # "warn"   - outputs messages when possible issues are encountered
 # "error"  - outputs messages when errors occur

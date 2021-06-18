@@ -48,6 +48,9 @@ type Config interface {
 
 	// Specific logger backend (journald or syslog).
 	Logger() string
+
+	// Level of verbosity requested via CLI args.
+	Verbosity() int
 }
 
 // EnvironmentConfig provides configuration specific to one environment.

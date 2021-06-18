@@ -20,7 +20,7 @@ func candidatePaths() []string {
 	}
 }
 
-func loadFromPath(path string) (*globalConfig, error) {
+func loadFromPath(path string, args args.Config) (*globalConfig, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return &globalConfig{}, err
@@ -29,6 +29,7 @@ func loadFromPath(path string) (*globalConfig, error) {
 
 	dec := yaml.NewDecoder(file)
 	out := &globalConfig{}
+	out.args = args
 
 	err = dec.Decode(&out)
 	if err != nil {
@@ -73,7 +74,7 @@ func (impl) Load(ctx context.Context, args args.Config) (GlobalConfig, error) {
 		_, err := os.Stat(candidate)
 		if err == nil {
 			logger.F("path", candidate).Debug("loading config")
-			return loadFromPath(candidate)
+			return loadFromPath(candidate, args)
 		}
 		logger.F("path", candidate, "error", err).Debug("config file not usable")
 	}

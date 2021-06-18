@@ -3,6 +3,8 @@ package conf
 import (
 	"fmt"
 	"strings"
+
+	"github.com/release-engineering/exodus-rsync/internal/args"
 )
 
 type sharedConfig struct {
@@ -19,6 +21,7 @@ type sharedConfig struct {
 
 type environment struct {
 	sharedConfig `yaml:",inline"`
+	args         args.Config `embed:"1"`
 
 	PrefixRaw string `yaml:"prefix"`
 
@@ -27,6 +30,7 @@ type environment struct {
 
 type globalConfig struct {
 	sharedConfig `yaml:",inline"`
+	args         args.Config `embed:"1"`
 
 	// Configuration for each environment.
 	EnvironmentsRaw []environment `yaml:"environments"`
@@ -92,6 +96,10 @@ func (g *globalConfig) Logger() string {
 	return nonEmptyString(g.LoggerRaw, "auto")
 }
 
+func (g *globalConfig) Verbosity() int {
+	return g.args.Verbose
+}
+
 func (e *environment) GwCert() string {
 	return nonEmptyString(e.GwCertRaw, e.parent.GwCert())
 }
@@ -126,6 +134,10 @@ func (e *environment) LogLevel() string {
 
 func (e *environment) Logger() string {
 	return nonEmptyString(e.LoggerRaw, e.parent.Logger())
+}
+
+func (e *environment) Verbosity() int {
+	return nonEmptyInt(e.args.Verbose, e.parent.Verbosity())
 }
 
 func (e *environment) Prefix() string {

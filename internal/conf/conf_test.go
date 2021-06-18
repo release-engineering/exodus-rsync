@@ -50,7 +50,7 @@ environments:
 	ctx = log.NewContext(ctx, log.Package.NewLogger(args.Config{}))
 
 	var cfg GlobalConfig
-	cfg, err = loadFromPath(filename)
+	cfg, err = loadFromPath(filename, args.Config{})
 
 	if err != nil {
 		t.Fatalf("could not load config file: %v", err)
@@ -102,6 +102,7 @@ func TestDefaultsFromParent(t *testing.T) {
 
 	cfg.GwCertRaw = "cert"
 	cfg.GwPollIntervalRaw = 123
+	cfg.args.Verbose = 1
 
 	env := environment{parent: &cfg}
 
@@ -110,5 +111,8 @@ func TestDefaultsFromParent(t *testing.T) {
 	}
 	if env.GwPollInterval() != 123 {
 		t.Errorf("did not get GwPollInterval from parent")
+	}
+	if env.Verbosity() != 1 {
+		t.Errorf("did not get args.Verbose from parent")
 	}
 }
