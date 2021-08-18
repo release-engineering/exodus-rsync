@@ -56,7 +56,7 @@ type IgnoredConfig struct {
 type ExodusConfig struct {
 	Conf string `help:"Force usage of this configuration file."`
 
-	Publish string `help:"ID of existing exodus-gw publish to."`
+	Publish string `help:"ID of existing exodus-gw publish to join."`
 }
 
 // Config contains the subset of arguments which are returned by the parser and
