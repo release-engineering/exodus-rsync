@@ -184,7 +184,7 @@ gwbatchsize: 10000
 In order to publish to exodus CDN it is necessary to configure all of the
 `gw*` configuration items, and add at least one entry under `environments`.
 
-(TODO) If the configuration file is absent, exodus-rsync will pass through all commands
+If the configuration file is absent, exodus-rsync will pass through all commands
 to rsync without any usage of exodus-gw.
 
 
