@@ -6,6 +6,7 @@ import (
 	fs "io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/release-engineering/exodus-rsync/internal/log"
@@ -20,8 +21,46 @@ func pathRewriter(src string, dest string, fn fs.WalkDirFunc) fs.WalkDirFunc {
 	}
 }
 
+// Determines if path matches pattern, striving for parity with rsync,
+// ("Include/Exclude Pattern Rules", https://linux.die.net/man/1/rsync).
+func matchPattern(path string, pattern string, isDir bool) (bool, error) {
+	if strings.ContainsAny(pattern, "*?") {
+		converted := ""
+		chars := []rune(pattern)
+		for i := 0; i < len(chars); i++ {
+			char := string(chars[i])
+			switch char {
+			case `\`:
+				i++
+				converted += (char + string(chars[i]))
+			case `*`:
+				converted += `[^/]+`
+			case `?`:
+				converted += `[^/]`
+			default:
+				converted += char
+			}
+		}
+		pattern = strings.Replace(converted, `[^/]+[^/]+`, `.*`, -1)
+	}
+
+	if strings.HasPrefix(pattern, "/") {
+		pattern = `^` + pattern
+	}
+	if strings.HasSuffix(pattern, "/") && isDir {
+		pattern = strings.TrimRight(pattern, "/") + `\z`
+	}
+
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		return false, err
+	}
+
+	return re.MatchString(path), nil
+}
+
 // Like filepath.WalkDir but resolves symlinks to directories.
-func walkDirWithLinks(ctx context.Context, root string, fn fs.WalkDirFunc) error {
+func walkDirWithLinks(ctx context.Context, root string, exclude []string, fn fs.WalkDirFunc) error {
 	logger := log.FromContext(ctx)
 
 	var walkFunc fs.WalkDirFunc
@@ -29,6 +68,22 @@ func walkDirWithLinks(ctx context.Context, root string, fn fs.WalkDirFunc) error
 	walkFunc = func(path string, d fs.DirEntry, err error) error {
 		if ctx.Err() != nil {
 			return ctx.Err()
+		}
+
+		for _, pattern := range exclude {
+			isExcluded, err := matchPattern(path, pattern, d.IsDir())
+			if err != nil {
+				return fmt.Errorf("error processing --exclude `%s`: %w", pattern, err)
+			}
+
+			if isExcluded {
+				if d.IsDir() {
+					logger.F("path", path, "exclude", pattern).Info("dir excluded")
+					return filepath.SkipDir
+				}
+				logger.F("path", path, "exclude", pattern).Info("file excluded")
+				return nil
+			}
 		}
 
 		if err != nil {

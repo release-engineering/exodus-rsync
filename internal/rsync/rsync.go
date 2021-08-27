@@ -126,6 +126,9 @@ func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []st
 	if args.Filter != "" {
 		argv = append(argv, "--filter", fmt.Sprint(args.Filter))
 	}
+	for _, ex := range args.Exclude {
+		argv = append(argv, "--exclude", fmt.Sprint(ex))
+	}
 
 	argv = append(argv, args.Src, args.Dest)
 
