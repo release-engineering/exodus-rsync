@@ -57,6 +57,9 @@ func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []st
 	if args.Recursive {
 		argv = append(argv, "--recursive")
 	}
+	if args.Relative {
+		argv = append(argv, "--relative")
+	}
 	if args.CopyLinks {
 		argv = append(argv, "--copy-links")
 	}

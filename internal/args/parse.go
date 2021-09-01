@@ -3,6 +3,7 @@ package args
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -65,6 +66,10 @@ type Config struct {
 	// Adjust verbosity.
 	Verbose int `short:"v" type:"counter" help:"Increase verbosity; can be provided multiple times."`
 
+	// Appends the source path to the destination path,
+	// e.g., /foo/bar/baz.c remote:/tmp => /tmp/foo/bar/baz.c.
+	Relative bool `short:"R" help:"use relative path names"`
+
 	// Mostly ignored, but causes a failure if publish contains any files.
 	// See comments where the argument is checked for the explanation why.
 	IgnoreExisting bool `hidden:"1"`
@@ -87,9 +92,15 @@ type Config struct {
 // on the command-line.
 // For example, if invoked with user@host.example.com:/some/dir,
 // this will return "/some/dir".
+// If relative paths are requested (-R), appends the source path to the
+// destination path, e.g., /foo/bar/baz.c remote:/tmp => /tmp/foo/bar/baz.c.
 func (c *Config) DestPath() string {
 	if strings.Contains(c.Dest, ":") {
-		return strings.SplitN(c.Dest, ":", 2)[1]
+		dest := strings.SplitN(c.Dest, ":", 2)[1]
+		if c.Relative {
+			dest = path.Join(dest, c.Src)
+		}
+		return dest
 	}
 	return ""
 }
