@@ -34,6 +34,14 @@ func TestParseOk(t *testing.T) {
 				"y"},
 			want: Config{Verbose: 3, Src: "x", Dest: "y"}},
 
+		"relative": {
+			input: []string{
+				"exodus-rsync",
+				"--relative",
+				"x",
+				"y"},
+			want: Config{Relative: true, Src: "x", Dest: "y"}},
+
 		"tolerable filter": {
 			input: []string{
 				"exodus-rsync",
@@ -80,15 +88,18 @@ func TestParseErrors(t *testing.T) {
 func TestDestPath(t *testing.T) {
 	tests := []struct {
 		name string
+		src  string
 		dest string
+		rel  bool
 		want string
 	}{
-		{"no : in dest", "some-dest", ""},
-		{": in dest", "user@somehost:/some/rsync/path", "/some/rsync/path"},
+		{"no : in dest", ".", "some-dest", true, ""},
+		{": in dest", ".", "user@somehost:/some/rsync/path", false, "/some/rsync/path"},
+		{"relative dest", "/some/path", "user@somehost:/rsync/", true, "/rsync/some/path"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := Config{Dest: tt.dest}
+			c := Config{Src: tt.src, Dest: tt.dest, Relative: tt.rel}
 			if got := c.DestPath(); got != tt.want {
 				t.Errorf("Config.DestPath() = %v, want %v", got, tt.want)
 			}
