@@ -223,7 +223,6 @@ is a summary of the differences:
   | --exodus-conf=PATH | use this configuration file |
   | --exodus-publish=ID | join content to an existing publish (see "Publish modes") |
 
-
 - exodus-rsync supports only the following rsync arguments, most of which do not have any
   effect.
 
@@ -257,7 +256,7 @@ is a summary of the differences:
   | --compress, -z | ignored |
   | --stats | ignored |
   | --itemize-changes, -i | ignored |
-
+  | --exclude | exclude files matching this pattern |
 
 ### Publish modes
 

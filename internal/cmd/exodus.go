@@ -44,7 +44,7 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 
 	var items []walk.SyncItem
 
-	err = walk.Walk(ctx, args.Src, func(item walk.SyncItem) error {
+	err = walk.Walk(ctx, args.Src, args.Exclude, func(item walk.SyncItem) error {
 		if args.IgnoreExisting {
 			// This argument is not (properly) supported, so bail out.
 			//

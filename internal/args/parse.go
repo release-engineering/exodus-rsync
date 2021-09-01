@@ -82,6 +82,8 @@ type Config struct {
 	// This should be parsed but not exposed
 	Filter filterArgument `short:"f" hidden:"1"`
 
+	Exclude []string `placeholder:"PATTERN" help:"Exclude files matching this pattern"`
+
 	IgnoredConfig `embed:"1" group:"ignored"`
 	ExodusConfig  `embed:"1" prefix:"exodus-"`
 }

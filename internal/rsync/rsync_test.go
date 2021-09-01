@@ -78,6 +78,7 @@ func TestExec(t *testing.T) {
 				Relative:       true,
 				IgnoreExisting: true,
 				Filter:         "some-filter",
+				Exclude:        []string{".*"},
 			},
 			[]string{
 				"../../test/bin/rsync", "-vvv",
@@ -86,7 +87,7 @@ func TestExec(t *testing.T) {
 				"--owner", "--group", "--devices", "--specials", "--times", "--atimes",
 				"--crtimes", "--omit-dir-times", "--rsh", "some-rsh", "--ignore-existing",
 				"--delete", "--timeout", "1234", "--compress", "--stats",
-				"--itemize-changes", "--filter", "some-filter", "src", "dest",
+				"--itemize-changes", "--filter", "some-filter", "--exclude", ".*", "src", "dest",
 			},
 		},
 	}
