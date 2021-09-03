@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -42,9 +44,29 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 		return 101
 	}
 
-	var items []walk.SyncItem
+	var (
+		onlyTheseFiles []string
+		items          []walk.SyncItem
+	)
 
-	err = walk.Walk(ctx, args.Src, args.Exclude, func(item walk.SyncItem) error {
+	if args.FilesFrom != "" {
+		args.Relative = true
+
+		f, err := os.Open(args.FilesFrom)
+		if err != nil {
+			logger.F("src", args.Src, "error", err).Error("can't read --files-from file")
+			return 73
+		}
+		defer f.Close()
+
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			path := filepath.Join(args.Src, strings.TrimSpace(scanner.Text()))
+			onlyTheseFiles = append(onlyTheseFiles, path)
+		}
+	}
+
+	err = walk.Walk(ctx, args.Src, args.Exclude, onlyTheseFiles, func(item walk.SyncItem) error {
 		if args.IgnoreExisting {
 			// This argument is not (properly) supported, so bail out.
 			//

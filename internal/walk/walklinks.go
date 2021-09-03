@@ -59,8 +59,18 @@ func matchPattern(path string, pattern string, isDir bool) (bool, error) {
 	return re.MatchString(path), nil
 }
 
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
+
 // Like filepath.WalkDir but resolves symlinks to directories.
-func walkDirWithLinks(ctx context.Context, root string, exclude []string, fn fs.WalkDirFunc) error {
+func walkDirWithLinks(ctx context.Context, root string, exclude []string,
+	onlyTheseFiles []string, fn fs.WalkDirFunc) error {
 	logger := log.FromContext(ctx)
 
 	var walkFunc fs.WalkDirFunc
@@ -70,6 +80,11 @@ func walkDirWithLinks(ctx context.Context, root string, exclude []string, fn fs.
 			return ctx.Err()
 		}
 
+		if len(onlyTheseFiles) > 0 && !contains(onlyTheseFiles, path) {
+			logger.F("path", path).Debug("skipping; not included in --files-from file")
+			return nil
+		}
+
 		for _, pattern := range exclude {
 			isExcluded, err := matchPattern(path, pattern, d.IsDir())
 			if err != nil {
@@ -77,11 +92,10 @@ func walkDirWithLinks(ctx context.Context, root string, exclude []string, fn fs.
 			}
 
 			if isExcluded {
+				logger.F("path", path, "exclude", pattern).Info("path excluded")
 				if d.IsDir() {
-					logger.F("path", path, "exclude", pattern).Info("dir excluded")
 					return filepath.SkipDir
 				}
-				logger.F("path", path, "exclude", pattern).Info("file excluded")
 				return nil
 			}
 		}

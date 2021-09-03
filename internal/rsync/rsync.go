@@ -120,17 +120,20 @@ func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []st
 	if args.Compress {
 		argv = append(argv, "--compress")
 	}
-	if args.Stats {
-		argv = append(argv, "--stats")
-	}
-	if args.ItemizeChanges {
-		argv = append(argv, "--itemize-changes")
-	}
 	if args.Filter != "" {
 		argv = append(argv, "--filter", fmt.Sprint(args.Filter))
 	}
 	for _, ex := range args.Exclude {
 		argv = append(argv, "--exclude", fmt.Sprint(ex))
+	}
+	if args.FilesFrom != "" {
+		argv = append(argv, "--files-from", fmt.Sprint(args.FilesFrom))
+	}
+	if args.Stats {
+		argv = append(argv, "--stats")
+	}
+	if args.ItemizeChanges {
+		argv = append(argv, "--itemize-changes")
 	}
 
 	argv = append(argv, args.Src, args.Dest)

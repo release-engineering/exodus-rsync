@@ -1,0 +1,2 @@
+some.conf
+just-files/subdir/some-binary

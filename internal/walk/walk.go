@@ -112,18 +112,20 @@ func fillItems(ctx context.Context, in <-chan walkItem, c chan<- syncItemPrivate
 	}
 }
 
-func getSyncItems(ctx context.Context, path string, exclude []string) <-chan syncItemPrivate {
+func getSyncItems(ctx context.Context, path string, exclude []string,
+	onlyTheseFiles []string) <-chan syncItemPrivate {
 	c := make(chan syncItemPrivate, 10)
 	walkItemCh := make(chan walkItem, 10)
 
 	go func() {
-		err := walkDirWithLinks(ctx, path, exclude, func(path string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			walkItemCh <- walkItem{SrcPath: path, Entry: d}
-			return nil
-		})
+		err := walkDirWithLinks(ctx, path, exclude, onlyTheseFiles,
+			func(path string, d fs.DirEntry, err error) error {
+				if err != nil {
+					return err
+				}
+				walkItemCh <- walkItem{SrcPath: path, Entry: d}
+				return nil
+			})
 
 		if err != nil {
 			walkItemCh <- walkItem{Error: err}
@@ -146,10 +148,11 @@ func getSyncItems(ctx context.Context, path string, exclude []string) <-chan syn
 
 // Walk will walk the directory tree at the given path and invoke a handler
 // for every discovered item eligible for sync.
-func Walk(ctx context.Context, path string, exclude []string, handler SyncItemHandler) error {
+func Walk(ctx context.Context, path string, exclude []string,
+	onlyTheseFiles []string, handler SyncItemHandler) error {
 	logger := log.FromContext(ctx)
 
-	for item := range getSyncItems(ctx, path, exclude) {
+	for item := range getSyncItems(ctx, path, exclude, onlyTheseFiles) {
 		logger.F("item", item).Debug("got item")
 
 		if ctx.Err() != nil {
