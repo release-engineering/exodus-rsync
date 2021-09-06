@@ -53,6 +53,15 @@ func TestParseOk(t *testing.T) {
 				"y"},
 			want: Config{Exclude: []string{".*", "*.conf"}, Src: "x", Dest: "y"}},
 
+		"files-from": {
+			input: []string{
+				"exodus-rsync",
+				"--files-from",
+				"sources.txt",
+				"x",
+				"y"},
+			want: Config{FilesFrom: "sources.txt", Src: "x", Dest: "y"}},
+
 		"tolerable filter": {
 			input: []string{
 				"exodus-rsync",

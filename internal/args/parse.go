@@ -70,19 +70,20 @@ type Config struct {
 	// e.g., /foo/bar/baz.c remote:/tmp => /tmp/foo/bar/baz.c.
 	Relative bool `short:"R" help:"use relative path names"`
 
+	DryRun bool `short:"n" help:"Perform a trial run with no changes made"`
+
 	// Mostly ignored, but causes a failure if publish contains any files.
 	// See comments where the argument is checked for the explanation why.
 	IgnoreExisting bool `hidden:"1"`
 
-	DryRun bool `short:"n" help:"Perform a trial run with no changes made"`
-
-	Src  string `arg:"1" placeholder:"SRC" help:"Local path to a file or directory for sync"`
-	Dest string `arg:"1" placeholder:"[USER@]HOST:DEST" help:"Remote destination for sync"`
-
 	// This should be parsed but not exposed
 	Filter filterArgument `short:"f" hidden:"1"`
 
-	Exclude []string `placeholder:"PATTERN" help:"Exclude files matching this pattern"`
+	Exclude   []string `placeholder:"PATTERN" help:"Exclude files matching this pattern"`
+	FilesFrom string   `placeholder:"FILE" help:"Read list of source-file names from FILE"`
+
+	Src  string `arg:"1" placeholder:"SRC" help:"Local path to a file or directory for sync"`
+	Dest string `arg:"1" placeholder:"[USER@]HOST:DEST" help:"Remote destination for sync"`
 
 	IgnoredConfig `embed:"1" group:"ignored"`
 	ExodusConfig  `embed:"1" prefix:"exodus-"`

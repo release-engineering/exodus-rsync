@@ -254,9 +254,10 @@ is a summary of the differences:
   | --delete | ignored; deleting content is not supported |
   | --timeout | ignored |
   | --compress, -z | ignored |
+  | --exclude | exclude files matching this pattern |
+  | --files-from | read list of source-file names from FILE |
   | --stats | ignored |
   | --itemize-changes, -i | ignored |
-  | --exclude | exclude files matching this pattern |
 
 ### Publish modes
 
