@@ -114,6 +114,9 @@ func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []st
 	if args.Delete {
 		argv = append(argv, "--delete")
 	}
+	if args.PruneEmptyDirs {
+		argv = append(argv, "--prune-empty-dirs")
+	}
 	if args.Timeout != 0 {
 		argv = append(argv, "--timeout", fmt.Sprint(args.Timeout))
 	}
