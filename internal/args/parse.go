@@ -45,6 +45,7 @@ type IgnoredConfig struct {
 	OmitDirTimes    bool   `short:"O"`
 	Rsh             string `short:"e"`
 	Delete          bool
+	PruneEmptyDirs  bool `short:"m"`
 	Timeout         int
 	Compress        bool `short:"z"`
 	Stats           bool

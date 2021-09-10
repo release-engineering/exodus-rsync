@@ -252,6 +252,7 @@ is a summary of the differences:
   | --rsh, -e | ignored; ssh is not used |
   | --ignore-existing | ignored; exodus-rsync always skips existing files |
   | --delete | ignored; deleting content is not supported |
+  | --prune-empty-dirs, -m | ignored; there are no directories on exodus CDN |
   | --timeout | ignored |
   | --compress, -z | ignored |
   | --exclude | exclude files matching this pattern |

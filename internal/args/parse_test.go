@@ -16,15 +16,13 @@ func TestParseOk(t *testing.T) {
 		"ignored args": {
 			input: []string{
 				"exodus-rsync",
-				"--recursive",
-				"-z",
+				"-rDmz",
 				"--delete",
-				"-D",
 				"x",
 				"y"},
 			want: Config{Src: "x", Dest: "y",
 				// -D should enable DevicesSpecials which enables Devices and Specials
-				IgnoredConfig: IgnoredConfig{Recursive: true, Devices: true, Specials: true, DevicesSpecials: true, Delete: true, Compress: true}}},
+				IgnoredConfig: IgnoredConfig{Recursive: true, Devices: true, Specials: true, DevicesSpecials: true, PruneEmptyDirs: true, Compress: true, Delete: true}}},
 
 		"verbose": {
 			input: []string{
