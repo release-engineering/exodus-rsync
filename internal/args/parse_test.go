@@ -63,11 +63,11 @@ func TestParseOk(t *testing.T) {
 		"tolerable filter": {
 			input: []string{
 				"exodus-rsync",
-				"--filter",
-				"+ */",
+				"--filter", "+ **/hi/**",
+				"--filter=\"-/_*\"",
 				"x",
 				"y"},
-			want: Config{Src: "x", Dest: "y", Filter: "+ */"}},
+			want: Config{Src: "x", Dest: "y", Filter: []string{"+ **/hi/**", "\"-/_*\""}}},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {

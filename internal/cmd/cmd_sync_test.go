@@ -198,7 +198,7 @@ func TestMainTypicalSync(t *testing.T) {
 	}
 }
 
-func TestMainSyncExclude(t *testing.T) {
+func TestMainSyncFilter(t *testing.T) {
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -217,9 +217,9 @@ func TestMainSyncExclude(t *testing.T) {
 
 	args := []string{
 		"rsync",
-		"--exclude", ".conf",
-		"--exclude", "**/subdir/",
-		"--exclude", "link?",
+		"--filter", "+ */",
+		"--filter", "+/ **/hello-copy*",
+		"--filter", "\"- *\"",
 		srcPath + "/",
 		"exodus:/some/target",
 	}

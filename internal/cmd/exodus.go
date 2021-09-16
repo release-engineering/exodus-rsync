@@ -45,8 +45,8 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	}
 
 	var (
-		onlyTheseFiles []string
-		items          []walk.SyncItem
+		onlyThese []string
+		items     []walk.SyncItem
 	)
 
 	if args.FilesFrom != "" {
@@ -62,11 +62,11 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 		scanner := bufio.NewScanner(f)
 		for scanner.Scan() {
 			path := filepath.Join(args.Src, strings.TrimSpace(scanner.Text()))
-			onlyTheseFiles = append(onlyTheseFiles, path)
+			onlyThese = append(onlyThese, path)
 		}
 	}
 
-	err = walk.Walk(ctx, args.Src, args.Exclude, onlyTheseFiles, func(item walk.SyncItem) error {
+	err = walk.Walk(ctx, args.Src, args.Excluded(), args.Included(), onlyThese, func(item walk.SyncItem) error {
 		if args.IgnoreExisting {
 			// This argument is not (properly) supported, so bail out.
 			//
