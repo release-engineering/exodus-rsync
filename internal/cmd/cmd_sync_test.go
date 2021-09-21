@@ -219,7 +219,7 @@ func TestMainSyncFilter(t *testing.T) {
 		"rsync",
 		"--filter", "+ */",
 		"--filter", "+/ **/hello-copy*",
-		"--filter", "\"- *\"",
+		"--filter", "- *",
 		srcPath + "/",
 		"exodus:/some/target",
 	}

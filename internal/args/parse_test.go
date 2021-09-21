@@ -3,6 +3,8 @@ package args
 import (
 	"reflect"
 	"testing"
+
+	"github.com/alecthomas/kong"
 )
 
 func TestParseOk(t *testing.T) {
@@ -64,10 +66,10 @@ func TestParseOk(t *testing.T) {
 			input: []string{
 				"exodus-rsync",
 				"--filter", "+ **/hi/**",
-				"--filter=\"-/_*\"",
+				"--filter=-/_*",
 				"x",
 				"y"},
-			want: Config{Src: "x", Dest: "y", Filter: []string{"+ **/hi/**", "\"-/_*\""}}},
+			want: Config{Src: "x", Dest: "y", Filter: []string{"+ **/hi/**", "-/_*"}}},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -122,5 +124,17 @@ func TestDestPath(t *testing.T) {
 				t.Errorf("Config.DestPath() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestStringMapDecodeError(t *testing.T) {
+	err := argStringMapper{}.Decode(
+		&kong.DecodeContext{Value: &kong.Value{}, Scan: &kong.Scanner{}},
+		reflect.Value{},
+	)
+
+	// Scan holds no tokens; no flag or flag value to decode.
+	if err.Error() != "flag : missing value" {
+		t.Fatalf("didn't get expected error, got %s", err.Error())
 	}
 }

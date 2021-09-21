@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -19,12 +20,11 @@ func (f filterArguments) Validate() error {
 	validSeps := []string{" ", "_"}
 validation:
 	for _, arg := range f {
-		arg = strings.Trim(arg, "\"'")
 		for _, rule := range validRules {
 			for _, mod := range validMods {
 				for _, sep := range validSeps {
 					prefix := rule + mod + sep
-					if strings.HasPrefix(arg, prefix) {
+					if strings.HasPrefix(arg, prefix) && strings.TrimLeft(arg, prefix) != "" {
 						continue validation
 					}
 				}
@@ -107,7 +107,6 @@ type Config struct {
 // (based on the given rule) from Filter arguments onto the given slice.
 func (c *Config) processFilterArgs(rule string, slice []string) []string {
 	for _, arg := range c.Filter {
-		arg = strings.Trim(arg, "\"'")
 		if strings.HasPrefix(string(arg), rule) {
 			slice = append(slice, strings.TrimLeft(arg, "+-/ _"))
 		}
@@ -143,6 +142,24 @@ func (c *Config) DestPath() string {
 	return ""
 }
 
+type argStringMapper struct{}
+
+// A custom string decoder for kong. We use this because the default decoder
+// has "magic" behavior: it explicitly rejects arguments starting with "-"
+// apparently guessing that the caller probably meant for that argument to be a flag
+// rather than a value. But we know that we have actual values starting with "-",
+// such as in an exclude rule set by --filter.
+func (argStringMapper) Decode(ctx *kong.DecodeContext, target reflect.Value) error {
+	token := ctx.Scan.Pop()
+	if token.IsEOL() {
+		return fmt.Errorf("flag %s: missing value", ctx.Value.Name)
+	}
+
+	value := token.Value.(string)
+	target.SetString(value)
+	return nil
+}
+
 // Parse will parse provided command-line arguments and either return
 // a valid Config object, or call the exit function with a non-zero
 // exit code.
@@ -160,6 +177,7 @@ func Parse(args []string, version string, exit func(int)) Config {
 	out := Config{}
 	kong.Parse(&out,
 		kong.Exit(exit),
+		kong.KindMapper(reflect.String, argStringMapper{}),
 		kong.Description(
 			fmt.Sprintf(
 				"exodus-rsync %s, an exodus-aware rsync replacement.\n\nSee also: %s",
