@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- n/a
+- Support --include, --filter arguments
 
 ## 1.2.0 - 2021-09-20
 

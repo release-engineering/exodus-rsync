@@ -34,7 +34,7 @@ func TestWalkEarlyCancel(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{}, []string{}, handler)
+	err := Walk(ctx, ".", []string{}, []string{}, []string{}, handler)
 
 	// It should have returned the cancelled error
 	if err != ctx.Err() {
@@ -61,7 +61,7 @@ func TestWalkCancelInProgress(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{}, []string{}, handler)
+	err := Walk(ctx, ".", []string{}, []string{}, []string{}, handler)
 
 	// It should have returned the cancelled error
 	if err != ctx.Err() {
@@ -80,7 +80,7 @@ func TestWalkHandlerError(t *testing.T) {
 		return fmt.Errorf("simulated error")
 	}
 
-	err := Walk(ctx, ".", []string{}, []string{}, handler)
+	err := Walk(ctx, ".", []string{}, []string{}, []string{}, handler)
 
 	// It should have returned the error from handler
 	if err.Error() != "simulated error" {
@@ -99,10 +99,30 @@ func TestWalkExcludeMatchError(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{"a(b"}, []string{}, handler)
+	err := Walk(ctx, ".", []string{"a(b"}, []string{}, []string{}, handler)
 
 	// It should have caused a regexp error
-	msg := "error processing --exclude `a(b`: error parsing regexp: missing closing ): `a(b`"
+	msg := "could not process --exclude `a(b`: error parsing regexp: missing closing ): `a(b`"
+	if err.Error() != msg {
+		t.Errorf("unexpected success")
+	}
+}
+
+func TestWalkIncludeMatchError(t *testing.T) {
+	ctx := context.Background()
+	logger := log.Logger{}
+	logger.Handler = cli.New(os.Stdout)
+
+	ctx = log.NewContext(ctx, &logger)
+
+	handler := func(item SyncItem) error {
+		return nil
+	}
+
+	err := Walk(ctx, ".", []string{"*"}, []string{"a(b"}, []string{}, handler)
+
+	// It should have caused a regexp error
+	msg := "could not process --include `a(b`: error parsing regexp: missing closing ): `a(b`"
 	if err.Error() != msg {
 		t.Errorf("unexpected success")
 	}
@@ -112,25 +132,50 @@ func TestWalkLinksMatchPattern(t *testing.T) {
 	tests := []struct {
 		path    string
 		pattern string
-		isDir   bool
 	}{
-		{"/foo/bar/baz", ".", true},
-		{"/foo/bar", "/foo", true},
-		{"foo/bar", "bar/", true},
-		{"foo/bar", `foo/***`, true},
-		{"test.txt", `.txt`, false},
-		{"test?.txt", `\?.txt`, false},
-		{"foo/bars", `bar?`, true},
-		{"foo/bar/baz/buzz/bats.oog", `foo/**/bats.oog`, false},
-		{"foo/4/baz", `foo/[0-9]/baz`, true},
-		{"foo/bar/baz", `foo/[a-z]+/baz`, true},
+		{"/foo/bar/baz", "."},
+		{"/foo/bar", "/foo"},
+		{"foo/bar", "bar/"},
+		{"foo/bar", `foo/***`},
+		{"test.txt", `.txt`},
+		{"test?.txt", `\?.txt`},
+		{"foo/bars", `bar?`},
+		{"foo/bar/baz/buzz/bats.oog", `foo/**/bats.oog`},
+		{"foo/4/baz", `foo/[0-9]/baz`},
+		{"foo/bar/baz", `foo/[a-z]+/baz`},
 	}
 	for _, tt := range tests {
 		t.Run(tt.path, func(t *testing.T) {
-			matched, _ := matchPattern(tt.path, tt.pattern, tt.isDir)
+			matched, _ := matchPattern(tt.path, tt.pattern)
 			if matched == false {
 				t.Errorf("'%s' did not match, '%s", tt.pattern, tt.path)
 			}
 		})
+	}
+}
+
+func TestWalkLinksFilterPathAll(t *testing.T) {
+	ctx := context.Background()
+	logger := log.Logger{}
+	logger.Handler = cli.New(os.Stdout)
+
+	ctx = log.NewContext(ctx, &logger)
+
+	err := filterPath(log.FromContext(ctx), "/some/dir", []string{"*"}, []string{}, true)
+	if err != nil && err.Error() != "filtered '/some/dir'" {
+		t.Errorf("failed to filter '/some/dir' for exclude pattern `*`")
+	}
+}
+
+func TestWalkLinksFilterPathInclude(t *testing.T) {
+	ctx := context.Background()
+	logger := log.Logger{}
+	logger.Handler = cli.New(os.Stdout)
+
+	ctx = log.NewContext(ctx, &logger)
+
+	err := filterPath(log.FromContext(ctx), "/some/dir", []string{"*"}, []string{"*/", "**/dir"}, true)
+	if err != nil {
+		t.Errorf("unexpected error `%s`", err)
 	}
 }

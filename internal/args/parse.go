@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -11,15 +12,28 @@ import (
 
 const docsURL = "https://github.com/release-engineering/exodus-rsync"
 
-type filterArgument string
+type filterArguments []string
 
-func (f filterArgument) Validate() error {
-	if f == "+ */" {
-		// This is OK as it means nothing is filtered
-		return nil
+func (f filterArguments) Validate() error {
+	validRules := []string{"+", "-"}
+	validMods := []string{"", "/"}
+	validSeps := []string{" ", "_"}
+validation:
+	for _, arg := range f {
+		for _, rule := range validRules {
+			for _, mod := range validMods {
+				for _, sep := range validSeps {
+					prefix := rule + mod + sep
+					if strings.HasPrefix(arg, prefix) && strings.TrimLeft(arg, prefix) != "" {
+						continue validation
+					}
+				}
+			}
+		}
+		// Anything else is not supported
+		return fmt.Errorf("unsupported filter '%s'", arg)
 	}
-	// Anything else is not supported
-	return fmt.Errorf("unsupported filter '%s'", f)
+	return nil
 }
 
 // IgnoredConfig defines arguments which can be accepted for compatibility with rsync,
@@ -77,17 +91,38 @@ type Config struct {
 	// See comments where the argument is checked for the explanation why.
 	IgnoreExisting bool `hidden:"1"`
 
-	// This should be parsed but not exposed
-	Filter filterArgument `short:"f" hidden:"1"`
-
-	Exclude   []string `placeholder:"PATTERN" help:"Exclude files matching this pattern"`
-	FilesFrom string   `placeholder:"FILE" help:"Read list of source-file names from FILE"`
+	Filter    filterArguments `short:"f" placeholder:"RULE" help:"Add a file-filtering RULE"`
+	Exclude   []string        `placeholder:"PATTERN" help:"Exclude files matching this pattern"`
+	Include   []string        `placeholder:"PATTERN" help:"Don't exclude files matching this pattern"`
+	FilesFrom string          `placeholder:"FILE" help:"Read list of source-file names from FILE"`
 
 	Src  string `arg:"1" placeholder:"SRC" help:"Local path to a file or directory for sync"`
 	Dest string `arg:"1" placeholder:"[USER@]HOST:DEST" help:"Remote destination for sync"`
 
 	IgnoredConfig `embed:"1" group:"ignored"`
 	ExodusConfig  `embed:"1" prefix:"exodus-"`
+}
+
+// processFilterArgs is a helper function that appends the appropriate patterns
+// (based on the given rule) from Filter arguments onto the given slice.
+func (c *Config) processFilterArgs(rule string, slice []string) []string {
+	for _, arg := range c.Filter {
+		if strings.HasPrefix(string(arg), rule) {
+			slice = append(slice, strings.TrimLeft(arg, "+-/ _"))
+		}
+	}
+	return slice
+}
+
+// Excluded exctracts the pattern from Filter arguments and appends it onto Exclude.
+func (c *Config) Excluded() []string {
+	return c.processFilterArgs("-", c.Exclude)
+}
+
+// Included exctracts the pattern from Filter arguments and appends it onto Include.
+func (c *Config) Included() []string {
+	return c.processFilterArgs("+", c.Include)
+
 }
 
 // DestPath returns only the path portion of the destination argument passed
@@ -107,6 +142,24 @@ func (c *Config) DestPath() string {
 	return ""
 }
 
+type argStringMapper struct{}
+
+// A custom string decoder for kong. We use this because the default decoder
+// has "magic" behavior: it explicitly rejects arguments starting with "-"
+// apparently guessing that the caller probably meant for that argument to be a flag
+// rather than a value. But we know that we have actual values starting with "-",
+// such as in an exclude rule set by --filter.
+func (argStringMapper) Decode(ctx *kong.DecodeContext, target reflect.Value) error {
+	token := ctx.Scan.Pop()
+	if token.IsEOL() {
+		return fmt.Errorf("flag %s: missing value", ctx.Value.Name)
+	}
+
+	value := token.Value.(string)
+	target.SetString(value)
+	return nil
+}
+
 // Parse will parse provided command-line arguments and either return
 // a valid Config object, or call the exit function with a non-zero
 // exit code.
@@ -124,6 +177,7 @@ func Parse(args []string, version string, exit func(int)) Config {
 	out := Config{}
 	kong.Parse(&out,
 		kong.Exit(exit),
+		kong.KindMapper(reflect.String, argStringMapper{}),
 		kong.Description(
 			fmt.Sprintf(
 				"exodus-rsync %s, an exodus-aware rsync replacement.\n\nSee also: %s",

@@ -254,9 +254,11 @@ is a summary of the differences:
   | --delete | ignored; deleting content is not supported |
   | --prune-empty-dirs, -m | ignored; there are no directories on exodus CDN |
   | --timeout | ignored |
-  | --compress, -z | ignored |
+  | --filter  | add a file-filtering RULE (supports "+/-" rules and "/" modifier) |
   | --exclude | exclude files matching this pattern |
+  | --include | don't exclude files matching PATTERN | 
   | --files-from | read list of source-file names from FILE |
+  | --compress, -z | ignored |
   | --stats | ignored |
   | --itemize-changes, -i | ignored |
 

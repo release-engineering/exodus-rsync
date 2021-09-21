@@ -23,7 +23,7 @@ func pathRewriter(src string, dest string, fn fs.WalkDirFunc) fs.WalkDirFunc {
 
 // Determines if path matches pattern, striving for parity with rsync,
 // ("Include/Exclude Pattern Rules", https://linux.die.net/man/1/rsync).
-func matchPattern(path string, pattern string, isDir bool) (bool, error) {
+func matchPattern(path string, pattern string) (bool, error) {
 	if strings.ContainsAny(pattern, "*?") {
 		converted := ""
 		chars := []rune(pattern)
@@ -47,7 +47,7 @@ func matchPattern(path string, pattern string, isDir bool) (bool, error) {
 	if strings.HasPrefix(pattern, "/") {
 		pattern = `^` + pattern
 	}
-	if strings.HasSuffix(pattern, "/") && isDir {
+	if strings.HasSuffix(pattern, "/") {
 		pattern = strings.TrimRight(pattern, "/") + `\z`
 	}
 
@@ -68,9 +68,45 @@ func contains(s []string, str string) bool {
 	return false
 }
 
+func filterPath(logger *log.Logger, path string, exclude []string, include []string, isDir bool) error {
+	filtErr := fmt.Errorf("filtered '%s'", path)
+
+	for _, ex := range exclude {
+		isExcluded, matchErr := matchPattern(path, ex)
+		if matchErr != nil {
+			return fmt.Errorf("could not process --exclude `%s`: %w", ex, matchErr)
+		}
+
+		if isExcluded {
+			for _, in := range include {
+				if in == "*/" {
+					// Automatically include dirs, do not apply pattern otherwise.
+					if isDir {
+						return nil
+					}
+					continue
+				}
+
+				isIncluded, err := matchPattern(path, in)
+				if err != nil {
+					return fmt.Errorf("could not process --include `%s`: %w", in, err)
+				}
+
+				if isIncluded {
+					logger.F("path", path, "include", in).Debug("path included")
+					return nil
+				}
+			}
+
+			logger.F("path", path, "exclude", ex).Debug("path excluded")
+			return filtErr
+		}
+	}
+	return nil
+}
+
 // Like filepath.WalkDir but resolves symlinks to directories.
-func walkDirWithLinks(ctx context.Context, root string, exclude []string,
-	onlyTheseFiles []string, fn fs.WalkDirFunc) error {
+func walkDirWithLinks(ctx context.Context, root string, exclude []string, include []string, onlyThese []string, fn fs.WalkDirFunc) error {
 	logger := log.FromContext(ctx)
 
 	var walkFunc fs.WalkDirFunc
@@ -80,24 +116,17 @@ func walkDirWithLinks(ctx context.Context, root string, exclude []string,
 			return ctx.Err()
 		}
 
-		if len(onlyTheseFiles) > 0 && !contains(onlyTheseFiles, path) {
+		if len(onlyThese) > 0 && !contains(onlyThese, path) {
 			logger.F("path", path).Debug("skipping; not included in --files-from file")
 			return nil
 		}
 
-		for _, pattern := range exclude {
-			isExcluded, err := matchPattern(path, pattern, d.IsDir())
-			if err != nil {
-				return fmt.Errorf("error processing --exclude `%s`: %w", pattern, err)
-			}
-
-			if isExcluded {
-				logger.F("path", path, "exclude", pattern).Info("path excluded")
-				if d.IsDir() {
-					return filepath.SkipDir
-				}
+		filterErr := filterPath(logger, path, exclude, include, d.IsDir())
+		if filterErr != nil {
+			if strings.Contains(filterErr.Error(), fmt.Sprintf("filtered '%s'", path)) {
 				return nil
 			}
+			return filterErr
 		}
 
 		if err != nil {
