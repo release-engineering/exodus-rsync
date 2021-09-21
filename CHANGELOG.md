@@ -10,7 +10,7 @@
 - Support --files-from argument
 - Support --relative argument
 - Support --exclude arguments
-- Integrate AWS SDK dubug logging
+- Integrate AWS SDK debug logging
 - Show error responses from exodus-gw
 
 ## 1.1.0 - 2021-06-08
