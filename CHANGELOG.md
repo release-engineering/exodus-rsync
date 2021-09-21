@@ -4,6 +4,15 @@
 
 - n/a
 
+## 1.2.0 - 2021-09-20
+
+- Support --prune-empty-dirs argument
+- Support --files-from argument
+- Support --relative argument
+- Support --exclude arguments
+- Integrate AWS SDK debug logging
+- Show error responses from exodus-gw
+
 ## 1.1.0 - 2021-06-08
 
 - Accept "preserve" family of rsync arguments
