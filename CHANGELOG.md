@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Support --server, --sender internal arguments
 - Support --include, --filter arguments
 
 ## 1.2.0 - 2021-09-20

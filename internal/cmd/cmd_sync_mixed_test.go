@@ -12,7 +12,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
-	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 	"github.com/release-engineering/exodus-rsync/internal/rsync"
 )
@@ -22,8 +21,8 @@ type fakeRsync struct {
 	prefix   []string
 }
 
-func (r *fakeRsync) Command(ctx context.Context, cfg conf.Config, args args.Config) *exec.Cmd {
-	cmd := r.delegate.Command(ctx, cfg, args)
+func (r *fakeRsync) Command(ctx context.Context, args []string) *exec.Cmd {
+	cmd := r.delegate.Command(ctx, args)
 
 	cmd.Path = r.prefix[0]
 	cmd.Args = append(r.prefix, cmd.Args...)
@@ -39,8 +38,12 @@ func (r *fakeRsync) Command(ctx context.Context, cfg conf.Config, args args.Conf
 	return cmd
 }
 
-func (r *fakeRsync) Exec(ctx context.Context, cfg conf.Config, args args.Config) error {
+func (r *fakeRsync) Exec(ctx context.Context, args args.Config) error {
 	return fmt.Errorf("this test is not supposed to Exec")
+}
+
+func (r *fakeRsync) RawExec(ctx context.Context, args []string) error {
+	return fmt.Errorf("this test is not supposed to RawExec")
 }
 
 func TestMainSyncMixedOk(t *testing.T) {

@@ -36,12 +36,23 @@ func invalidMain(ctx context.Context, cfg conf.Config, _ args.Config) int {
 
 // Main is the top-level entry point to the exodus-rsync command.
 func Main(rawArgs []string) int {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Before anything else, check for --server or --sender, which
+	// indicate rsync itself is trying to do something.
+	// If either are provided, pass through to real rsync.
+	for _, arg := range rawArgs {
+		if arg == "--server" || arg == "--sender" {
+			logger := ext.log.NewLogger(args.Config{})
+			ctx = log.NewContext(ctx, logger)
+			return rsyncRaw(ctx, rawArgs)
+		}
+	}
+
 	parsedArgs := args.Parse(rawArgs, version, nil)
 
 	logger := ext.log.NewLogger(parsedArgs)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	ctx = log.NewContext(ctx, logger)
 
