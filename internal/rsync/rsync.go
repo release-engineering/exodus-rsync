@@ -100,10 +100,10 @@ func Arguments(ctx context.Context, args args.Config) []string {
 	if args.Times {
 		argv = append(argv, "--times")
 	}
-	if args.ATimes {
+	if args.Atimes {
 		argv = append(argv, "--atimes")
 	}
-	if args.CrTimes {
+	if args.Crtimes {
 		argv = append(argv, "--crtimes")
 	}
 	if args.OmitDirTimes {
