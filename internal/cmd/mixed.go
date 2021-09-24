@@ -10,6 +10,7 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/log"
+	"github.com/release-engineering/exodus-rsync/internal/rsync"
 )
 
 // Mixed publish mode, publishing both via exodus and rsync.
@@ -50,7 +51,7 @@ func mixedMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	var lastCode *chan int
 	rsyncCode := make(chan int, 1)
 	exodusCode := make(chan int, 1)
-	rsyncCmd := ext.rsync.Command(ctx, cfg, args)
+	rsyncCmd := ext.rsync.Command(ctx, rsync.Arguments(ctx, args))
 
 	// Let rsync & exodus publishes run in their own goroutines.
 	go func() {

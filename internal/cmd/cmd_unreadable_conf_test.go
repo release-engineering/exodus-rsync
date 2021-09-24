@@ -63,7 +63,7 @@ func TestMainNonexistentConf(t *testing.T) {
 	// an error.
 	rsyncError := fmt.Errorf("simulated error")
 
-	mockRsync.EXPECT().Exec(gomock.Any(), nil, parsedArgs).Return(rsyncError)
+	mockRsync.EXPECT().Exec(gomock.Any(), parsedArgs).Return(rsyncError)
 
 	got := Main(rawArgs)
 

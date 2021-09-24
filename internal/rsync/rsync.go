@@ -9,7 +9,6 @@ import (
 	"syscall"
 
 	"github.com/release-engineering/exodus-rsync/internal/args"
-	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
@@ -22,13 +21,17 @@ type Interface interface {
 	//
 	// Note that the command is run using the execve syscall, meaning that it
 	// *replaces* the current process. It never returns, unless an error occurs.
-	Exec(context.Context, conf.Config, args.Config) error
+	Exec(context.Context, args.Config) error
+
+	// RawExec will execute an rsync command with no argument parsing or configuration,
+	// simply passing the raw arguments through to real rsync, /usr/bin/rsync.
+	RawExec(context.Context, []string) error
 
 	// Command will prepare and return an os.exec Cmd struct for invoking rsync.
 	//
 	// Only Path and Args are filled in. Other elements such as stdout, stderr
 	// can be set up by the caller prior to invoking the command.
-	Command(context.Context, conf.Config, args.Config) *exec.Cmd
+	Command(context.Context, []string) *exec.Cmd
 }
 
 type impl struct{}
@@ -43,7 +46,8 @@ var ext = struct {
 	syscall.Exec,
 }
 
-func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []string {
+// Arguments converts the args.Config struct back into an argument vector.
+func Arguments(ctx context.Context, args args.Config) []string {
 	logger := log.FromContext(ctx)
 
 	argv := []string{}
@@ -149,8 +153,8 @@ func rsyncArguments(ctx context.Context, cfg conf.Config, args args.Config) []st
 	return argv
 }
 
-func (i impl) Exec(ctx context.Context, cfg conf.Config, args args.Config) error {
-	cmd := i.Command(ctx, cfg, args)
+func (i impl) Exec(ctx context.Context, args args.Config) error {
+	cmd := i.Command(ctx, Arguments(ctx, args))
 	return ext.exec(
 		cmd.Path,
 		cmd.Args,
@@ -158,7 +162,16 @@ func (i impl) Exec(ctx context.Context, cfg conf.Config, args args.Config) error
 	)
 }
 
-func (impl) Command(ctx context.Context, cfg conf.Config, args args.Config) *exec.Cmd {
+func (i impl) RawExec(ctx context.Context, args []string) error {
+	cmd := i.Command(ctx, args)
+	return ext.exec(
+		cmd.Path,
+		cmd.Args,
+		os.Environ(),
+	)
+}
+
+func (impl) Command(ctx context.Context, args []string) *exec.Cmd {
 	logger := log.FromContext(ctx)
 
 	rsync, err := lookupTrueRsync(ctx)
@@ -169,5 +182,5 @@ func (impl) Command(ctx context.Context, cfg conf.Config, args args.Config) *exe
 		logger.F("path", rsync).Debug("Located rsync")
 	}
 
-	return exec.CommandContext(ctx, rsync, rsyncArguments(ctx, cfg, args)...)
+	return exec.CommandContext(ctx, rsync, args...)
 }

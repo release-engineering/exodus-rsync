@@ -7,9 +7,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
-	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
@@ -28,15 +26,12 @@ func setPath(t *testing.T, value string) {
 // If an rsync command can't be located, /usr/bin/rsync is used
 // as fallback.
 func TestCommandFallback(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	conf := conf.NewMockConfig(ctrl)
-
 	// No PATH at all means no rsync in PATH
 	setPath(t, "")
 
 	ctx := log.NewContext(context.Background(), log.Package.NewLogger(args.Config{}))
 
-	cmd := Package.Command(ctx, conf, args.Config{})
+	cmd := Package.Command(ctx, []string{})
 
 	if cmd.Path != "/usr/bin/rsync" {
 		t.Errorf("command returned unexpected path %v", cmd.Path)
@@ -72,11 +67,9 @@ func TestCommandAvoidSelf(t *testing.T) {
 		t.Fatalf("sanity check of test setup failed, lookup of rsync returned %v", foundRsync)
 	}
 
-	ctrl := gomock.NewController(t)
-	conf := conf.NewMockConfig(ctrl)
 	ctx := log.NewContext(context.Background(), log.Package.NewLogger(args.Config{}))
 
-	cmd := Package.Command(ctx, conf, args.Config{})
+	cmd := Package.Command(ctx, []string{})
 
 	// Rather than looking up ourselves as a plain LookPath did, it should be smart
 	// enough to remove self from path and find the "real" rsync

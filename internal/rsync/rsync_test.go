@@ -7,9 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
-	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
@@ -26,10 +24,41 @@ func addTestBinPath(t *testing.T) {
 	}
 }
 
-func TestExec(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	conf := conf.NewMockConfig(ctrl)
+func TestRawExec(t *testing.T) {
+	addTestBinPath(t)
 
+	argv := []string{"some-src", "some-dest"}
+	expectedArgv := []string{"../../test/bin/rsync", "some-src", "some-dest"}
+
+	var gotArgv0 string
+	var gotArgv []string
+
+	oldExec := ext.exec
+	ext.exec = func(argv0 string, argv, _ []string) error {
+		gotArgv0 = argv0
+		gotArgv = argv
+		return fmt.Errorf("simulated error")
+	}
+	defer func() { ext.exec = oldExec }()
+
+	ctx := context.Background()
+	ctx = log.NewContext(ctx, log.Package.NewLogger(args.Config{}))
+
+	err := Package.RawExec(ctx, argv)
+	if err.Error() != "simulated error" {
+		t.Error("error not propagated from exec, got =", err)
+	}
+
+	if gotArgv0 != "../../test/bin/rsync" {
+		t.Error("invoked unexpected rsync command", gotArgv0)
+	}
+
+	if !reflect.DeepEqual(gotArgv, expectedArgv) {
+		t.Error("rsync invoked with wrong arguments", gotArgv)
+	}
+}
+
+func TestExec(t *testing.T) {
 	addTestBinPath(t)
 
 	tests := []struct {
@@ -112,7 +141,7 @@ func TestExec(t *testing.T) {
 			ctx := context.Background()
 			ctx = log.NewContext(ctx, log.Package.NewLogger(tt.args))
 
-			err := Package.Exec(ctx, conf, tt.args)
+			err := Package.Exec(ctx, tt.args)
 			if err.Error() != "simulated error" {
 				t.Error("error not propagated from exec, got =", err)
 			}

@@ -11,7 +11,6 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	args "github.com/release-engineering/exodus-rsync/internal/args"
-	conf "github.com/release-engineering/exodus-rsync/internal/conf"
 )
 
 // MockInterface is a mock of Interface interface.
@@ -38,29 +37,43 @@ func (m *MockInterface) EXPECT() *MockInterfaceMockRecorder {
 }
 
 // Command mocks base method.
-func (m *MockInterface) Command(arg0 context.Context, arg1 conf.Config, arg2 args.Config) *exec.Cmd {
+func (m *MockInterface) Command(arg0 context.Context, arg1 []string) *exec.Cmd {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Command", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Command", arg0, arg1)
 	ret0, _ := ret[0].(*exec.Cmd)
 	return ret0
 }
 
 // Command indicates an expected call of Command.
-func (mr *MockInterfaceMockRecorder) Command(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockInterfaceMockRecorder) Command(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Command", reflect.TypeOf((*MockInterface)(nil).Command), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Command", reflect.TypeOf((*MockInterface)(nil).Command), arg0, arg1)
 }
 
 // Exec mocks base method.
-func (m *MockInterface) Exec(arg0 context.Context, arg1 conf.Config, arg2 args.Config) error {
+func (m *MockInterface) Exec(arg0 context.Context, arg1 args.Config) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Exec", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Exec", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Exec indicates an expected call of Exec.
-func (mr *MockInterfaceMockRecorder) Exec(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockInterfaceMockRecorder) Exec(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockInterface)(nil).Exec), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockInterface)(nil).Exec), arg0, arg1)
+}
+
+// RawExec mocks base method.
+func (m *MockInterface) RawExec(arg0 context.Context, arg1 []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RawExec", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RawExec indicates an expected call of RawExec.
+func (mr *MockInterfaceMockRecorder) RawExec(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RawExec", reflect.TypeOf((*MockInterface)(nil).RawExec), arg0, arg1)
 }
