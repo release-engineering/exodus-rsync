@@ -54,8 +54,8 @@ type IgnoredConfig struct {
 	Specials        bool
 	DevicesSpecials bool   `short:"D"`
 	Times           bool   `short:"t"`
-	ATimes          bool   `short:"U"`
-	CrTimes         bool   `short:"N"`
+	Atimes          bool   `short:"U"`
+	Crtimes         bool   `short:"N"`
 	OmitDirTimes    bool   `short:"O"`
 	Rsh             string `short:"e"`
 	Delete          bool
