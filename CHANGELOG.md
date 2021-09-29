@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- n/a
+
+## 1.3.0 - 2021-09-29
+
 - Fix: correct --atimes, --crtimes names 
 - Support --server, --sender internal arguments
 - Support --include, --filter arguments
