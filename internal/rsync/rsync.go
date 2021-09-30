@@ -64,6 +64,9 @@ func Arguments(ctx context.Context, args args.Config) []string {
 	if args.Relative {
 		argv = append(argv, "--relative")
 	}
+	if args.Links {
+		argv = append(argv, "--links")
+	}
 	if args.CopyLinks {
 		argv = append(argv, "--copy-links")
 	}
