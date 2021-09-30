@@ -41,6 +41,7 @@ validation:
 type IgnoredConfig struct {
 	Archive         bool `short:"a"`
 	Recursive       bool `short:"r"`
+	Links           bool `short:"l"`
 	CopyLinks       bool `short:"L"`
 	KeepDirlinks    bool `short:"K"`
 	HardLinks       bool `short:"H"`

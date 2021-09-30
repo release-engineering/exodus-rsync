@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- n/a
+- Support --links argument
 
 ## 1.3.0 - 2021-09-29
 
