@@ -6,7 +6,7 @@ require (
 	github.com/adrg/xdg v0.3.4
 	github.com/alecthomas/kong v0.2.17
 	github.com/apex/log v1.9.0
-	github.com/aws/aws-sdk-go v1.41.4
+	github.com/aws/aws-sdk-go v1.41.9
 	github.com/coreos/go-systemd/v22 v22.3.2
 	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.7.0
