@@ -51,6 +51,7 @@ func TestMainExecRsync(t *testing.T) {
 	emptyConfig.EXPECT().EnvironmentForDest(gomock.Any(), gomock.Any()).Return(nil)
 	emptyConfig.EXPECT().LogLevel().AnyTimes().Return("info")
 	emptyConfig.EXPECT().Logger().AnyTimes().Return("auto")
+	emptyConfig.EXPECT().Diag().AnyTimes().Return(false)
 
 	// Since no environment matches, we expect it to run rsync and it should pass
 	// through whatever arguments we're giving it.

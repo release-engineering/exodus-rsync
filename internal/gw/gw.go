@@ -57,6 +57,12 @@ type Client interface {
 	// is valid. If an invalid publish ID is given, an error will occur the next
 	// time any write operation is attempted on the publish.
 	GetPublish(string) Publish
+
+	// WhoAmI returns raw authentication & authorization info for this exodus-gw client
+	// in the format provided by the "/whoami" endpoint.
+	//
+	// This function is intended for debugging purposes only.
+	WhoAmI(context.Context) (map[string]interface{}, error)
 }
 
 // Publish represents a publish object in exodus-gw.

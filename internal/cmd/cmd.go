@@ -5,6 +5,7 @@ import (
 
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
+	"github.com/release-engineering/exodus-rsync/internal/diag"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 	"github.com/release-engineering/exodus-rsync/internal/rsync"
@@ -15,11 +16,13 @@ var ext = struct {
 	rsync rsync.Interface
 	gw    gw.Interface
 	log   log.Interface
+	diag  diag.Interface
 }{
 	conf.Package,
 	rsync.Package,
 	gw.Package,
 	log.Package,
+	diag.Package,
 }
 
 // This version should be written at build time, see Makefile.
@@ -83,6 +86,15 @@ func Main(rawArgs []string) int {
 	}
 
 	logger.StartPlatformLogger(env)
+
+	// We've now decided more or less what we're going to do.
+	// In diagnostic mode, before proceeding we will *also* dump
+	// a wealth of information about the current environment,
+	// configuration and command, then proceed with publish
+	// afterward.
+	if env.Diag() {
+		ext.diag.Run(ctx, env, parsedArgs)
+	}
 
 	return main(ctx, env, parsedArgs)
 }

@@ -73,6 +73,20 @@ func (m *MockConfig) EXPECT() *MockConfigMockRecorder {
 	return m.recorder
 }
 
+// Diag mocks base method.
+func (m *MockConfig) Diag() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Diag")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// Diag indicates an expected call of Diag.
+func (mr *MockConfigMockRecorder) Diag() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Diag", reflect.TypeOf((*MockConfig)(nil).Diag))
+}
+
 // GwBatchSize mocks base method.
 func (m *MockConfig) GwBatchSize() int {
 	m.ctrl.T.Helper()
@@ -234,6 +248,20 @@ func NewMockEnvironmentConfig(ctrl *gomock.Controller) *MockEnvironmentConfig {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockEnvironmentConfig) EXPECT() *MockEnvironmentConfigMockRecorder {
 	return m.recorder
+}
+
+// Diag mocks base method.
+func (m *MockEnvironmentConfig) Diag() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Diag")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// Diag indicates an expected call of Diag.
+func (mr *MockEnvironmentConfigMockRecorder) Diag() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Diag", reflect.TypeOf((*MockEnvironmentConfig)(nil).Diag))
 }
 
 // GwBatchSize mocks base method.
@@ -411,6 +439,20 @@ func NewMockGlobalConfig(ctrl *gomock.Controller) *MockGlobalConfig {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockGlobalConfig) EXPECT() *MockGlobalConfigMockRecorder {
 	return m.recorder
+}
+
+// Diag mocks base method.
+func (m *MockGlobalConfig) Diag() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Diag")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// Diag indicates an expected call of Diag.
+func (mr *MockGlobalConfigMockRecorder) Diag() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Diag", reflect.TypeOf((*MockGlobalConfig)(nil).Diag))
 }
 
 // EnvironmentForDest mocks base method.

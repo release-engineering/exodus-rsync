@@ -17,6 +17,7 @@ type sharedConfig struct {
 	RsyncModeRaw      string `yaml:"rsyncmode"`
 	LogLevelRaw       string `yaml:"loglevel"`
 	LoggerRaw         string `yaml:"logger"`
+	DiagRaw           bool   `yaml:"diag"`
 }
 
 type environment struct {
@@ -100,6 +101,10 @@ func (g *globalConfig) Verbosity() int {
 	return g.args.Verbose
 }
 
+func (g *globalConfig) Diag() bool {
+	return g.args.Diag || g.DiagRaw
+}
+
 func (e *environment) GwCert() string {
 	return nonEmptyString(e.GwCertRaw, e.parent.GwCert())
 }
@@ -138,6 +143,10 @@ func (e *environment) Logger() string {
 
 func (e *environment) Verbosity() int {
 	return nonEmptyInt(e.args.Verbose, e.parent.Verbosity())
+}
+
+func (e *environment) Diag() bool {
+	return e.DiagRaw || e.parent.Diag()
 }
 
 func (e *environment) Prefix() string {
