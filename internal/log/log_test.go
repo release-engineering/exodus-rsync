@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"testing"
 
 	apexLog "github.com/apex/log"
@@ -69,6 +70,48 @@ func TestPlatformAutoLoggers(t *testing.T) {
 	if handler2 == nil {
 		t.Error("auto with haveJournal=true did not return journald handler")
 	}
+}
+
+func TestSyslogHandler(t *testing.T) {
+	fn := loggerBackend(&testcase{"", "syslog"}, false)
+	h, _ := fn().(*syslogHandler)
+	h.test = true
+
+	log := Package.NewLogger(args.Config{})
+	log.Level = DebugLevel
+	log.Handler = h
+
+	// should handle simple fields
+	log.F("foo", "bar").Info("Hi")
+
+	// and complex fields
+	err := fmt.Errorf("Mistakes were made")
+	log.F("error", err).Error("Something went wrong")
+
+	e := h.Entries
+	assert.Equal(t, e[0], "Hi {\"foo\":\"bar\"}\n")
+	assert.Equal(t, e[1], "Something went wrong {\"error\":\"Mistakes were made\"}\n")
+}
+
+func TestJournaldHandler(t *testing.T) {
+	fn := loggerBackend(&testcase{"", "journald"}, false)
+	h, _ := fn().(*journalHandler)
+	h.test = true
+
+	log := Package.NewLogger(args.Config{})
+	log.Level = DebugLevel
+	log.Handler = h
+
+	// should handle simple fields
+	log.F("foo", "bar").Info("Hi")
+
+	// and complex fields
+	err := fmt.Errorf("Mistakes were made")
+	log.F("error", err).Error("Something went wrong")
+
+	e := h.Entries
+	assert.Equal(t, e[0], "Hi FOO=bar")
+	assert.Equal(t, e[1], "Something went wrong ERROR=Mistakes were made")
 }
 
 func TestLogFunc(t *testing.T) {
