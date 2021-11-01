@@ -91,6 +91,12 @@ func (c *FakeClient) GetPublish(id string) gw.Publish {
 	return &BrokenPublish{id: id}
 }
 
+func (c *FakeClient) WhoAmI(context.Context) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+	out["whoami"] = "fake-info"
+	return out, nil
+}
+
 func (p *FakePublish) AddItems(ctx context.Context, items []gw.ItemInput) error {
 	if p.committed != 0 {
 		return fmt.Errorf("attempted to modify committed publish")

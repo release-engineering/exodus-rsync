@@ -132,6 +132,21 @@ func (mr *MockClientMockRecorder) NewPublish(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewPublish", reflect.TypeOf((*MockClient)(nil).NewPublish), arg0)
 }
 
+// WhoAmI mocks base method.
+func (m *MockClient) WhoAmI(arg0 context.Context) (map[string]interface{}, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WhoAmI", arg0)
+	ret0, _ := ret[0].(map[string]interface{})
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WhoAmI indicates an expected call of WhoAmI.
+func (mr *MockClientMockRecorder) WhoAmI(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WhoAmI", reflect.TypeOf((*MockClient)(nil).WhoAmI), arg0)
+}
+
 // MockPublish is a mock of Publish interface.
 type MockPublish struct {
 	ctrl     *gomock.Controller

@@ -51,6 +51,9 @@ type Config interface {
 
 	// Level of verbosity requested via CLI args.
 	Verbosity() int
+
+	// Diagnostics mode.
+	Diag() bool
 }
 
 // EnvironmentConfig provides configuration specific to one environment.

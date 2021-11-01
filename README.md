@@ -163,6 +163,20 @@ loglevel: info
 #
 logger: auto
 
+#
+# Diagnostic mode.
+#
+# In diagnostic mode, exodus-rsync will perform various self-checks and dump
+# detailed info on the execution environment at the beginning of each
+# invocation.
+#
+# Diagnostic mode is intended for debugging only. It negatively impacts
+# performance and should generally be disabled in production.
+#
+# The `--exodus-diag` command-line option can also enable diagnostic mode.
+#
+diag: false
+
 ###############################################################################
 # Tuning
 ###############################################################################
@@ -222,6 +236,7 @@ is a summary of the differences:
   | -------- | ----- |
   | --exodus-conf=PATH | use this configuration file |
   | --exodus-publish=ID | join content to an existing publish (see "Publish modes") |
+  | --exodus-diag | diagnostic mode, outputs various info for troubleshooting |
 
 - exodus-rsync supports only the following rsync arguments, most of which do not have any
   effect.

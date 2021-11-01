@@ -81,6 +81,12 @@ func (c *client) doJSONRequest(ctx context.Context, method string, url string, b
 	return nil
 }
 
+func (c *client) WhoAmI(ctx context.Context) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+	err := c.doJSONRequest(ctx, "GET", "/whoami", nil, &out)
+	return out, err
+}
+
 func (c *client) haveBlob(ctx context.Context, item walk.SyncItem) (bool, error) {
 	logger := log.FromContext(ctx)
 
