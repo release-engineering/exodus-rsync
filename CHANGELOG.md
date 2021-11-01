@@ -4,6 +4,11 @@
 
 - n/a
 
+## 1.5.0 - 2021-11-02
+
+- Fix: ensure complex types are included in syslog messages
+- Introduced diagnostic mode (`--exodus-diag`) for troubleshooting
+
 ## 1.4.0 - 2021-10-01
 
 - Support --links argument
