@@ -79,8 +79,6 @@ func (p *publish) AddItems(ctx context.Context, items []ItemInput) error {
 
 	logger := log.FromContext(ctx)
 
-	logger.F("url", url, "count", len(items)).Debug("Adding to publish object")
-
 	var batch []ItemInput
 	batchSize := p.client.cfg.GwBatchSize()
 
@@ -97,7 +95,11 @@ func (p *publish) AddItems(ctx context.Context, items []ItemInput) error {
 
 	for nextBatch(); len(batch) > 0; nextBatch() {
 		count++
-		logger.F("count", count).Debug("Putting batch")
+
+		for _, item := range batch {
+			logger.F("item", item, "batch", count, "url", url).Debug("Adding to publish object")
+		}
+
 		err := c.doJSONRequest(ctx, "PUT", url, batch, &empty)
 		if err != nil {
 			return err
