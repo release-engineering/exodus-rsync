@@ -247,7 +247,7 @@ is a summary of the differences:
   | --archive, -a | ignored |
   | --recursive, -r | ignored; exodus-rsync is always recursive |
   | --relative, -R | use relative path names |
-  | --links, -l | ignored; there are no symlinks on exodus CDN |
+  | --links, -l | copy symlinks as symlinks without following |
   | --copy-links, -L | ignored; exodus-rsync always follows links |
   | --keep-dirlinks, -K | ignored; there are no directories on exodus CDN |
   | --hard-links, -H | ignored; exodus-rsync always follows links |

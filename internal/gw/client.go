@@ -154,6 +154,11 @@ func (c *client) EnsureUploaded(
 ) error {
 	// TODO: concurrency
 	for _, item := range items {
+		if item.Key == "" && item.LinkTo != "" {
+			log.FromContext(ctx).F("uri", item.SrcPath).Debug("Skipping unfollowed symlink")
+			continue
+		}
+
 		// Check if it's present
 		have, err := c.haveBlob(ctx, item)
 		if err != nil {

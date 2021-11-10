@@ -170,7 +170,7 @@ func (f *fakeGw) addPublishItems(r *http.Request, id string) *http.Response {
 	}
 
 	for _, item := range requestItems {
-		publish.items = append(publish.items, ItemInput{item["web_uri"], item["object_key"]})
+		publish.items = append(publish.items, ItemInput{item["web_uri"], item["object_key"], item["link_to"]})
 	}
 
 	out.Status = "200 OK"

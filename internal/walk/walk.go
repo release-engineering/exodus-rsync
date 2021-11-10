@@ -30,6 +30,7 @@ type walkItem struct {
 type SyncItem struct {
 	SrcPath string
 	Key     string
+	LinkTo  string
 	Info    fs.FileInfo
 }
 
@@ -52,7 +53,7 @@ func fileHash(path string, hasher hash.Hash) (string, error) {
 	return fmt.Sprintf("%x", hasher.Sum(nil)), nil
 }
 
-func fillItem(ctx context.Context, c chan<- syncItemPrivate, w walkItem) error {
+func fillItem(ctx context.Context, c chan<- syncItemPrivate, w walkItem, links bool) error {
 	logger := log.FromContext(ctx)
 
 	if w.Error != nil {
@@ -69,16 +70,29 @@ func fillItem(ctx context.Context, c chan<- syncItemPrivate, w walkItem) error {
 		return nil
 	}
 
-	key, err := fileHash(w.SrcPath, sha256.New())
-	if err != nil {
-		return fmt.Errorf("checksum %s: %w", w.SrcPath, err)
+	var (
+		key    string
+		linkTo string
+	)
+
+	if w.Entry.Type()&fs.ModeSymlink != 0 && links {
+		linkTo, err = os.Readlink(w.SrcPath)
+		if err != nil {
+			return err
+		}
+	} else {
+		key, err = fileHash(w.SrcPath, sha256.New())
+		if err != nil {
+			return fmt.Errorf("checksum %s: %w", w.SrcPath, err)
+		}
 	}
 
 	item := syncItemPrivate{
 		SyncItem{
 			SrcPath: w.SrcPath,
-			Info:    info,
 			Key:     key,
+			LinkTo:  linkTo,
+			Info:    info,
 		},
 		nil,
 	}
@@ -89,7 +103,7 @@ func fillItem(ctx context.Context, c chan<- syncItemPrivate, w walkItem) error {
 	return nil
 }
 
-func fillItems(ctx context.Context, in <-chan walkItem, c chan<- syncItemPrivate) {
+func fillItems(ctx context.Context, in <-chan walkItem, c chan<- syncItemPrivate, links bool) {
 	logger := log.FromContext(ctx)
 
 	for {
@@ -105,19 +119,19 @@ func fillItems(ctx context.Context, in <-chan walkItem, c chan<- syncItemPrivate
 				return
 			}
 
-			if err := fillItem(ctx, c, item); err != nil {
+			if err := fillItem(ctx, c, item, links); err != nil {
 				c <- syncItemPrivate{Error: err}
 			}
 		}
 	}
 }
 
-func getSyncItems(ctx context.Context, path string, exclude []string, include []string, onlyThese []string) <-chan syncItemPrivate {
+func getSyncItems(ctx context.Context, path string, exclude []string, include []string, onlyThese []string, links bool) <-chan syncItemPrivate {
 	c := make(chan syncItemPrivate, 10)
 	walkItemCh := make(chan walkItem, 10)
 
 	go func() {
-		err := walkDirWithLinks(ctx, path, exclude, include, onlyThese,
+		err := walkDirWithLinks(ctx, path, exclude, include, onlyThese, links,
 			func(path string, d fs.DirEntry, err error) error {
 				if err != nil {
 					return err
@@ -135,7 +149,7 @@ func getSyncItems(ctx context.Context, path string, exclude []string, include []
 
 	go syncutil.RunWithGroup(20,
 		func() {
-			fillItems(ctx, walkItemCh, c)
+			fillItems(ctx, walkItemCh, c, links)
 		},
 		func() {
 			close(c)
@@ -147,10 +161,10 @@ func getSyncItems(ctx context.Context, path string, exclude []string, include []
 
 // Walk will walk the directory tree at the given path and invoke a handler
 // for every discovered item eligible for sync.
-func Walk(ctx context.Context, path string, exclude []string, include []string, onlyThese []string, handler SyncItemHandler) error {
+func Walk(ctx context.Context, path string, exclude []string, include []string, onlyThese []string, links bool, handler SyncItemHandler) error {
 	logger := log.FromContext(ctx)
 
-	for item := range getSyncItems(ctx, path, exclude, include, onlyThese) {
+	for item := range getSyncItems(ctx, path, exclude, include, onlyThese, links) {
 		logger.F("item", item).Debug("got item")
 
 		if ctx.Err() != nil {

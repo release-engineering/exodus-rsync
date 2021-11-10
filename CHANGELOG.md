@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- n/a
+- Generate link_to for symlinks if --links
 
 ## 1.5.0 - 2021-11-02
 
