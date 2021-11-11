@@ -346,6 +346,87 @@ func TestMainSyncFollowsLinks(t *testing.T) {
 	}
 }
 
+func TestMainSyncDontFollowLinks(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	SetConfig(t, CONFIG)
+	ctrl := MockController(t)
+
+	mockGw := gw.NewMockInterface(ctrl)
+	ext.gw = mockGw
+
+	client := FakeClient{blobs: make(map[string]string)}
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
+
+	srcPath := path.Clean(wd + "/../../test/data/srctrees/links")
+
+	args := []string{
+		"rsync",
+		"-lvvv",
+		srcPath + "/",
+		"exodus:/some/target",
+	}
+
+	got := Main(args)
+
+	// It should complete successfully.
+	if got != 0 {
+		t.Error("returned incorrect exit code", got)
+	}
+
+	// Check paths of some blobs we expected to deal with.
+	binPath := client.blobs["5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"]
+
+	// It should have uploaded the binary from here
+	if binPath != srcPath+"/subdir/regular-file" {
+		t.Error("binary uploaded from unexpected path", binPath)
+	}
+
+	// It should have created one publish.
+	if len(client.publishes) != 1 {
+		t.Error("expected to create 1 publish, instead created", len(client.publishes))
+	}
+
+	p := client.publishes[0]
+
+	// Build up a URI => Key mapping of what was published
+	itemMap := make(map[string]string)
+	for _, item := range p.items {
+		if _, ok := itemMap[item.WebURI]; ok {
+			t.Error("tried to publish this URI more than once:", item.WebURI)
+		}
+
+		if item.LinkTo != "" {
+			itemMap[item.WebURI] = "link-" + item.LinkTo
+		} else if item.ObjectKey != "" {
+			itemMap[item.WebURI] = "key-" + item.ObjectKey
+		} else {
+			t.Error("no object_key or link_to generated:", item.WebURI)
+		}
+	}
+
+	// It should have been exactly this
+	expectedItems := map[string]string{
+		"/some/target/link-to-regular-file": "link-/some/target/subdir/regular-file",
+		"/some/target/subdir/rand1":         "link-/some/target/rand1",
+		"/some/target/subdir/rand2":         "link-/some/target/rand2",
+		"/some/target/subdir/regular-file":  "key-5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+		"/some/target/subdir2/dir-link":     "link-/some/target/subdir",
+	}
+
+	if !reflect.DeepEqual(itemMap, expectedItems) {
+		t.Error("did not publish expected items, published:", itemMap)
+	}
+
+	// It should have committed the publish (once)
+	if p.committed != 1 {
+		t.Error("expected to commit publish (once), instead p.committed ==", p.committed)
+	}
+}
+
 // When src tree has no trailing slash, the basename is repeated as a directory
 // name on the destination.
 func TestMainSyncNoSlash(t *testing.T) {

@@ -66,7 +66,7 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 		}
 	}
 
-	err = walk.Walk(ctx, args.Src, args.Excluded(), args.Included(), onlyThese, func(item walk.SyncItem) error {
+	err = walk.Walk(ctx, args.Src, args.Excluded(), args.Included(), onlyThese, args.Links, func(item walk.SyncItem) error {
 		if args.IgnoreExisting {
 			// This argument is not (properly) supported, so bail out.
 			//
@@ -134,10 +134,15 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	publishItems := []gw.ItemInput{}
 
 	for _, item := range items {
-		publishItems = append(publishItems, gw.ItemInput{
-			WebURI:    webURI(item.SrcPath, args.Src, args.DestPath()),
-			ObjectKey: item.Key,
-		})
+		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, args.DestPath())}
+
+		if item.LinkTo != "" {
+			gwItem.LinkTo = path.Join(args.DestPath(), strings.TrimLeft(item.LinkTo, "./"))
+		} else {
+			gwItem.ObjectKey = item.Key
+		}
+
+		publishItems = append(publishItems, gwItem)
 	}
 
 	err = publish.AddItems(ctx, publishItems)

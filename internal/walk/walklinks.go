@@ -106,7 +106,7 @@ func filterPath(logger *log.Logger, path string, exclude []string, include []str
 }
 
 // Like filepath.WalkDir but resolves symlinks to directories.
-func walkDirWithLinks(ctx context.Context, root string, exclude []string, include []string, onlyThese []string, fn fs.WalkDirFunc) error {
+func walkDirWithLinks(ctx context.Context, root string, exclude []string, include []string, onlyThese []string, links bool, fn fs.WalkDirFunc) error {
 	logger := log.FromContext(ctx)
 
 	var walkFunc fs.WalkDirFunc
@@ -114,6 +114,9 @@ func walkDirWithLinks(ctx context.Context, root string, exclude []string, includ
 	walkFunc = func(path string, d fs.DirEntry, err error) error {
 		if ctx.Err() != nil {
 			return ctx.Err()
+		}
+		if err != nil {
+			return fn(path, d, err)
 		}
 
 		if len(onlyThese) > 0 && !contains(onlyThese, path) {
@@ -129,11 +132,7 @@ func walkDirWithLinks(ctx context.Context, root string, exclude []string, includ
 			return filterErr
 		}
 
-		if err != nil {
-			return fn(path, d, err)
-		}
-
-		if d.Type()&fs.ModeSymlink != 0 {
+		if d.Type()&fs.ModeSymlink != 0 && !links {
 			var info fs.FileInfo
 
 			resolved, err := filepath.EvalSymlinks(path)

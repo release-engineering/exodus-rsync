@@ -82,7 +82,6 @@ func TestExec(t *testing.T) {
 				IgnoredConfig: args.IgnoredConfig{
 					Archive:        true,
 					Recursive:      true,
-					Links:          true,
 					CopyLinks:      true,
 					KeepDirlinks:   true,
 					HardLinks:      true,
@@ -107,6 +106,7 @@ func TestExec(t *testing.T) {
 					ItemizeChanges: true,
 				},
 				Relative:       true,
+				Links:          true,
 				IgnoreExisting: true,
 				Filter:         []string{"some-filter"},
 				Exclude:        []string{".*"},

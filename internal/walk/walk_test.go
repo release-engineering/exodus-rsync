@@ -34,7 +34,7 @@ func TestWalkEarlyCancel(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{}, []string{}, []string{}, handler)
+	err := Walk(ctx, ".", []string{}, []string{}, []string{}, false, handler)
 
 	// It should have returned the cancelled error
 	if err != ctx.Err() {
@@ -61,7 +61,7 @@ func TestWalkCancelInProgress(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{}, []string{}, []string{}, handler)
+	err := Walk(ctx, ".", []string{}, []string{}, []string{}, false, handler)
 
 	// It should have returned the cancelled error
 	if err != ctx.Err() {
@@ -80,7 +80,7 @@ func TestWalkHandlerError(t *testing.T) {
 		return fmt.Errorf("simulated error")
 	}
 
-	err := Walk(ctx, ".", []string{}, []string{}, []string{}, handler)
+	err := Walk(ctx, ".", []string{}, []string{}, []string{}, false, handler)
 
 	// It should have returned the error from handler
 	if err.Error() != "simulated error" {
@@ -99,7 +99,7 @@ func TestWalkExcludeMatchError(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{"a(b"}, []string{}, []string{}, handler)
+	err := Walk(ctx, ".", []string{"a(b"}, []string{}, []string{}, false, handler)
 
 	// It should have caused a regexp error
 	msg := "could not process --exclude `a(b`: error parsing regexp: missing closing ): `a(b`"
@@ -119,7 +119,7 @@ func TestWalkIncludeMatchError(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{"*"}, []string{"a(b"}, []string{}, handler)
+	err := Walk(ctx, ".", []string{"*"}, []string{"a(b"}, []string{}, false, handler)
 
 	// It should have caused a regexp error
 	msg := "could not process --include `a(b`: error parsing regexp: missing closing ): `a(b`"

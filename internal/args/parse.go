@@ -41,7 +41,6 @@ validation:
 type IgnoredConfig struct {
 	Archive         bool `short:"a"`
 	Recursive       bool `short:"r"`
-	Links           bool `short:"l"`
 	CopyLinks       bool `short:"L"`
 	KeepDirlinks    bool `short:"K"`
 	HardLinks       bool `short:"H"`
@@ -88,6 +87,7 @@ type Config struct {
 	// e.g., /foo/bar/baz.c remote:/tmp => /tmp/foo/bar/baz.c.
 	Relative bool `short:"R" help:"use relative path names"`
 
+	Links  bool `short:"l" help:"Copy symlinks as symlinks without following"`
 	DryRun bool `short:"n" help:"Perform a trial run with no changes made"`
 
 	// Mostly ignored, but causes a failure if publish contains any files.

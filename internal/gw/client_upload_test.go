@@ -55,6 +55,46 @@ func TestClientTypicalUpload(t *testing.T) {
 	}
 }
 
+func TestClientUploadWithLinks(t *testing.T) {
+	client, _ := newClientWithFakeS3(t)
+
+	chdirInTest(t, "../../test/data/srctrees/links")
+
+	ctx := context.Background()
+	ctx = log.NewContext(ctx, log.Package.NewLogger(args.Config{}))
+
+	// Note: these files have to actually exist because they will be
+	// opened by the client for sending. However this test does not require
+	// the key to match the actual checksums.
+	items := []walk.SyncItem{
+		{SrcPath: "link-to-regular-file", LinkTo: "subdir/regular-file"},
+		{SrcPath: "subdir/rand2", LinkTo: "../../../rand2"},
+		{SrcPath: "subdir/regular-file", Key: "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"},
+		{SrcPath: "subdir2/dir-link", LinkTo: "../subdir"},
+		{SrcPath: "subdir/rand1", LinkTo: "../../../rand1:"},
+	}
+
+	uploaded := make([]walk.SyncItem, 0)
+	present := make([]walk.SyncItem, 0)
+
+	err := client.EnsureUploaded(ctx, items, func(item walk.SyncItem) error {
+		uploaded = append(uploaded, item)
+		return nil
+	}, func(item walk.SyncItem) error {
+		present = append(present, item)
+		return nil
+	})
+
+	if err != nil {
+		t.Errorf("got unexpected error %v", err)
+	}
+
+	// It should have uploaded just the one
+	if !reflect.DeepEqual(uploaded, []walk.SyncItem{items[2]}) {
+		t.Errorf("unexpected set of uploaded items: %v", uploaded)
+	}
+}
+
 func TestClientUploadCallbackError(t *testing.T) {
 	client, _ := newClientWithFakeS3(t)
 

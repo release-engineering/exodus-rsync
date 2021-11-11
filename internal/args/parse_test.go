@@ -19,7 +19,7 @@ func TestParseOk(t *testing.T) {
 			// At least all compound names should be in long-form to ensure rsync compatibility.
 			input: []string{
 				"exodus-rsync",
-				"-arlpEogDtz",
+				"-arpEogDtz",
 				"--copy-links",
 				"--keep-dirlinks",
 				"--hard-links",
@@ -40,7 +40,6 @@ func TestParseOk(t *testing.T) {
 				IgnoredConfig: IgnoredConfig{
 					Archive:         true,
 					Recursive:       true,
-					Links:           true,
 					CopyLinks:       true,
 					KeepDirlinks:    true,
 					HardLinks:       true,
@@ -81,6 +80,14 @@ func TestParseOk(t *testing.T) {
 				"x",
 				"y"},
 			want: Config{Relative: true, Src: "x", Dest: "y"}},
+
+		"links": {
+			input: []string{
+				"exodus-rsync",
+				"-l",
+				"x",
+				"y"},
+			want: Config{Links: true, Src: "x", Dest: "y"}},
 
 		"exclude": {
 			input: []string{

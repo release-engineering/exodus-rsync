@@ -21,6 +21,7 @@ type publish struct {
 type ItemInput struct {
 	WebURI    string `json:"web_uri"`
 	ObjectKey string `json:"object_key"`
+	LinkTo    string `json:"link_to"`
 }
 
 // NewPublish creates and returns a new publish object within exodus-gw.
