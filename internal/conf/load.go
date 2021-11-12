@@ -52,11 +52,15 @@ func loadFromPath(path string, args args.Config) (*globalConfig, error) {
 	prefs := map[string]bool{}
 	for i := range out.EnvironmentsRaw {
 		env := &out.EnvironmentsRaw[i]
+		if !strings.HasPrefix(env.Prefix(), out.Strip()) {
+			return nil, fmt.Errorf("cannot strip '%s' prefix from '%s'", out.Strip(), env.Prefix())
+		}
 		if prefs[env.Prefix()] {
 			return nil, fmt.Errorf("duplicate environment definitions for '%s'", env.Prefix())
 		}
 		prefs[env.Prefix()] = true
 		out.EnvironmentsRaw[i].parent = out
+
 	}
 
 	return out, nil
@@ -89,7 +93,11 @@ func (c *globalConfig) EnvironmentForDest(ctx context.Context, dest string) Envi
 
 	for i := range c.EnvironmentsRaw {
 		out := &c.EnvironmentsRaw[i]
-		if strings.HasPrefix(dest, out.Prefix()+":") {
+		prefix := out.Prefix()
+		if !strings.Contains(prefix, ":") {
+			prefix = prefix + ":"
+		}
+		if strings.HasPrefix(dest, prefix) {
 			return out
 		}
 	}

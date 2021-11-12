@@ -213,6 +213,20 @@ func (mr *MockConfigMockRecorder) RsyncMode() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RsyncMode", reflect.TypeOf((*MockConfig)(nil).RsyncMode))
 }
 
+// Strip mocks base method.
+func (m *MockConfig) Strip() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Strip")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Strip indicates an expected call of Strip.
+func (mr *MockConfigMockRecorder) Strip() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Strip", reflect.TypeOf((*MockConfig)(nil).Strip))
+}
+
 // Verbosity mocks base method.
 func (m *MockConfig) Verbosity() int {
 	m.ctrl.T.Helper()
@@ -404,6 +418,20 @@ func (mr *MockEnvironmentConfigMockRecorder) RsyncMode() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RsyncMode", reflect.TypeOf((*MockEnvironmentConfig)(nil).RsyncMode))
 }
 
+// Strip mocks base method.
+func (m *MockEnvironmentConfig) Strip() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Strip")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Strip indicates an expected call of Strip.
+func (mr *MockEnvironmentConfigMockRecorder) Strip() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Strip", reflect.TypeOf((*MockEnvironmentConfig)(nil).Strip))
+}
+
 // Verbosity mocks base method.
 func (m *MockEnvironmentConfig) Verbosity() int {
 	m.ctrl.T.Helper()
@@ -593,6 +621,20 @@ func (m *MockGlobalConfig) RsyncMode() string {
 func (mr *MockGlobalConfigMockRecorder) RsyncMode() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RsyncMode", reflect.TypeOf((*MockGlobalConfig)(nil).RsyncMode))
+}
+
+// Strip mocks base method.
+func (m *MockGlobalConfig) Strip() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Strip")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Strip indicates an expected call of Strip.
+func (mr *MockGlobalConfigMockRecorder) Strip() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Strip", reflect.TypeOf((*MockGlobalConfig)(nil).Strip))
 }
 
 // Verbosity mocks base method.

@@ -18,6 +18,7 @@ type sharedConfig struct {
 	LogLevelRaw       string `yaml:"loglevel"`
 	LoggerRaw         string `yaml:"logger"`
 	DiagRaw           bool   `yaml:"diag"`
+	StripRaw          string `yaml:"strip"`
 }
 
 type environment struct {
@@ -105,6 +106,10 @@ func (g *globalConfig) Diag() bool {
 	return g.args.Diag || g.DiagRaw
 }
 
+func (g *globalConfig) Strip() string {
+	return g.StripRaw
+}
+
 func (e *environment) GwCert() string {
 	return nonEmptyString(e.GwCertRaw, e.parent.GwCert())
 }
@@ -151,4 +156,11 @@ func (e *environment) Diag() bool {
 
 func (e *environment) Prefix() string {
 	return e.PrefixRaw
+}
+
+func (e *environment) Strip() string {
+	// If the 'strip:' key is defined in the global config, the environment's prefix will not
+	// be stripped from the destination path by default. The prefix is only stripped from the
+	// destination path if the 'strip:' key is undefined.
+	return nonEmptyString(nonEmptyString(e.StripRaw, e.parent.Strip()), e.PrefixRaw)
 }

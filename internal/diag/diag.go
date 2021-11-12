@@ -105,12 +105,14 @@ func logCommand(ctx context.Context, cfg conf.Config, args args.Config) {
 	envConfig, isEnv := cfg.(conf.EnvironmentConfig)
 
 	prefix := "<no prefix matched in config>"
+	strip := cfg.Strip()
 
 	if isEnv {
 		prefix = envConfig.Prefix()
 	}
 
-	logger.F("src", args.Src, "dest", args.Dest, "prefix", prefix).Warn("paths")
+	logger.F("src", args.Src, "dest", args.Dest, "prefix", prefix,
+		"strip", strip).Warn("paths")
 
 	cmd := ext.rsync.Command(ctx, rsync.Arguments(ctx, args))
 	logger.F("mode", cfg.RsyncMode(), "path", cmd.Path, "args", cmd.Args).Warn("rsync")

@@ -32,13 +32,15 @@ gwurl: https://exodus-gw.example.com
 gwcert: global-cert
 gwkey: global-key
 gwbatchsize: 100
+strip: dest:/foo
 
 environments:
-- prefix: dest
+- prefix: dest:/foo/bar/baz
   gwenv: one-env
   gwkey: override-key
   gwpollinterval: 123
   rsyncmode: mixed
+  strip: dest:/foo/bar
 
 `), 0755)
 
@@ -56,7 +58,7 @@ environments:
 		t.Fatalf("could not load config file: %v", err)
 	}
 
-	env := cfg.EnvironmentForDest(ctx, "dest:/foo/bar")
+	env := cfg.EnvironmentForDest(ctx, "dest:/foo/bar/baz")
 
 	// It should be able to get the environment.
 	if env == nil {
@@ -84,12 +86,14 @@ environments:
 	assertEqual("global gwenv", cfg.GwEnv(), "global-env")
 	assertEqual("global gwpollinterval", cfg.GwPollInterval(), 5000)
 	assertEqual("global rsyncmode", cfg.RsyncMode(), "exodus")
+	assertEqual("global strip", cfg.Strip(), "dest:/foo")
 
 	// Values can be overridden in environment.
 	assertEqual("env gwenv", env.GwEnv(), "one-env")
 	assertEqual("env gwkey", env.GwKey(), "override-key")
 	assertEqual("env gwpollinterval", env.GwPollInterval(), 123)
 	assertEqual("env rsyncmode", env.RsyncMode(), "mixed")
+	assertEqual("env strip", env.Strip(), "dest:/foo/bar")
 
 	// For values which are NOT overridden, they should be equal to global.
 	assertEqual("env gwurl", env.GwURL(), cfg.GwURL())
