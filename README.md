@@ -107,9 +107,21 @@ environments:
   # Defining a prefix like this enables overriding publishes to existing non-exodus
   # targets and diverting them instead to exodus CDN, as in example:
   #
-  #   rsync /my/src/tree upload@example.com:/my/dest
+  #   rsync /my/src/tree upload@example1.com:/root/my/dest
+  #   => publishes to "/my/dest" on exodus
   #
-- prefix: upload@example.com
+- prefix: upload@example1.com:/root
+
+  # By default, the path used in "prefix" will be stripped from the exodus
+  # destination, meaning that the root directory of the prefix is equivalent to
+  # the root path on exodus. This can be customized via "strip", as in example:
+  #
+  #   rsync /src upload@example2.com:/1234/content/foo/bar
+  #   => publishes to "/content" on exodus when using the below
+  #      value for strip
+  #
+- prefix: upload@example2.com:/1234/content
+  strip: upload@example2.com:/1234
 
   # All top-level configuration keys can also be overridden per environment;
   # for example, to use a different exodus-gw service & environment:
