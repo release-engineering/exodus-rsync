@@ -16,10 +16,25 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/walk"
 )
 
-func webURI(srcPath string, srcTree string, destTree string) string {
+func webURI(srcPath string, srcTree string, destTree string, strip string) string {
 	cleanSrcPath := path.Clean(srcPath)
 	cleanSrcTree := path.Clean(srcTree)
 	relPath := strings.TrimPrefix(cleanSrcPath, cleanSrcTree+"/")
+
+	// If the configured strip string contains ":", any characters following the ":"
+	// must be stripped from the destination path.
+	//
+	// For example, if exodus-rsync is invoked with
+	// "exodus-rsync ./src/ otherhost:/foo/bar/baz/my/dest",
+	// args.Config.DestPath("otherhost:/foo/bar/baz/my/dest") returns
+	// "/foo/bar/baz/my/dest", and thus destTree is "/foo/bar/baz/my/dest".
+	// If the configuration contains "strip: otherhost:/foo", an additional "/foo"
+	// must be removed from the destination path ("/foo/bar/baz/my/dest"), which
+	// will publish to "/bar/baz/my/dest".
+	if strings.Contains(strip, ":") {
+		stripPrefix := strings.SplitN(strip, ":", 2)[1]
+		destTree = strings.TrimPrefix(destTree, stripPrefix)
+	}
 
 	// Presence of trailing slash changes the behavior when assembling
 	// destination paths, see "man rsync" and search for "trailing".
@@ -133,8 +148,10 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 
 	publishItems := []gw.ItemInput{}
 
+	strip := cfg.Strip()
+
 	for _, item := range items {
-		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, args.DestPath())}
+		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, args.DestPath(), strip)}
 
 		if item.LinkTo != "" {
 			gwItem.LinkTo = path.Join(args.DestPath(), strings.TrimLeft(item.LinkTo, "./"))

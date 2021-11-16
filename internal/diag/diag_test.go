@@ -29,6 +29,7 @@ func mockConfig(ctrl *gomock.Controller) conf.Config {
 	e.Logger().Return("syslog").AnyTimes()
 	e.Verbosity().Return(3).AnyTimes()
 	e.Prefix().Return("test-prefix").AnyTimes()
+	e.Strip().Return("").AnyTimes()
 
 	return out
 }
