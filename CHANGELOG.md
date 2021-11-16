@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-- Generate link_to for symlinks if --links
+- n/a
+
+## 1.6.0 - 2021-11-17
+
+- The destination path now has the `prefix` path stripped (overridable by `strip`
+  in configuration)
+- `--links` now supports copying links without following them
 
 ## 1.5.0 - 2021-11-02
 
