@@ -247,10 +247,10 @@ is a summary of the differences:
   | --archive, -a | ignored |
   | --recursive, -r | ignored; exodus-rsync is always recursive |
   | --relative, -R | use relative path names |
-  | --links, -l | copy symlinks as symlinks without following |
-  | --copy-links, -L | ignored; exodus-rsync always follows links |
+  | --links, -l | copy symlinks as symlinks without following¹ |
+  | --copy-links, -L | follow symlinks |
   | --keep-dirlinks, -K | ignored; there are no directories on exodus CDN |
-  | --hard-links, -H | ignored; exodus-rsync always follows links |
+  | --hard-links, -H | ignored |
   | --perms, -p | ignored |
   | --executability, -E | ignored |
   | --acls, -A | ignored |
@@ -277,6 +277,14 @@ is a summary of the differences:
   | --compress, -z | ignored |
   | --stats | ignored |
   | --itemize-changes, -i | ignored |
+
+1. `--links` has the following restrictions:
+   * All links must resolve to an item included within the current publish at the
+     time of commit.
+     (Note that multiple exodus-rsync commands can participate in a single publish,
+     see "Publish modes".)
+   * Only a single level of link resolution is permitted. This restriction may be
+     revisited in the future.
 
 ### Publish modes
 
