@@ -71,6 +71,11 @@ func logConfig(ctx context.Context, cfg conf.Config) {
 		"logger", cfg.Logger(),
 		"verbosity", cfg.Verbosity(),
 	).Warn("logging")
+
+	logger.Debug("This is a DEBUG log.")
+	logger.Info("This is an INFO log.")
+	logger.Warn("This is a WARNING log.")
+	logger.Error("This is an ERROR log.")
 }
 
 func logGw(ctx context.Context, cfg conf.Config) {
