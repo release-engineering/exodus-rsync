@@ -22,7 +22,7 @@ type writeFunc func(string) error
 func newSyslogHandler() apexLog.Handler {
 	out := syslogHandler{}
 
-	writer, err := syslog.New(syslog.LOG_INFO, "")
+	writer, err := syslog.New(syslog.LOG_INFO, "exodus-rsync")
 	if err == nil {
 		out.writer = writer
 	}
@@ -37,10 +37,9 @@ func (h *syslogHandler) writerForLevel(l apexLog.Level) writeFunc {
 	if l == apexLog.WarnLevel {
 		return h.writer.Warning
 	}
-	if l == apexLog.InfoLevel {
-		return h.writer.Info
-	}
-	return h.writer.Debug
+	// We will not go any lower than INFO severity here because such
+	// messages will often be filtered by syslog itself.
+	return h.writer.Info
 }
 
 func syslogFields(e *apexLog.Entry) map[string]string {
