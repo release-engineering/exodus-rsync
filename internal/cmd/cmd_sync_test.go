@@ -376,7 +376,7 @@ func TestMainSyncDontFollowLinks(t *testing.T) {
 		"rsync",
 		"-lvvv",
 		srcPath + "/",
-		"exodus:/some/target",
+		"somehost:/cdn/root/some/target",
 	}
 
 	got := Main(args)

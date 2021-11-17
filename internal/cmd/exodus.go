@@ -16,11 +16,7 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/walk"
 )
 
-func webURI(srcPath string, srcTree string, destTree string, strip string) string {
-	cleanSrcPath := path.Clean(srcPath)
-	cleanSrcTree := path.Clean(srcTree)
-	relPath := strings.TrimPrefix(cleanSrcPath, cleanSrcTree+"/")
-
+func cleanDestTree(destTree string, strip string) string {
 	// If the configured strip string contains ":", any characters following the ":"
 	// must be stripped from the destination path.
 	//
@@ -35,6 +31,13 @@ func webURI(srcPath string, srcTree string, destTree string, strip string) strin
 		stripPrefix := strings.SplitN(strip, ":", 2)[1]
 		destTree = strings.TrimPrefix(destTree, stripPrefix)
 	}
+	return destTree
+}
+
+func webURI(srcPath string, srcTree string, destTree string) string {
+	cleanSrcPath := path.Clean(srcPath)
+	cleanSrcTree := path.Clean(srcTree)
+	relPath := strings.TrimPrefix(cleanSrcPath, cleanSrcTree+"/")
 
 	// Presence of trailing slash changes the behavior when assembling
 	// destination paths, see "man rsync" and search for "trailing".
@@ -149,12 +152,13 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	publishItems := []gw.ItemInput{}
 
 	strip := cfg.Strip()
+	destTree := cleanDestTree(args.DestPath(), strip)
 
 	for _, item := range items {
-		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, args.DestPath(), strip)}
+		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, destTree)}
 
 		if item.LinkTo != "" {
-			gwItem.LinkTo = path.Join(args.DestPath(), strings.TrimLeft(item.LinkTo, "./"))
+			gwItem.LinkTo = path.Join(destTree, strings.TrimLeft(item.LinkTo, "./"))
 		} else {
 			gwItem.ObjectKey = item.Key
 		}
