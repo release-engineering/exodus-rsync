@@ -132,12 +132,16 @@ func (c *Config) Included() []string {
 // on the command-line.
 // For example, if invoked with user@host.example.com:/some/dir,
 // this will return "/some/dir".
+//
 // If relative paths are requested (-R), appends the source path to the
 // destination path, e.g., /foo/bar/baz.c remote:/tmp => /tmp/foo/bar/baz.c.
+//
+// If --files-from is used, listed files are located relative to the source
+// path but the destination path is not altered like in the above example.
 func (c *Config) DestPath() string {
 	if strings.Contains(c.Dest, ":") {
 		dest := strings.SplitN(c.Dest, ":", 2)[1]
-		if c.Relative {
+		if c.Relative && c.FilesFrom == "" {
 			dest = path.Join(dest, c.Src)
 		}
 		return dest
