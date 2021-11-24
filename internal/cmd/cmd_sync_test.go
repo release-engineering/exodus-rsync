@@ -517,7 +517,7 @@ func TestMainSyncFilesFrom(t *testing.T) {
 	client := FakeClient{blobs: make(map[string]string)}
 	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
-	srcPath := path.Clean(wd + "/../../test/data/srctrees")
+	srcPath := path.Clean(wd + "/../../test/data")
 	filesFromPath := path.Clean(wd + "/../../test/data/source-list.txt")
 
 	args := []string{
@@ -551,14 +551,80 @@ func TestMainSyncFilesFrom(t *testing.T) {
 		itemMap[item.WebURI] = item.ObjectKey
 	}
 
-	// Full source path should be preserved, as --relative is implied with --files-from.
-	expPath1 := path.Join("/dest", srcPath, "just-files/subdir/some-binary")
-	expPath2 := path.Join("/dest", srcPath, "some.conf")
+	// Paths should be comprised of the dest and the path written in the file.
+	expectPath1 := path.Join("/dest", "srctrees/just-files/subdir/some-binary")
+	expectPath2 := path.Join("/dest", "srctrees/some.conf")
 
 	// It should have been exactly this.
 	expectedItems := map[string]string{
-		expPath1: "c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6",
-		expPath2: "4cfe7dba345453b9e2e7a505084238095511ef673e03b6a016f871afe2dfa599",
+		expectPath1: "c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6",
+		expectPath2: "4cfe7dba345453b9e2e7a505084238095511ef673e03b6a016f871afe2dfa599",
+	}
+
+	if !reflect.DeepEqual(itemMap, expectedItems) {
+		t.Error("did not publish expected items, published:", itemMap)
+	}
+
+	// It should have committed the publish (once).
+	if p.committed != 1 {
+		t.Error("expected to commit publish (once), instead p.committed ==", p.committed)
+	}
+}
+
+func TestMainSyncRelative(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	SetConfig(t, CONFIG)
+	ctrl := MockController(t)
+
+	mockGw := gw.NewMockInterface(ctrl)
+	ext.gw = mockGw
+
+	client := FakeClient{blobs: make(map[string]string)}
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
+
+	srcPath := path.Clean(wd + "/../../test/data/srctrees/just-files/subdir")
+
+	args := []string{
+		"rsync",
+		"-vvv",
+		"--relative",
+		srcPath + "/",
+		"exodus:/dest",
+	}
+
+	got := Main(args)
+
+	// It should complete successfully.
+	if got != 0 {
+		t.Error("returned incorrect exit code", got)
+	}
+
+	// It should have created one publish.
+	if len(client.publishes) != 1 {
+		t.Error("expected to create 1 publish, instead created", len(client.publishes))
+	}
+
+	p := client.publishes[0]
+
+	// Build up a URI => Key mapping of what was published.
+	itemMap := make(map[string]string)
+	for _, item := range p.items {
+		if _, ok := itemMap[item.WebURI]; ok {
+			t.Error("tried to publish this URI more than once:", item.WebURI)
+		}
+		itemMap[item.WebURI] = item.ObjectKey
+	}
+
+	// Full source path should be preserved due to --relative.
+	expectPath := path.Join("/dest", srcPath, "some-binary")
+
+	// It should have been exactly this.
+	expectedItems := map[string]string{
+		expectPath: "c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6",
 	}
 
 	if !reflect.DeepEqual(itemMap, expectedItems) {

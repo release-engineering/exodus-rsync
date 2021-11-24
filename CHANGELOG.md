@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- n/a
+- --files-from shouldn't duplicate source-spec path
 
 ## 1.6.0 - 2021-11-17
 

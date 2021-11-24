@@ -1,2 +1,2 @@
-some.conf
-just-files/subdir/some-binary
+srctrees/some.conf
+srctrees/just-files/subdir/some-binary
