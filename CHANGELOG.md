@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-- --files-from shouldn't duplicate source-spec path
+- n/a
+
+## 1.7.0 - 2021-11-24
+
+- Add documentation for `strip` in environment configuration
+- Fix: `--files-from` wrongly duplicates source-spec path in `web_uri`
 
 ## 1.6.0 - 2021-11-17
 
