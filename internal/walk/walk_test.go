@@ -99,10 +99,10 @@ func TestWalkExcludeMatchError(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{"a(b"}, []string{}, []string{}, false, handler)
+	err := Walk(ctx, ".", []string{"a(b*"}, []string{}, []string{}, false, handler)
 
 	// It should have caused a regexp error
-	msg := "could not process --exclude `a(b`: error parsing regexp: missing closing ): `a(b`"
+	msg := "could not process --exclude `a(b*`: error parsing regexp: missing closing ): `^a(b[^/]+$`"
 	if err.Error() != msg {
 		t.Errorf("unexpected success")
 	}
@@ -119,10 +119,10 @@ func TestWalkIncludeMatchError(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{"*"}, []string{"a(b"}, []string{}, false, handler)
+	err := Walk(ctx, ".", []string{"*"}, []string{"a(b*"}, []string{}, false, handler)
 
 	// It should have caused a regexp error
-	msg := "could not process --include `a(b`: error parsing regexp: missing closing ): `a(b`"
+	msg := "could not process --include `a(b*`: error parsing regexp: missing closing ): `^a(b[^/]+$`"
 	if err.Error() != msg {
 		t.Errorf("unexpected success")
 	}
@@ -132,23 +132,48 @@ func TestWalkLinksMatchPattern(t *testing.T) {
 	tests := []struct {
 		path    string
 		pattern string
+		isDir   bool
+		result  bool
 	}{
-		{"/foo/bar/baz", "."},
-		{"/foo/bar", "/foo"},
-		{"foo/bar", "bar/"},
-		{"foo/bar", `foo/***`},
-		{"test.txt", `.txt`},
-		{"test?.txt", `\?.txt`},
-		{"foo/bars", `bar?`},
-		{"foo/bar/baz/buzz/bats.oog", `foo/**/bats.oog`},
-		{"foo/4/baz", `foo/[0-9]/baz`},
-		{"foo/bar/baz", `foo/[a-z]+/baz`},
+		// Should match
+		{"foo/app.c", `app.*`, false, true},
+		{"foo/.some-conf", `.*`, false, true},
+		{"foo/bar", `*`, false, true},
+		{"/foo/bar", `/foo`, false, true},
+		{"foo/bar", `bar`, false, true},
+		{"foo/bar", `bar/`, true, true},
+		{"foo/bar/baz", `foo/***`, false, true},
+		{"test.txt", `*.txt`, false, true},
+		{"foo/bars", `bar?`, false, true},
+		{"foo/bar/baz.dat", `foo/*/baz.dat`, false, true},
+		{"foo/bar/baz/buz/bats.oog", `foo/**/bats.oog`, false, true},
+		{"foo/4/bar", `foo/[0-9]/bar`, false, true},
+		{"foo/d/bar", `foo/[a-z]/bar`, false, true},
+		{"foo/?/bar", `foo/\?/bar`, false, true},
+		// Should not match
+		{"foo/some.conf", `.*`, false, false},
+		{"foo/bar/baz", `.`, false, false},
+		{"foo/bar/baz", `bar/`, false, false},
+		{"foo/bar/baz", `baz/`, false, false},
+		{"foo/4/baz", `foo/\d/baz`, false, false},
+		{"foo/bar/bar", `foo/[a-z]+/baz`, false, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.path, func(t *testing.T) {
-			matched, _ := matchPattern(tt.path, tt.pattern)
-			if matched == false {
-				t.Errorf("'%s' did not match, '%s", tt.pattern, tt.path)
+			var errMsg string
+			if tt.result {
+				errMsg = "pattern `%s` did not match path, '%s'"
+			} else {
+				errMsg = "pattern `%s` matched path, '%s'"
+			}
+
+			matched, err := matchPattern(tt.path, tt.pattern, tt.isDir)
+			if err != nil {
+				t.Errorf("Unexpected error, %v", err)
+			}
+
+			if matched != tt.result {
+				t.Errorf(errMsg, tt.pattern, tt.path)
 			}
 		})
 	}
@@ -161,9 +186,14 @@ func TestWalkLinksFilterPathAll(t *testing.T) {
 
 	ctx = log.NewContext(ctx, &logger)
 
-	err := filterPath(log.FromContext(ctx), "/some/dir", []string{"*"}, []string{}, true)
-	if err != nil && err.Error() != "filtered '/some/dir'" {
-		t.Errorf("failed to filter '/some/dir' for exclude pattern `*`")
+	err := filterPath(log.FromContext(ctx), "file", []string{"*"}, []string{}, false)
+	if err != nil && err.Error() != "filtered 'file'" {
+		t.Errorf("failed to filter 'file' for exclude pattern `*`")
+	}
+
+	err = filterPath(log.FromContext(ctx), "some/dir", []string{"*"}, []string{}, true)
+	if err != nil && err.Error() != "skip this directory" {
+		t.Errorf("failed to filter 'some/dir' for exclude pattern `*`")
 	}
 }
 

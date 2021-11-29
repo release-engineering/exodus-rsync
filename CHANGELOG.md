@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- n/a
+- Fix: include/exclude pattern matching differs from rsync
 
 ## 1.7.0 - 2021-11-24
 
