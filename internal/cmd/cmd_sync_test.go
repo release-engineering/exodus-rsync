@@ -343,6 +343,8 @@ func TestMainSyncFollowsLinks(t *testing.T) {
 		"/dest/subdir2/dir-link/regular-file": "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
 		"/dest/subdir2/dir-link/rand1":        "57921e8a0929eaff5003cc9dd528c3421296055a4de2ba72429dc7f41bfa8411",
 		"/dest/subdir2/dir-link/rand2":        "f3a5340ae2a400803b8150f455ad285d173cbdcf62c8e9a214b30f467f45b310",
+		"/dest/some/somefile":                 "57921e8a0929eaff5003cc9dd528c3421296055a4de2ba72429dc7f41bfa8411",
+		"/dest/some/dir/link-to-somefile":     "57921e8a0929eaff5003cc9dd528c3421296055a4de2ba72429dc7f41bfa8411",
 	}
 
 	if !reflect.DeepEqual(itemMap, expectedItems) {
@@ -419,11 +421,13 @@ func TestMainSyncDontFollowLinks(t *testing.T) {
 
 	// It should have been exactly this
 	expectedItems := map[string]string{
-		"/some/target/link-to-regular-file": "link-/some/target/subdir/regular-file",
-		"/some/target/subdir/rand1":         "link-/some/target/rand1",
-		"/some/target/subdir/rand2":         "link-/some/target/rand2",
-		"/some/target/subdir/regular-file":  "key-5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
-		"/some/target/subdir2/dir-link":     "link-/some/target/subdir",
+		"/some/target/link-to-regular-file":      "link-/some/target/subdir/regular-file",
+		"/some/target/some/somefile":             "key-57921e8a0929eaff5003cc9dd528c3421296055a4de2ba72429dc7f41bfa8411",
+		"/some/target/some/dir/link-to-somefile": "link-/some/target/some/somefile",
+		"/some/target/subdir/rand1":              "link-/rand1",
+		"/some/target/subdir/rand2":              "link-/rand2",
+		"/some/target/subdir/regular-file":       "key-5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+		"/some/target/subdir2/dir-link":          "link-/some/target/subdir",
 	}
 
 	if !reflect.DeepEqual(itemMap, expectedItems) {

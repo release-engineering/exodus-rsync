@@ -34,10 +34,15 @@ func cleanDestTree(destTree string, strip string) string {
 	return destTree
 }
 
-func webURI(srcPath string, srcTree string, destTree string) string {
+func getRelPath(srcPath string, srcTree string) string {
 	cleanSrcPath := path.Clean(srcPath)
 	cleanSrcTree := path.Clean(srcTree)
 	relPath := strings.TrimPrefix(cleanSrcPath, cleanSrcTree+"/")
+	return relPath
+}
+
+func webURI(srcPath string, srcTree string, destTree string) string {
+	relPath := getRelPath(srcPath, srcTree+"/")
 
 	// Presence of trailing slash changes the behavior when assembling
 	// destination paths, see "man rsync" and search for "trailing".
@@ -158,7 +163,9 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, destTree)}
 
 		if item.LinkTo != "" {
-			gwItem.LinkTo = path.Join(destTree, strings.TrimLeft(item.LinkTo, "./"))
+			linkSrcDirRelative := path.Dir(getRelPath(item.SrcPath, args.Src))
+			linkSrcDirFull := path.Join(destTree, linkSrcDirRelative)
+			gwItem.LinkTo = path.Join(linkSrcDirFull, "/", item.LinkTo)
 		} else {
 			gwItem.ObjectKey = item.Key
 		}
