@@ -21,42 +21,71 @@ func pathRewriter(src string, dest string, fn fs.WalkDirFunc) fs.WalkDirFunc {
 	}
 }
 
+func makeRegexp(pattern string) (*regexp.Regexp, error) {
+	converted := ""
+	chars := []rune(pattern)
+	for i := 0; i < len(chars); i++ {
+		char := string(chars[i])
+		switch char {
+		case `\`:
+			// Escape; skip this and following wildcard character.
+			i++
+			next := string(chars[i])
+			if strings.ContainsAny(next, "*?[]") {
+				converted += (char + next)
+			}
+		case `.`:
+			// Always treat as literal.
+			converted += `\.`
+		case `*`:
+			// Matches any path component, but it stops at forward slashes (/).
+			converted += `[^/]+`
+		case `?`:
+			// Matches any character except a forward slash (/).
+			converted += `[^/]`
+		default:
+			converted += char
+		}
+	}
+
+	pattern = strings.Replace(converted, `[^/]+[^/]+`, `.*`, -1)
+
+	pattern = "^" + pattern + "$"
+
+	return regexp.Compile(pattern)
+}
+
 // Determines if path matches pattern, striving for parity with rsync,
 // ("Include/Exclude Pattern Rules", https://linux.die.net/man/1/rsync).
-func matchPattern(path string, pattern string) (bool, error) {
-	if strings.ContainsAny(pattern, "*?") {
-		converted := ""
-		chars := []rune(pattern)
-		for i := 0; i < len(chars); i++ {
-			char := string(chars[i])
-			switch char {
-			case `\`:
-				i++
-				converted += (char + string(chars[i]))
-			case `*`:
-				converted += `[^/]+`
-			case `?`:
-				converted += `[^/]`
-			default:
-				converted += char
+func matchPattern(path string, pattern string, isDir bool) (bool, error) {
+	if strings.HasSuffix(pattern, "/") {
+		// If pattern ends with a forward slash (/), only match a directory.
+		if isDir {
+			pattern = strings.TrimRight(pattern, "/")
+		} else {
+			return false, nil
+		}
+	}
+
+	if strings.ContainsAny(pattern, "*?[]") {
+		// Use regex for wildcard matching.
+		re, err := makeRegexp(pattern)
+		if err != nil {
+			return false, err
+		}
+
+		components := strings.SplitAfter(path, "/")
+		for c := range components {
+			match := re.MatchString(components[c])
+			if match {
+				return match, nil
 			}
 		}
-		pattern = strings.Replace(converted, `[^/]+[^/]+`, `.*`, -1)
+		return re.MatchString(path), nil
 	}
 
-	if strings.HasPrefix(pattern, "/") {
-		pattern = `^` + pattern
-	}
-	if strings.HasSuffix(pattern, "/") {
-		pattern = strings.TrimRight(pattern, "/") + `\z`
-	}
-
-	re, err := regexp.Compile(pattern)
-	if err != nil {
-		return false, err
-	}
-
-	return re.MatchString(path), nil
+	// Default to simple string matching.
+	return strings.Contains(path, pattern), nil
 }
 
 func contains(s []string, str string) bool {
@@ -72,7 +101,7 @@ func filterPath(logger *log.Logger, path string, exclude []string, include []str
 	filtErr := fmt.Errorf("filtered '%s'", path)
 
 	for _, ex := range exclude {
-		isExcluded, matchErr := matchPattern(path, ex)
+		isExcluded, matchErr := matchPattern(path, ex, isDir)
 		if matchErr != nil {
 			return fmt.Errorf("could not process --exclude `%s`: %w", ex, matchErr)
 		}
@@ -87,7 +116,7 @@ func filterPath(logger *log.Logger, path string, exclude []string, include []str
 					continue
 				}
 
-				isIncluded, err := matchPattern(path, in)
+				isIncluded, err := matchPattern(path, in, isDir)
 				if err != nil {
 					return fmt.Errorf("could not process --include `%s`: %w", in, err)
 				}
@@ -99,6 +128,10 @@ func filterPath(logger *log.Logger, path string, exclude []string, include []str
 			}
 
 			logger.F("path", path, "exclude", ex).Debug("path excluded")
+
+			if isDir {
+				return fs.SkipDir
+			}
 			return filtErr
 		}
 	}
