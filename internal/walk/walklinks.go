@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
@@ -97,7 +98,7 @@ func contains(s []string, str string) bool {
 	return false
 }
 
-func filterPath(logger *log.Logger, path string, exclude []string, include []string, isDir bool) error {
+func filter(logger *log.Logger, path string, exclude []string, include []string, isDir bool) error {
 	filtErr := fmt.Errorf("filtered '%s'", path)
 
 	for _, ex := range exclude {
@@ -139,7 +140,7 @@ func filterPath(logger *log.Logger, path string, exclude []string, include []str
 }
 
 // Like filepath.WalkDir but resolves symlinks to directories.
-func walkDirWithLinks(ctx context.Context, root string, exclude []string, include []string, onlyThese []string, links bool, fn fs.WalkDirFunc) error {
+func walkDirWithLinks(ctx context.Context, args args.Config, onlyThese []string, fn fs.WalkDirFunc) error {
 	logger := log.FromContext(ctx)
 
 	var walkFunc fs.WalkDirFunc
@@ -157,15 +158,17 @@ func walkDirWithLinks(ctx context.Context, root string, exclude []string, includ
 			return nil
 		}
 
-		filterErr := filterPath(logger, path, exclude, include, d.IsDir())
+		// The path filtered should be relative.
+		filterPath := strings.TrimPrefix(filepath.Clean(path), filepath.Clean(args.Src+"/"))
+		filterErr := filter(logger, filterPath, args.Excluded(), args.Included(), d.IsDir())
 		if filterErr != nil {
-			if strings.Contains(filterErr.Error(), fmt.Sprintf("filtered '%s'", path)) {
+			if strings.Contains(filterErr.Error(), fmt.Sprintf("filtered '%s'", filterPath)) {
 				return nil
 			}
 			return filterErr
 		}
 
-		if d.Type()&fs.ModeSymlink != 0 && !links {
+		if d.Type()&fs.ModeSymlink != 0 && !args.Links {
 			var info fs.FileInfo
 
 			resolved, err := filepath.EvalSymlinks(path)
@@ -193,5 +196,5 @@ func walkDirWithLinks(ctx context.Context, root string, exclude []string, includ
 		return fn(path, d, err)
 	}
 
-	return filepath.WalkDir(root, walkFunc)
+	return filepath.WalkDir(args.Src, walkFunc)
 }

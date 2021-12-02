@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/apex/log/handlers/cli"
+	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
@@ -34,7 +35,7 @@ func TestWalkEarlyCancel(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{}, []string{}, []string{}, false, handler)
+	err := Walk(ctx, args.Config{Src: "."}, []string{}, handler)
 
 	// It should have returned the cancelled error
 	if err != ctx.Err() {
@@ -61,7 +62,7 @@ func TestWalkCancelInProgress(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{}, []string{}, []string{}, false, handler)
+	err := Walk(ctx, args.Config{Src: "."}, []string{}, handler)
 
 	// It should have returned the cancelled error
 	if err != ctx.Err() {
@@ -80,7 +81,7 @@ func TestWalkHandlerError(t *testing.T) {
 		return fmt.Errorf("simulated error")
 	}
 
-	err := Walk(ctx, ".", []string{}, []string{}, []string{}, false, handler)
+	err := Walk(ctx, args.Config{Src: "."}, []string{}, handler)
 
 	// It should have returned the error from handler
 	if err.Error() != "simulated error" {
@@ -99,7 +100,7 @@ func TestWalkExcludeMatchError(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{"a(b*"}, []string{}, []string{}, false, handler)
+	err := Walk(ctx, args.Config{Src: ".", Exclude: []string{"a(b*"}}, []string{}, handler)
 
 	// It should have caused a regexp error
 	msg := "could not process --exclude `a(b*`: error parsing regexp: missing closing ): `^a(b[^/]+$`"
@@ -119,7 +120,7 @@ func TestWalkIncludeMatchError(t *testing.T) {
 		return nil
 	}
 
-	err := Walk(ctx, ".", []string{"*"}, []string{"a(b*"}, []string{}, false, handler)
+	err := Walk(ctx, args.Config{Src: ".", Exclude: []string{"*"}, Include: []string{"a(b*"}}, []string{}, handler)
 
 	// It should have caused a regexp error
 	msg := "could not process --include `a(b*`: error parsing regexp: missing closing ): `^a(b[^/]+$`"
@@ -186,12 +187,12 @@ func TestWalkLinksFilterPathAll(t *testing.T) {
 
 	ctx = log.NewContext(ctx, &logger)
 
-	err := filterPath(log.FromContext(ctx), "file", []string{"*"}, []string{}, false)
+	err := filter(log.FromContext(ctx), "file", []string{"*"}, []string{}, false)
 	if err != nil && err.Error() != "filtered 'file'" {
 		t.Errorf("failed to filter 'file' for exclude pattern `*`")
 	}
 
-	err = filterPath(log.FromContext(ctx), "some/dir", []string{"*"}, []string{}, true)
+	err = filter(log.FromContext(ctx), "some/dir", []string{"*"}, []string{}, true)
 	if err != nil && err.Error() != "skip this directory" {
 		t.Errorf("failed to filter 'some/dir' for exclude pattern `*`")
 	}
@@ -204,7 +205,7 @@ func TestWalkLinksFilterPathInclude(t *testing.T) {
 
 	ctx = log.NewContext(ctx, &logger)
 
-	err := filterPath(log.FromContext(ctx), "/some/dir", []string{"*"}, []string{"*/", "**/dir"}, true)
+	err := filter(log.FromContext(ctx), "/some/dir", []string{"*"}, []string{"*/", "**/dir"}, true)
 	if err != nil {
 		t.Errorf("unexpected error `%s`", err)
 	}
