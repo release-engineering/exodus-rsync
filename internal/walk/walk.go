@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 	"github.com/release-engineering/exodus-rsync/internal/syncutil"
 )
@@ -126,12 +127,12 @@ func fillItems(ctx context.Context, in <-chan walkItem, c chan<- syncItemPrivate
 	}
 }
 
-func getSyncItems(ctx context.Context, path string, exclude []string, include []string, onlyThese []string, links bool) <-chan syncItemPrivate {
+func getSyncItems(ctx context.Context, args args.Config, onlyThese []string) <-chan syncItemPrivate {
 	c := make(chan syncItemPrivate, 10)
 	walkItemCh := make(chan walkItem, 10)
 
 	go func() {
-		err := walkDirWithLinks(ctx, path, exclude, include, onlyThese, links,
+		err := walkDirWithLinks(ctx, args, onlyThese,
 			func(path string, d fs.DirEntry, err error) error {
 				if err != nil {
 					return err
@@ -149,7 +150,7 @@ func getSyncItems(ctx context.Context, path string, exclude []string, include []
 
 	go syncutil.RunWithGroup(20,
 		func() {
-			fillItems(ctx, walkItemCh, c, links)
+			fillItems(ctx, walkItemCh, c, args.Links)
 		},
 		func() {
 			close(c)
@@ -161,10 +162,10 @@ func getSyncItems(ctx context.Context, path string, exclude []string, include []
 
 // Walk will walk the directory tree at the given path and invoke a handler
 // for every discovered item eligible for sync.
-func Walk(ctx context.Context, path string, exclude []string, include []string, onlyThese []string, links bool, handler SyncItemHandler) error {
+func Walk(ctx context.Context, args args.Config, onlyThese []string, handler SyncItemHandler) error {
 	logger := log.FromContext(ctx)
 
-	for item := range getSyncItems(ctx, path, exclude, include, onlyThese, links) {
+	for item := range getSyncItems(ctx, args, onlyThese) {
 		logger.F("item", item).Debug("got item")
 
 		if ctx.Err() != nil {

@@ -84,7 +84,7 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 		}
 	}
 
-	err = walk.Walk(ctx, args.Src, args.Excluded(), args.Included(), onlyThese, args.Links, func(item walk.SyncItem) error {
+	err = walk.Walk(ctx, args, onlyThese, func(item walk.SyncItem) error {
 		if args.IgnoreExisting {
 			// This argument is not (properly) supported, so bail out.
 			//
