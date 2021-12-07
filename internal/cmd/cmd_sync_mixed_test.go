@@ -107,6 +107,8 @@ func TestMainSyncMixedOk(t *testing.T) {
 	// It should have been exactly this
 	expectedItems := map[string]string{
 		"/dest/link-to-regular-file":          "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+		"/dest/some/dir/link-to-somefile":     "57921e8a0929eaff5003cc9dd528c3421296055a4de2ba72429dc7f41bfa8411",
+		"/dest/some/somefile":                 "57921e8a0929eaff5003cc9dd528c3421296055a4de2ba72429dc7f41bfa8411",
 		"/dest/subdir/regular-file":           "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
 		"/dest/subdir/rand1":                  "57921e8a0929eaff5003cc9dd528c3421296055a4de2ba72429dc7f41bfa8411",
 		"/dest/subdir/rand2":                  "f3a5340ae2a400803b8150f455ad285d173cbdcf62c8e9a214b30f467f45b310",
