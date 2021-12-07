@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- n/a
+
+## 1.8.0 - 2021-12-07
+
+- Fix: incorrect calculation of link_to values
 - Fix: include/exclude matches against full path
 - Fix: include/exclude pattern matching differs from rsync
 
