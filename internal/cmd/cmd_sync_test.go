@@ -602,7 +602,7 @@ func TestMainSyncFilesFrom(t *testing.T) {
 		"rsync",
 		"-vvv",
 		"--files-from", filesFromPath,
-		srcPath + "/",
+		srcPath,
 		"exodus:/dest",
 	}
 
