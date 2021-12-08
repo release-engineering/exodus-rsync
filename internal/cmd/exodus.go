@@ -75,6 +75,12 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	if args.FilesFrom != "" {
 		args.Relative = true
 
+		// When using --files-from, we don't want to recreate the source directory.
+		// Ensure the source path ends with a slash (/), indicating we only want it's contents.
+		if !strings.HasSuffix(args.Src, "/") {
+			args.Src += "/"
+		}
+
 		f, err := os.Open(args.FilesFrom)
 		if err != nil {
 			logger.F("src", args.Src, "error", err).Error("can't read --files-from file")
