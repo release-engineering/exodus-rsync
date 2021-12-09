@@ -4,6 +4,11 @@
 
 - n/a
 
+## 1.8.1 - 2021-12-09
+
+- Fix: incorrect path calculation when `--files-from` is used together
+  with a source tree without a trailing slash.
+
 ## 1.8.0 - 2021-12-07
 
 - Fix: incorrect calculation of link_to values
