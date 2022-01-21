@@ -27,7 +27,7 @@ func TestOverrideValues(t *testing.T) {
 	err := os.WriteFile(filename, []byte(`
 
 # Some global values.
-gwenv: global-env
+gwenv: $TEST_EXODUS_GW_ENV
 gwurl: https://exodus-gw.example.com
 gwcert: global-cert
 gwkey: global-key
@@ -46,6 +46,12 @@ environments:
 
 	if err != nil {
 		t.Fatalf("could not write config file for test: %v", err)
+	}
+
+	oldEnv := os.Getenv("TEST_EXODUS_GW_ENV")
+	err = os.Setenv("TEST_EXODUS_GW_ENV", "global-env")
+	if err != nil {
+		t.Fatalf("could not set TEST_EXODUS_GW_ENV, err = %v", err)
 	}
 
 	ctx := context.Background()
@@ -99,6 +105,10 @@ environments:
 	assertEqual("env gwurl", env.GwURL(), cfg.GwURL())
 	assertEqual("env gwcert", env.GwCert(), cfg.GwCert())
 	assertEqual("env gwbatchsize", env.GwBatchSize(), cfg.GwBatchSize())
+
+	t.Cleanup(func() {
+		os.Setenv("TEST_EXODUS_GW_ENV", oldEnv)
+	})
 }
 
 func TestDefaultsFromParent(t *testing.T) {
