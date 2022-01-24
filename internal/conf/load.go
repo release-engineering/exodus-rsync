@@ -47,6 +47,8 @@ func loadFromPath(path string, args args.Config) (*globalConfig, error) {
 	// A few vars support env var expansion for convenience
 	out.GwCertRaw = os.ExpandEnv(out.GwCertRaw)
 	out.GwKeyRaw = os.ExpandEnv(out.GwKeyRaw)
+	out.GwURLRaw = os.ExpandEnv(out.GwURLRaw)
+	out.GwEnvRaw = os.ExpandEnv(out.GwEnvRaw)
 
 	// Fill in the Environment parent references
 	prefs := map[string]bool{}

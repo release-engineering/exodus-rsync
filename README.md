@@ -73,6 +73,7 @@ gwcert: $HOME/certs/$USER.crt
 gwkey: $HOME/certs/$USER.key
 
 # Base URL of the exodus-gw service to be used.
+# The base URL may be set using an environment variable.
 gwurl: https://exodus-gw.example.com
 
 # Defines the exodus-gw "environment" for use.
@@ -82,6 +83,8 @@ gwurl: https://exodus-gw.example.com
 #
 # Additionally, the `gwcert` in use must grant the necessary roles for writing to
 # this environment, such as `prod-blob-uploader`, `prod-publisher`.
+#
+# The exodus-gw environment may be set using an environment variable.
 gwenv: prod
 
 ###############################################################################
