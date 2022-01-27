@@ -79,6 +79,7 @@ func TestExec(t *testing.T) {
 				Src:     "src",
 				Dest:    "dest",
 				Verbose: 3,
+				DryRun:  true,
 				IgnoredConfig: args.IgnoredConfig{
 					Archive:        true,
 					Recursive:      true,
@@ -118,7 +119,7 @@ func TestExec(t *testing.T) {
 				"--archive", "--recursive", "--relative", "--links", "--copy-links",
 				"--keep-dirlinks", "--hard-links", "--perms", "--executability", "--acls",
 				"--xattrs", "--owner", "--group", "--devices", "--specials", "--times",
-				"--atimes", "--crtimes", "--omit-dir-times", "--rsh", "some-rsh",
+				"--atimes", "--crtimes", "--omit-dir-times", "--dry-run", "--rsh", "some-rsh",
 				"--ignore-existing", "--delete", "--prune-empty-dirs", "--timeout", "1234",
 				"--compress", "--filter", "some-filter", "--exclude", ".*", "--include", "**/dir",
 				"--files-from", "sources.txt", "--stats", "--itemize-changes",
