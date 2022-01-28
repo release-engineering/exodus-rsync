@@ -112,6 +112,9 @@ func Arguments(ctx context.Context, args args.Config) []string {
 	if args.OmitDirTimes {
 		argv = append(argv, "--omit-dir-times")
 	}
+	if args.DryRun {
+		argv = append(argv, "--dry-run")
+	}
 	if args.Rsh != "" {
 		argv = append(argv, "--rsh", args.Rsh)
 	}
