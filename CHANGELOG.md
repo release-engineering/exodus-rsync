@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- n/a
+
+## 1.8.2 - 2022-02-03
+
 - Fix: `--dry-run` not passed through to rsync
 
 ## 1.8.1 - 2021-12-09
