@@ -20,6 +20,10 @@ func candidatePaths() []string {
 	}
 }
 
+func normalizeURL(gwURL string) string {
+	return strings.TrimRight(gwURL, "/")
+}
+
 func loadFromPath(path string, args args.Config) (*globalConfig, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -36,24 +40,23 @@ func loadFromPath(path string, args args.Config) (*globalConfig, error) {
 		return &globalConfig{}, fmt.Errorf("can't parse %s: %w", path, err)
 	}
 
-	// A bit of normalization...
-	for {
-		if !strings.HasSuffix(out.GwURLRaw, "/") {
-			break
-		}
-		out.GwURLRaw = strings.TrimSuffix(out.GwURLRaw, "/")
-	}
-
 	// A few vars support env var expansion for convenience
 	out.GwCertRaw = os.ExpandEnv(out.GwCertRaw)
 	out.GwKeyRaw = os.ExpandEnv(out.GwKeyRaw)
-	out.GwURLRaw = os.ExpandEnv(out.GwURLRaw)
+	out.GwURLRaw = normalizeURL(os.ExpandEnv(out.GwURLRaw))
 	out.GwEnvRaw = os.ExpandEnv(out.GwEnvRaw)
 
 	// Fill in the Environment parent references
 	prefs := map[string]bool{}
 	for i := range out.EnvironmentsRaw {
 		env := &out.EnvironmentsRaw[i]
+
+		// A few vars support env var expansion for convenience
+		env.GwCertRaw = os.ExpandEnv(env.GwCertRaw)
+		env.GwKeyRaw = os.ExpandEnv(env.GwKeyRaw)
+		env.GwURLRaw = normalizeURL(os.ExpandEnv(env.GwURLRaw))
+		env.GwEnvRaw = os.ExpandEnv(env.GwEnvRaw)
+
 		if !strings.HasPrefix(env.Prefix(), out.Strip()) {
 			return nil, fmt.Errorf("cannot strip '%s' prefix from '%s'", out.Strip(), env.Prefix())
 		}

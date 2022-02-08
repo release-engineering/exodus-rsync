@@ -27,8 +27,8 @@ func TestOverrideValues(t *testing.T) {
 	err := os.WriteFile(filename, []byte(`
 
 # Some global values.
-gwenv: $TEST_EXODUS_GW_ENV
-gwurl: https://exodus-gw.example.com
+gwenv: global-env
+gwurl: $TEST_EXODUS_GW_URL
 gwcert: global-cert
 gwkey: global-key
 gwbatchsize: 100
@@ -36,7 +36,7 @@ strip: dest:/foo
 
 environments:
 - prefix: dest:/foo/bar/baz
-  gwenv: one-env
+  gwenv: $TEST_EXODUS_GW_ENV
   gwkey: override-key
   gwpollinterval: 123
   rsyncmode: mixed
@@ -48,8 +48,13 @@ environments:
 		t.Fatalf("could not write config file for test: %v", err)
 	}
 
+	oldURL := os.Getenv("TEST_EXODUS_GW_URL")
+	err = os.Setenv("TEST_EXODUS_GW_URL", "https://exodus-gw.example.com")
+	if err != nil {
+		t.Fatalf("could not set TEST_EXODUS_GW_URL, err = %v", err)
+	}
 	oldEnv := os.Getenv("TEST_EXODUS_GW_ENV")
-	err = os.Setenv("TEST_EXODUS_GW_ENV", "global-env")
+	err = os.Setenv("TEST_EXODUS_GW_ENV", "one-env")
 	if err != nil {
 		t.Fatalf("could not set TEST_EXODUS_GW_ENV, err = %v", err)
 	}
@@ -108,6 +113,7 @@ environments:
 
 	t.Cleanup(func() {
 		os.Setenv("TEST_EXODUS_GW_ENV", oldEnv)
+		os.Setenv("TEST_EXODUS_GW_URL", oldURL)
 	})
 }
 
