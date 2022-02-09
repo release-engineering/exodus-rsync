@@ -60,13 +60,12 @@ func (c *client) doJSONRequest(ctx context.Context, method string, url string, b
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		byteSlice := make([]byte, 2000)
-		bytesRead, err := resp.Body.Read(byteSlice)
+		byteSlice, err := io.ReadAll(io.LimitReader(resp.Body, 2000))
 		if err != nil {
 			log.FromContext(ctx).F("error", err).Debugf(
 				"No body in response for '%s %s'", req.Method, req.URL,
 			)
-		} else if bytesRead > 0 {
+		} else if len(byteSlice) > 0 {
 			return fmt.Errorf("%s %s: %s, %s", req.Method, req.URL, resp.Status, byteSlice)
 		}
 		return fmt.Errorf("%s %s: %s", req.Method, req.URL, resp.Status)

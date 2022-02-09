@@ -12,6 +12,19 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
+type (
+	mockReadCloser struct {
+		expectedData []byte
+		expectedErr  error
+	}
+)
+
+func (mrc *mockReadCloser) Read(p []byte) (n int, err error) {
+	copy(p, mrc.expectedData)
+	return 0, mrc.expectedErr
+}
+func (mrc *mockReadCloser) Close() error { return nil }
+
 func TestClientPublishErrors(t *testing.T) {
 	cfg := testConfig(t)
 
@@ -54,7 +67,10 @@ func TestClientPublishErrors(t *testing.T) {
 		gw.nextHTTPResponse = &http.Response{
 			Status:     "418 I'm a teapot",
 			StatusCode: 418,
-			Body:       io.NopCloser(strings.NewReader("")),
+			Body: io.NopCloser(&mockReadCloser{
+				expectedData: []byte(""),
+				expectedErr:  fmt.Errorf("Failed to read"),
+			}),
 		}
 
 		_, err := clientIface.NewPublish(ctx)
