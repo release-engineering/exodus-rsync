@@ -4,6 +4,11 @@
 
 - n/a
 
+## 1.8.3 - 2022-02-24
+
+- Fix: exodus-gw error responses truncated with null bytes
+- Expand environment variables at environment config level
+
 ## 1.8.2 - 2022-02-03
 
 - Fix: `--dry-run` not passed through to rsync
