@@ -939,3 +939,65 @@ func TestMainStripDefaultPrefix(t *testing.T) {
 		t.Error("expected to commit publish (once), instead p.committed ==", p.committed)
 	}
 }
+
+func TestMainSyncSingleFile(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	SetConfig(t, CONFIG)
+	ctrl := MockController(t)
+
+	mockGw := gw.NewMockInterface(ctrl)
+	ext.gw = mockGw
+
+	client := FakeClient{blobs: make(map[string]string)}
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
+
+	srcPath := path.Clean(wd + "/../../test/data/srctrees/single-file/test")
+
+	args := []string{
+		"rsync",
+		"-vvv",
+		srcPath,
+		"exodus:/dest/test",
+	}
+
+	got := Main(args)
+
+	// It should complete successfully.
+	if got != 0 {
+		t.Error("returned incorrect exit code", got)
+	}
+
+	// It should have created one publish.
+	if len(client.publishes) != 1 {
+		t.Error("expected to create 1 publish, instead created", len(client.publishes))
+	}
+
+	p := client.publishes[0]
+
+	// Build up a URI => Key mapping of what was published
+	itemMap := make(map[string]string)
+	for _, item := range p.items {
+		if _, ok := itemMap[item.WebURI]; ok {
+			t.Error("tried to publish this URI more than once:", item.WebURI)
+		}
+		itemMap[item.WebURI] = item.ObjectKey
+	}
+
+	// It should have been exactly this
+	expectedItems := map[string]string{
+		"/dest/test": "98ea6e4f216f2fb4b69fff9b3a44842c38686ca685f3f55dc48c5d3fb1107be4",
+	}
+
+	if !reflect.DeepEqual(itemMap, expectedItems) {
+		t.Error("did not publish expected items, published:", itemMap)
+	}
+
+	// It should have committed the publish (once)
+	if p.committed != 1 {
+		t.Error("expected to commit publish (once), instead p.committed ==", p.committed)
+	}
+}
