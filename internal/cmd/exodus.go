@@ -41,14 +41,17 @@ func getRelPath(srcPath string, srcTree string) string {
 	return relPath
 }
 
-func webURI(srcPath string, srcTree string, destTree string) string {
+func webURI(srcPath string, srcTree string, destTree string, srcIsDir bool) string {
 	relPath := getRelPath(srcPath, srcTree+"/")
 
 	// Presence of trailing slash changes the behavior when assembling
 	// destination paths, see "man rsync" and search for "trailing".
 	if srcTree != "." && !strings.HasSuffix(srcTree, "/") {
 		srcBase := filepath.Base(srcTree)
-		return path.Join(destTree, srcBase, relPath)
+		if srcIsDir {
+			return path.Join(destTree, srcBase, relPath)
+		}
+		return destTree
 	}
 
 	return path.Join(destTree, relPath)
@@ -94,6 +97,13 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 			onlyThese = append(onlyThese, path)
 		}
 	}
+
+	fileStat, err := os.Stat(args.Src)
+	if err != nil {
+		logger.F("error", err).Error("can't stat file")
+		return 73
+	}
+	srcIsDir := fileStat.IsDir()
 
 	err = walk.Walk(ctx, args, onlyThese, func(item walk.SyncItem) error {
 		if args.IgnoreExisting {
@@ -166,7 +176,7 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	destTree := cleanDestTree(args.DestPath(), strip)
 
 	for _, item := range items {
-		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, destTree)}
+		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, destTree, srcIsDir)}
 
 		if item.LinkTo != "" {
 			linkSrcDirRelative := path.Dir(getRelPath(item.SrcPath, args.Src))
