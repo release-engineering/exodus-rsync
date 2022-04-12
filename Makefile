@@ -9,6 +9,9 @@ fmt-cmd = if ! test -z $$($(1) | tee /dev/stderr); then echo $(2); exit 3; fi
 BUILDVERSION := $$(git describe HEAD)
 BUILDFLAGS := -ldflags "-X github.com/release-engineering/exodus-rsync/internal/cmd.version=$(BUILDVERSION)"
 
+# Image used for recipes building in a container.
+GOTOOLSET_IMAGE := registry.access.redhat.com/ubi8/go-toolset:latest
+
 # Build the main binary for this project.
 exodus-rsync: generate
 	go build $(BUILDFLAGS) ./cmd/exodus-rsync
@@ -46,6 +49,13 @@ htmlcov: check
 # Delete generated files.
 clean:
 	rm -f exodus-rsync coverage.out
+
+# Build exodus-rsync in a container image.
+# If you have a working 'podman', this can be used as an alternative
+# to installing the go toolchain on the host.
+podman-exodus-rsync:
+	podman pull $(GOTOOLSET_IMAGE)
+	podman run --security-opt label=disable -v $$PWD:/src $(GOTOOLSET_IMAGE) make -C /src
 
 # Target for all checks applied in CI.
 all: exodus-rsync check lint fmt imports symver-check
