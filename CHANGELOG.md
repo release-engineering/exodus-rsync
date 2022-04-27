@@ -4,6 +4,11 @@
 
 - n/a
 
+## 1.8.4 - 2022-04-27
+
+- Refactor container build to support pinned base image
+- Fix: incorrect destination path for single file publishes
+
 ## 1.8.3 - 2022-02-24
 
 - Fix: exodus-gw error responses truncated with null bytes
