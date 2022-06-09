@@ -4,6 +4,10 @@
 
 - n/a
 
+## 1.8.5 - 2022-06-09
+
+- Upgraded AWS SDK
+
 ## 1.8.4 - 2022-04-27
 
 - Refactor container build to support pinned base image
