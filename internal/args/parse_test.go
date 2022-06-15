@@ -185,3 +185,12 @@ func TestStringMapDecodeError(t *testing.T) {
 		t.Fatalf("didn't get expected error, got %s", err.Error())
 	}
 }
+
+func TestAutoExcludedFiles(t *testing.T) {
+	want := []string{".nfs*", ".latest_rsync", ".lock"}
+	c := Config{Src: ".", Dest: "/test-dest"}
+	if got := c.Excluded(); !reflect.DeepEqual(got, want) {
+		t.Errorf("Config.Excluded() = %v, want %v", got, want)
+	}
+
+}

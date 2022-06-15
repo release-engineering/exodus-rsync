@@ -119,6 +119,8 @@ func (c *Config) processFilterArgs(rule string, slice []string) []string {
 
 // Excluded exctracts the pattern from Filter arguments and appends it onto Exclude.
 func (c *Config) Excluded() []string {
+	// Automatically exclude certain files we don't want to sync.
+	c.Exclude = append(c.Exclude, ".nfs*", ".latest_rsync", ".lock")
 	return c.processFilterArgs("-", c.Exclude)
 }
 
