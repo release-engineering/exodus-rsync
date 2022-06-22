@@ -2,6 +2,7 @@ package rsync
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -31,7 +32,7 @@ type Interface interface {
 	//
 	// Only Path and Args are filled in. Other elements such as stdout, stderr
 	// can be set up by the caller prior to invoking the command.
-	Command(context.Context, []string) *exec.Cmd
+	Command(context.Context, []string) (*exec.Cmd, error)
 }
 
 type impl struct{}
@@ -160,7 +161,8 @@ func Arguments(ctx context.Context, args args.Config) []string {
 }
 
 func (i impl) Exec(ctx context.Context, args args.Config) error {
-	cmd := i.Command(ctx, Arguments(ctx, args))
+	cmd, err := i.Command(ctx, Arguments(ctx, args))
+	maybePanic(err)
 	return ext.exec(
 		cmd.Path,
 		cmd.Args,
@@ -169,7 +171,8 @@ func (i impl) Exec(ctx context.Context, args args.Config) error {
 }
 
 func (i impl) RawExec(ctx context.Context, args []string) error {
-	cmd := i.Command(ctx, args)
+	cmd, err := i.Command(ctx, args)
+	maybePanic(err)
 	return ext.exec(
 		cmd.Path,
 		cmd.Args,
@@ -177,16 +180,19 @@ func (i impl) RawExec(ctx context.Context, args []string) error {
 	)
 }
 
-func (impl) Command(ctx context.Context, args []string) *exec.Cmd {
+func (impl) Command(ctx context.Context, args []string) (*exec.Cmd, error) {
 	logger := log.FromContext(ctx)
 
 	rsync, err := lookupTrueRsync(ctx)
 	if err != nil {
+		if errors.Is(err, ErrMissingRsync) {
+			return nil, err
+		}
 		logger.F("error", err).Warn("Failed to look up rsync, fallback to /usr/bin/rsync")
 		rsync = "/usr/bin/rsync"
 	} else {
 		logger.F("path", rsync).Debug("Located rsync")
 	}
 
-	return exec.CommandContext(ctx, rsync, args...)
+	return exec.CommandContext(ctx, rsync, args...), nil
 }

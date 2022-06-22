@@ -18,6 +18,12 @@ import (
 func mixedMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	logger := log.FromContext(ctx)
 
+	rsyncCmd, err := ext.rsync.Command(ctx, rsync.Arguments(ctx, args))
+	if err != nil {
+		logger.F("error", err).Error("Failed to generate rsync command")
+		return 25
+	}
+
 	ctx, cancelFn := context.WithCancel(ctx)
 
 	wg := sync.WaitGroup{}
@@ -51,7 +57,6 @@ func mixedMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	var lastCode *chan int
 	rsyncCode := make(chan int, 1)
 	exodusCode := make(chan int, 1)
-	rsyncCmd := ext.rsync.Command(ctx, rsync.Arguments(ctx, args))
 
 	// Let rsync & exodus publishes run in their own goroutines.
 	go func() {

@@ -19,11 +19,16 @@ import (
 type fakeRsync struct {
 	delegate rsync.Interface
 	prefix   []string
+	err      error
 }
 
-func (r *fakeRsync) Command(ctx context.Context, args []string) *exec.Cmd {
-	cmd := r.delegate.Command(ctx, args)
+func (r *fakeRsync) Command(ctx context.Context, args []string) (*exec.Cmd, error) {
+	if r.err != nil {
+		// Immediately return the error provided.
+		return nil, r.err
+	}
 
+	cmd, err := r.delegate.Command(ctx, args)
 	cmd.Path = r.prefix[0]
 	cmd.Args = append(r.prefix, cmd.Args...)
 
@@ -35,7 +40,7 @@ func (r *fakeRsync) Command(ctx context.Context, args []string) *exec.Cmd {
 		cmd.Path = newPath
 	}
 
-	return cmd
+	return cmd, err
 }
 
 func (r *fakeRsync) Exec(ctx context.Context, args args.Config) error {
