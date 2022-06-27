@@ -31,7 +31,10 @@ func TestCommandFallback(t *testing.T) {
 
 	ctx := log.NewContext(context.Background(), log.Package.NewLogger(args.Config{}))
 
-	cmd := Package.Command(ctx, []string{})
+	cmd, err := Package.Command(ctx, []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if cmd.Path != "/usr/bin/rsync" {
 		t.Errorf("command returned unexpected path %v", cmd.Path)
@@ -69,12 +72,52 @@ func TestCommandAvoidSelf(t *testing.T) {
 
 	ctx := log.NewContext(context.Background(), log.Package.NewLogger(args.Config{}))
 
-	cmd := Package.Command(ctx, []string{})
+	cmd, err := Package.Command(ctx, []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Rather than looking up ourselves as a plain LookPath did, it should be smart
 	// enough to remove self from path and find the "real" rsync
 	if cmd.Path != "../../test/bin/rsync" {
 		t.Errorf("command returned unexpected path %v", cmd.Path)
+	}
+}
+
+func TestCommandFindsSelf(t *testing.T) {
+	oldArg0 := os.Args[0]
+	defer func() {
+		os.Args[0] = oldArg0
+	}()
+
+	// Simulate that we are installed as 'rsync' in tempDir1.
+	tempDir1 := t.TempDir()
+	self := tempDir1 + "/rsync"
+	err := os.WriteFile(self, []byte("#!/bin/sh\necho hi\n"), 0755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Args[0] = self
+
+	// Simulate that we are symlinked where "real" rsync is expected.
+	tempDir2 := t.TempDir()
+	err = os.Symlink(self, tempDir2+"/rsync")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Add to PATH dir containing self and dir in which "real" rsync is
+	// expected.
+	setPath(t, tempDir1+":"+tempDir2)
+
+	// Command will fail to find rsync and return an error.
+	ctx := log.NewContext(context.Background(), log.Package.NewLogger(args.Config{}))
+	cmd, err := Package.Command(ctx, []string{})
+	if cmd != nil {
+		t.Fatalf("expected no command, got %v", cmd)
+	}
+	if err.Error() != "an 'rsync' command is required but could not be found" {
+		t.Fatalf("did not get expected error, got %v", err)
 	}
 }
 

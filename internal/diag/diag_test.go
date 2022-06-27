@@ -91,3 +91,45 @@ func TestDiagRun(t *testing.T) {
 	whoAmiI.Return(map[string]interface{}{"foo": "bar"}, nil)
 	Package.Run(ctx, conf, args)
 }
+
+func TestCommandErr(t *testing.T) {
+	oldArg0 := os.Args[0]
+	defer func() {
+		os.Args[0] = oldArg0
+	}()
+
+	ctrl := MockController(t)
+	conf := mockConfig(ctrl)
+	args := args.Config{Src: ".", Dest: "whatever-dest"}
+	ctx := context.Background()
+	ctx = log.NewContext(ctx, log.Package.NewLogger(args))
+
+	// Simulate that we are installed as 'rsync' in tempDir1.
+	tempDir1 := t.TempDir()
+	self := tempDir1 + "/rsync"
+	err := os.WriteFile(self, []byte("#!/bin/sh\necho hi\n"), 0755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Args[0] = self
+
+	// Simulate that we are symlinked where "real" rsync is expected.
+	tempDir2 := t.TempDir()
+	err = os.Symlink(self, tempDir2+"/rsync")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Add to PATH dir containing self and dir in which "real" rsync is
+	// expected.
+	t.Cleanup(func() {
+		os.Setenv("PATH", os.Getenv("PATH"))
+	})
+	err = os.Setenv("PATH", tempDir1+":"+tempDir2)
+	if err != nil {
+		t.Fatalf("could not set PATH, err = %v", err)
+	}
+
+	// logCommand can run when errors are returned.
+	logCommand(ctx, conf, args)
+}

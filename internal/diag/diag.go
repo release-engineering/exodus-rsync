@@ -119,7 +119,12 @@ func logCommand(ctx context.Context, cfg conf.Config, args args.Config) {
 	logger.F("src", args.Src, "dest", args.Dest, "prefix", prefix,
 		"strip", strip).Warn("paths")
 
-	cmd := ext.rsync.Command(ctx, rsync.Arguments(ctx, args))
+	cmd, err := ext.rsync.Command(ctx, rsync.Arguments(ctx, args))
+	if err != nil {
+		logger.F("error", err).Error("Couldn't generate rysnc command")
+		return
+	}
+
 	logger.F("mode", cfg.RsyncMode(), "path", cmd.Path, "args", cmd.Args).Warn("rsync")
 }
 

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -44,7 +45,6 @@ func TestExodusFailsFirst(t *testing.T) {
 	if last.Message != "Publish via exodus-gw failed" {
 		t.Errorf("unexpected final message: %v", last.Message)
 	}
-
 }
 
 func TestExodusFailsLater(t *testing.T) {
@@ -128,5 +128,29 @@ func TestRsyncFailsFirst(t *testing.T) {
 	if last.Message != "Publish via rsync failed" {
 		t.Errorf("unexpected final message: %v", last.Message)
 	}
+}
 
+func TestNoRsyncCommand(t *testing.T) {
+	ctrl := MockController(t)
+	cfg := conf.NewMockConfig(ctrl)
+
+	logs := CaptureLogger(t)
+	ctx := testContext()
+
+	// Force rsync to fail with given error.
+	rsync := &fakeRsync{delegate: ext.rsync}
+	rsync.prefix = []string{"echo"}
+	rsync.err = errors.New("didn't make rsync command")
+	ext.rsync = rsync
+
+	out := mixedMain(ctx, cfg, args.Config{})
+
+	if out != 25 {
+		t.Errorf("got unexpected exit code %v", out)
+	}
+
+	// It should tell us this.
+	if FindEntry(logs, "Failed to generate rsync command") == nil {
+		t.Error("missing log message")
+	}
 }

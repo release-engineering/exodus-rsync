@@ -2,6 +2,7 @@ package rsync
 
 import (
 	"context"
+	"errors"
 	"os"
 	exec "os/exec"
 	"path/filepath"
@@ -9,6 +10,9 @@ import (
 
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
+
+// ErrMissingRsync for use when rsync command cannot be found.
+var ErrMissingRsync = errors.New("an 'rsync' command is required but could not be found")
 
 // Returns path to current exodus-rsync executable.
 func lookupSelf() string {
@@ -82,8 +86,15 @@ func lookupTrueRsync(ctx context.Context) (rsync string, outerr error) {
 
 		rsync = lookupAnyRsync()
 
-		logger.F("rsync", rsync, "PATH", os.Getenv("PATH")).Debug(
-			"Resolved with adjusted PATH")
+		// Ensure we didn't find ourselves on the adjusted PATH.
+		if resolvedSelf == resolveLinks(rsync) {
+			logger.F("rsync", rsync, "PATH", os.Getenv("PATH")).Error(
+				"Cannot find 'rsync' command")
+			outerr = ErrMissingRsync
+		} else {
+			logger.F("rsync", rsync, "PATH", os.Getenv("PATH")).Debug(
+				"Resolved with adjusted PATH")
+		}
 	}
 
 	return
