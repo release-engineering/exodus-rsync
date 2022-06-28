@@ -8,6 +8,7 @@ require (
 	github.com/apex/log v1.9.0
 	github.com/aws/aws-sdk-go v1.44.42
 	github.com/coreos/go-systemd/v22 v22.3.2
+	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.7.5
 	gopkg.in/yaml.v3 v3.0.1

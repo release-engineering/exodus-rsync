@@ -38,8 +38,8 @@ func TestClientPublish(t *testing.T) {
 
 	// It should be able to add some items
 	addItems := []ItemInput{
-		{"/some/path", "1234", ""},
-		{"/other/path", "223344", ""},
+		{"/some/path", "1234", "mime/type", ""},
+		{"/other/path", "223344", "mime/type", ""},
 	}
 	err = publish.AddItems(ctx, addItems)
 	if err != nil {
@@ -99,8 +99,8 @@ func TestClientGetPublish(t *testing.T) {
 
 	// It should be able to add some items
 	addItems := []ItemInput{
-		{"/some/path", "1234", ""},
-		{"/other/path", "223344", ""},
+		{"/some/path", "1234", "mime/type", ""},
+		{"/other/path", "223344", "mime/type", ""},
 	}
 	err = p.AddItems(ctx, addItems)
 	if err != nil {

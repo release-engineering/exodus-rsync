@@ -146,7 +146,7 @@ func TestClientPublishErrors(t *testing.T) {
 			)),
 		}
 
-		err := publish.AddItems(ctx, []ItemInput{{"/some/uri", "abc123", ""}})
+		err := publish.AddItems(ctx, []ItemInput{{"/some/uri", "abc123", "mime/type", ""}})
 
 		if err == nil {
 			t.Error("Unexpectedly failed to return an error")
