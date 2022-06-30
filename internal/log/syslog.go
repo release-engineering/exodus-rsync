@@ -2,6 +2,7 @@ package log
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/syslog"
 	"strings"
@@ -59,6 +60,10 @@ func (h *syslogHandler) HandleLog(e *apexLog.Entry) error {
 
 	enc := json.NewEncoder(&bld)
 	enc.Encode(syslogFields(e))
+
+	if h.writer == nil {
+		return errors.New("Syslog unavailable, please change the logging config")
+	}
 
 	if h.test {
 		h.mutex.Lock()
