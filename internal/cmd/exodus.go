@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
@@ -177,6 +178,17 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 
 	for _, item := range items {
 		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, destTree, srcIsDir)}
+
+		// Try to detect MIME type of file.
+		// mimetype will return "application/octet-stream" type if it
+		// can't make a determination or encounters an error.
+		mtype, err := mimetype.DetectFile(item.SrcPath)
+		logger.F(
+			"file", item.SrcPath,
+			"MIME type", mtype.String(),
+			"error", err,
+		).Debug("MIME type detection attempted")
+		gwItem.ContentType = mtype.String()
 
 		if item.LinkTo != "" {
 			linkSrcDirRelative := path.Dir(getRelPath(item.SrcPath, args.Src))
