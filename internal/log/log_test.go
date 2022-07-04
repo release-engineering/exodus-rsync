@@ -93,6 +93,19 @@ func TestSyslogHandler(t *testing.T) {
 	assert.Equal(t, e[1], "Something went wrong {\"error\":\"Mistakes were made\"}\n")
 }
 
+func TestBadSyslogHandler(t *testing.T) {
+	fn := loggerBackend(&testcase{"", "syslog"}, false)
+	h, _ := fn().(*syslogHandler)
+	h.test = true
+	h.writer = nil
+
+	log := Package.NewLogger(args.Config{})
+	log.Level = DebugLevel
+	log.Handler = h
+
+	log.F("foo", "bar").Info("Hi")
+}
+
 func TestJournaldHandler(t *testing.T) {
 	fn := loggerBackend(&testcase{"", "journald"}, false)
 	h, _ := fn().(*journalHandler)
