@@ -6,7 +6,6 @@ import (
 	"os"
 
 	apexLog "github.com/apex/log"
-	"github.com/apex/log/handlers/cli"
 	"github.com/apex/log/handlers/level"
 	"github.com/apex/log/handlers/multi"
 	"github.com/coreos/go-systemd/v22/journal"
@@ -100,17 +99,14 @@ func (l *Logger) F(v ...interface{}) *apexLog.Entry {
 func (impl) NewLogger(args args.Config) *Logger {
 	logger := Logger{}
 
-	cliLevel := WarnLevel
+	logLevel := WarnLevel
 	if args.Verbose == 1 {
-		cliLevel = InfoLevel
+		logLevel = InfoLevel
 	} else if args.Verbose >= 2 {
-		cliLevel = DebugLevel
+		logLevel = DebugLevel
 	}
 
-	logger.Handler = level.New(
-		cli.New(os.Stdout),
-		cliLevel,
-	)
+	logger.Handler = level.New(newBaseHandler(os.Stdout), logLevel)
 
 	return &logger
 }
