@@ -227,6 +227,20 @@ func (mr *MockConfigMockRecorder) Strip() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Strip", reflect.TypeOf((*MockConfig)(nil).Strip))
 }
 
+// UploadThreads mocks base method.
+func (m *MockConfig) UploadThreads() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UploadThreads")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// UploadThreads indicates an expected call of UploadThreads.
+func (mr *MockConfigMockRecorder) UploadThreads() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadThreads", reflect.TypeOf((*MockConfig)(nil).UploadThreads))
+}
+
 // Verbosity mocks base method.
 func (m *MockConfig) Verbosity() int {
 	m.ctrl.T.Helper()
@@ -432,6 +446,20 @@ func (mr *MockEnvironmentConfigMockRecorder) Strip() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Strip", reflect.TypeOf((*MockEnvironmentConfig)(nil).Strip))
 }
 
+// UploadThreads mocks base method.
+func (m *MockEnvironmentConfig) UploadThreads() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UploadThreads")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// UploadThreads indicates an expected call of UploadThreads.
+func (mr *MockEnvironmentConfigMockRecorder) UploadThreads() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadThreads", reflect.TypeOf((*MockEnvironmentConfig)(nil).UploadThreads))
+}
+
 // Verbosity mocks base method.
 func (m *MockEnvironmentConfig) Verbosity() int {
 	m.ctrl.T.Helper()
@@ -635,6 +663,20 @@ func (m *MockGlobalConfig) Strip() string {
 func (mr *MockGlobalConfigMockRecorder) Strip() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Strip", reflect.TypeOf((*MockGlobalConfig)(nil).Strip))
+}
+
+// UploadThreads mocks base method.
+func (m *MockGlobalConfig) UploadThreads() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UploadThreads")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// UploadThreads indicates an expected call of UploadThreads.
+func (mr *MockGlobalConfigMockRecorder) UploadThreads() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadThreads", reflect.TypeOf((*MockGlobalConfig)(nil).UploadThreads))
 }
 
 // Verbosity mocks base method.

@@ -57,6 +57,9 @@ type Config interface {
 
 	// Strips this prefix from the destination path of exodus publish items.
 	Strip() string
+
+	// Number of threads used to upload files to the CDN.
+	UploadThreads() int
 }
 
 // EnvironmentConfig provides configuration specific to one environment.

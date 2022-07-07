@@ -67,21 +67,25 @@ type BrokenPublish struct {
 func (c *FakeClient) EnsureUploaded(ctx context.Context, items []walk.SyncItem,
 	onUploaded func(walk.SyncItem) error,
 	onExisting func(walk.SyncItem) error,
+	onDuplicate func(walk.SyncItem) error,
 ) error {
 	var err error
+	processedItems := make(map[string]walk.SyncItem)
 
 	for _, item := range items {
-		if _, ok := c.blobs[item.Key]; ok {
+		if _, ok := processedItems[item.Key]; ok {
+			err = onDuplicate(item)
+		} else if _, ok := c.blobs[item.Key]; ok {
 			err = onExisting(item)
 		} else {
 			c.blobs[item.Key] = item.SrcPath
+			processedItems[item.Key] = item
 			err = onUploaded(item)
 		}
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -999,5 +1003,71 @@ func TestMainSyncSingleFile(t *testing.T) {
 	// It should have committed the publish (once)
 	if p.committed != 1 {
 		t.Error("expected to commit publish (once), instead p.committed ==", p.committed)
+	}
+}
+
+func TestMainTypicalSyncWithExistingItems(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	SetConfig(t, CONFIG)
+	ctrl := MockController(t)
+
+	mockGw := gw.NewMockInterface(ctrl)
+	ext.gw = mockGw
+
+	srcPath := path.Clean(wd + "/../../test/data/srctrees/just-files")
+
+	client := FakeClient{blobs: make(map[string]string)}
+	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
+
+	// The hello file already exists in our bucket
+	client.blobs["5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"] = "/some/other/source/some-file"
+
+	args := []string{
+		"rsync",
+		srcPath + "/",
+		"exodus:/some/target",
+	}
+
+	got := Main(args)
+
+	// It should complete successfully.
+	if got != 0 {
+		t.Error("returned incorrect exit code", got)
+	}
+
+	p := client.publishes[0]
+	blobs := client.blobs
+
+	// Build up a URI => Key mapping of what was uploaded
+	itemMap := make(map[string]string)
+	for _, item := range p.items {
+		if _, ok := itemMap[item.WebURI]; ok {
+			t.Error("tried to publish this URI more than once:", item.WebURI)
+		}
+		itemMap[item.WebURI] = item.ObjectKey
+	}
+
+	// Only the binary file should have been uploaded.
+	// The hello file already existed in the bucket and thus should not have been re-uploaded.
+	expectedUploadedItems := map[string]string{
+		"5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03": "/some/other/source/some-file",
+		"c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6": srcPath + "/subdir/some-binary",
+	}
+	if !reflect.DeepEqual(blobs, expectedUploadedItems) {
+		t.Error("did not upload expected items, uploaded:", blobs)
+	}
+
+	// The hello files should be published despite already existing in the bucket
+	expectedPublishedItems := map[string]string{
+		"/some/target/subdir/some-binary": "c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6",
+		"/some/target/hello-copy-one":     "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+		"/some/target/hello-copy-two":     "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+	}
+	if !reflect.DeepEqual(itemMap, expectedPublishedItems) {
+		t.Error("did not publish expected items, published:", itemMap)
 	}
 }

@@ -137,6 +137,7 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 
 	uploadCount := 0
 	existingCount := 0
+	duplicateCount := 0
 
 	err = gwClient.EnsureUploaded(ctx, items,
 		func(uploadedItem walk.SyncItem) error {
@@ -147,6 +148,10 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 			existingCount++
 			return nil
 		},
+		func(duplicateItem walk.SyncItem) error {
+			duplicateCount++
+			return nil
+		},
 	)
 
 	if err != nil {
@@ -154,7 +159,7 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 		return 25
 	}
 
-	logger.F("uploaded", uploadCount, "existing", existingCount).Info("Completed uploads")
+	logger.F("uploaded", uploadCount, "existing", existingCount, "duplicate", duplicateCount).Info("Completed uploads")
 
 	var publish gw.Publish
 

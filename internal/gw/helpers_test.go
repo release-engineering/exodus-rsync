@@ -38,6 +38,7 @@ func testConfig(t *testing.T) conf.Config {
 	cfg.EXPECT().GwBatchSize().AnyTimes().Return(3)
 	cfg.EXPECT().LogLevel().AnyTimes().Return("info")
 	cfg.EXPECT().Verbosity().AnyTimes().Return(3)
+	cfg.EXPECT().UploadThreads().AnyTimes().Return(4)
 
 	return cfg
 }

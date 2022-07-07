@@ -90,17 +90,17 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 }
 
 // EnsureUploaded mocks base method.
-func (m *MockClient) EnsureUploaded(ctx context.Context, items []walk.SyncItem, onUploaded, onPresent func(walk.SyncItem) error) error {
+func (m *MockClient) EnsureUploaded(ctx context.Context, items []walk.SyncItem, onUploaded, onPresent, onDuplicate func(walk.SyncItem) error) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EnsureUploaded", ctx, items, onUploaded, onPresent)
+	ret := m.ctrl.Call(m, "EnsureUploaded", ctx, items, onUploaded, onPresent, onDuplicate)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // EnsureUploaded indicates an expected call of EnsureUploaded.
-func (mr *MockClientMockRecorder) EnsureUploaded(ctx, items, onUploaded, onPresent interface{}) *gomock.Call {
+func (mr *MockClientMockRecorder) EnsureUploaded(ctx, items, onUploaded, onPresent, onDuplicate interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnsureUploaded", reflect.TypeOf((*MockClient)(nil).EnsureUploaded), ctx, items, onUploaded, onPresent)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnsureUploaded", reflect.TypeOf((*MockClient)(nil).EnsureUploaded), ctx, items, onUploaded, onPresent, onDuplicate)
 }
 
 // GetPublish mocks base method.

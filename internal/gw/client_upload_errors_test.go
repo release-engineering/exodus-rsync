@@ -43,16 +43,15 @@ func TestClientUploadErrors(t *testing.T) {
 		setup     setupBlobs
 		wantError string
 	}{
+
 		{"error checking blob",
 			[]walk.SyncItem{{SrcPath: "some-file", Key: "abc123"}},
 			typicalError,
 			"checking for presence of abc123: simulated error"},
-
 		{"nonexistent file",
 			[]walk.SyncItem{{SrcPath: "nonexistent-file", Key: "abc123"}},
 			defaultBlobs,
 			"open nonexistent-file: no such file or directory"},
-
 		{"PUT fails",
 			[]walk.SyncItem{{SrcPath: "hello-copy-one", Key: "abc123"}},
 			putError,
@@ -69,6 +68,9 @@ func TestClientUploadErrors(t *testing.T) {
 				return nil
 			}, func(item walk.SyncItem) error {
 				t.Fatal("unexpectedly found blob", item)
+				return nil
+			}, func(item walk.SyncItem) error {
+				t.Fatal("unexpectedly created duplicate blob", item)
 				return nil
 			})
 
