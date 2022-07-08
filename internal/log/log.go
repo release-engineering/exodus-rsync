@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	apexLog "github.com/apex/log"
 	"github.com/apex/log/handlers/level"
@@ -106,18 +107,29 @@ func (impl) NewLogger(args args.Config) *Logger {
 		logLevel = DebugLevel
 	}
 
-	logger.Handler = level.New(newBaseHandler(os.Stdout), logLevel)
+	handler, _ := newBaseHandler(os.Stdout)
+	logger.Handler = level.New(handler, logLevel)
 
 	return &logger
 }
 
-func loggerBackend(cfg ConfigProvider, haveJournal bool) func() apexLog.Handler {
+func loggerBackend(cfg ConfigProvider, haveJournal bool) func() (apexLog.Handler, error) {
 	logger := cfg.Logger()
 	if logger == "journald" {
 		return newJournalHandler
 	}
 	if logger == "syslog" {
 		return newSyslogHandler
+	}
+	if strings.HasPrefix(logger, "file:") {
+		return func() (apexLog.Handler, error) {
+			logPath := strings.Split(logger, ":")[1]
+			f, err := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+			if err != nil {
+				return nil, err
+			}
+			return newBaseHandler(f)
+		}
 	}
 	if haveJournal {
 		return newJournalHandler
@@ -143,7 +155,12 @@ func (l *Logger) StartPlatformLogger(cfg ConfigProvider) {
 	}
 
 	ctor := loggerBackend(cfg, journal.Enabled())
-	handler := ctor()
+	handler, loggerErr := ctor()
+
+	if loggerErr != nil {
+		l.Errorf("Failed to initialize '%s' logger: %v", cfg.Logger(), loggerErr)
+		return
+	}
 
 	// platform logger only logs messages at lvl and higher.
 	handler = level.New(handler, lvl)

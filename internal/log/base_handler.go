@@ -1,8 +1,10 @@
 package log
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 
 	apexLog "github.com/apex/log"
@@ -17,30 +19,44 @@ var stringMap = [...]string{
 }
 
 type baseHandler struct {
-	mu     sync.Mutex
-	Writer io.Writer
+	mutex   sync.Mutex
+	test    bool
+	Writer  io.Writer
+	Entries []string
 }
 
-func newBaseHandler(w io.Writer) *baseHandler {
+func newBaseHandler(w io.Writer) (*baseHandler, error) {
 	return &baseHandler{
 		Writer: w,
+	}, nil
+}
+
+func baselFields(e *apexLog.Entry) map[string]string {
+	out := make(map[string]string)
+
+	for key := range e.Fields {
+		val := fmt.Sprint(e.Fields[key])
+		out[key] = val
 	}
+
+	return out
 }
 
 func (h *baseHandler) HandleLog(e *apexLog.Entry) error {
-	level := stringMap[e.Level]
-	names := e.Fields.Names()
+	bld := strings.Builder{}
+	bld.WriteString(e.Message + " ")
 
-	h.mu.Lock()
-	defer h.mu.Unlock()
+	enc := json.NewEncoder(&bld)
+	enc.Encode(baselFields(e))
 
-	fmt.Fprintf(h.Writer, "%s: %-25s", level, e.Message)
+	if h.test {
+		h.mutex.Lock()
+		defer h.mutex.Unlock()
 
-	for _, name := range names {
-		fmt.Fprintf(h.Writer, " %s=%v", name, e.Fields.Get(name))
+		h.Entries = append(h.Entries, bld.String())
 	}
 
-	fmt.Fprintln(h.Writer)
+	fmt.Fprintln(h.Writer, e.Timestamp.UTC().Format("2006-01-02 15:04:05")+" "+bld.String())
 
 	return nil
 }
