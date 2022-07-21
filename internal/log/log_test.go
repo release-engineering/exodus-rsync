@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	apexLog "github.com/apex/log"
@@ -57,7 +58,8 @@ func TestPlatformAutoLoggers(t *testing.T) {
 
 	// auto without journald means syslog
 	fn := loggerBackend(&testcase{"", "auto"}, false)
-	handler1, _ := fn().(*syslogHandler)
+	h1, _ := fn()
+	handler1, _ := h1.(*syslogHandler)
 
 	if handler1 == nil {
 		t.Error("auto with haveJournal=false did not return syslog handler")
@@ -65,7 +67,8 @@ func TestPlatformAutoLoggers(t *testing.T) {
 
 	// auto with journald means journald
 	fn = loggerBackend(&testcase{"", "auto"}, true)
-	handler2, _ := fn().(*journalHandler)
+	h2, _ := fn()
+	handler2, _ := h2.(*journalHandler)
 
 	if handler2 == nil {
 		t.Error("auto with haveJournal=true did not return journald handler")
@@ -74,12 +77,13 @@ func TestPlatformAutoLoggers(t *testing.T) {
 
 func TestSyslogHandler(t *testing.T) {
 	fn := loggerBackend(&testcase{"", "syslog"}, false)
-	h, _ := fn().(*syslogHandler)
-	h.test = true
+	h, _ := fn()
+	handler := h.(*syslogHandler)
+	handler.test = true
 
 	log := Package.NewLogger(args.Config{})
 	log.Level = DebugLevel
-	log.Handler = h
+	log.Handler = handler
 
 	// should handle simple fields
 	log.F("foo", "bar").Info("Hi")
@@ -88,32 +92,20 @@ func TestSyslogHandler(t *testing.T) {
 	err := fmt.Errorf("Mistakes were made")
 	log.F("error", err).Error("Something went wrong")
 
-	e := h.Entries
+	e := handler.Entries
 	assert.Equal(t, e[0], "Hi {\"foo\":\"bar\"}\n")
 	assert.Equal(t, e[1], "Something went wrong {\"error\":\"Mistakes were made\"}\n")
 }
 
-func TestBadSyslogHandler(t *testing.T) {
-	fn := loggerBackend(&testcase{"", "syslog"}, false)
-	h, _ := fn().(*syslogHandler)
-	h.test = true
-	h.writer = nil
-
-	log := Package.NewLogger(args.Config{})
-	log.Level = DebugLevel
-	log.Handler = h
-
-	log.F("foo", "bar").Info("Hi")
-}
-
 func TestJournaldHandler(t *testing.T) {
 	fn := loggerBackend(&testcase{"", "journald"}, false)
-	h, _ := fn().(*journalHandler)
-	h.test = true
+	h, _ := fn()
+	handler := h.(*journalHandler)
+	handler.test = true
 
 	log := Package.NewLogger(args.Config{})
 	log.Level = DebugLevel
-	log.Handler = h
+	log.Handler = handler
 
 	// should handle simple fields
 	log.F("foo", "bar").Info("Hi")
@@ -122,9 +114,46 @@ func TestJournaldHandler(t *testing.T) {
 	err := fmt.Errorf("Mistakes were made")
 	log.F("error", err).Error("Something went wrong")
 
-	e := h.Entries
+	e := handler.Entries
 	assert.Equal(t, e[0], "Hi FOO=bar")
 	assert.Equal(t, e[1], "Something went wrong ERROR=Mistakes were made")
+}
+
+func TestFileBaseHandler(t *testing.T) {
+	file, _ := os.CreateTemp("", "tmpfile-")
+	fn := loggerBackend(&testcase{"", "file:" + file.Name()}, false)
+	h, _ := fn()
+	handler := h.(*baseHandler)
+	handler.test = true
+
+	log := Package.NewLogger(args.Config{})
+	log.Level = DebugLevel
+	log.Handler = handler
+
+	// should handle simple fields
+	log.F("foo", "bar").Info("Hi")
+
+	// and complex fields
+	err := fmt.Errorf("Mistakes were made")
+	log.F("error", err).Error("Something went wrong")
+
+	e := handler.Entries
+	assert.Equal(t, e[0], "Hi {\"foo\":\"bar\"}\n")
+	assert.Equal(t, e[1], "Something went wrong {\"error\":\"Mistakes were made\"}\n")
+}
+
+func TestBadFileBaseHandler(t *testing.T) {
+	dir := os.TempDir()
+	name := dir + "tmpfile-not-permitted"
+	f, _ := os.OpenFile(name, os.O_CREATE, 0600)
+
+	// This is a case when a file is not allowed to open.
+	tc := testcase{"info", "file:" + name}
+	log := Package.NewLogger(args.Config{})
+	log.Level = DebugLevel
+
+	log.StartPlatformLogger(&tc)
+	f.Close()
 }
 
 func TestLogFunc(t *testing.T) {

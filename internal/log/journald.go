@@ -15,8 +15,8 @@ type journalHandler struct {
 	Entries []string
 }
 
-func newJournalHandler() apexLog.Handler {
-	return &journalHandler{}
+func newJournalHandler() (apexLog.Handler, error) {
+	return &journalHandler{}, nil
 }
 
 func priority(e *apexLog.Entry) journal.Priority {

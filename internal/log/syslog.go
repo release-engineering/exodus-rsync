@@ -2,7 +2,6 @@ package log
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/syslog"
 	"strings"
@@ -20,7 +19,7 @@ type syslogHandler struct {
 
 type writeFunc func(string) error
 
-func newSyslogHandler() apexLog.Handler {
+func newSyslogHandler() (apexLog.Handler, error) {
 	out := syslogHandler{}
 
 	writer, err := syslog.New(syslog.LOG_INFO, "exodus-rsync")
@@ -28,7 +27,7 @@ func newSyslogHandler() apexLog.Handler {
 		out.writer = writer
 	}
 
-	return &out
+	return &out, err
 }
 
 func (h *syslogHandler) writerForLevel(l apexLog.Level) writeFunc {
@@ -60,10 +59,6 @@ func (h *syslogHandler) HandleLog(e *apexLog.Entry) error {
 
 	enc := json.NewEncoder(&bld)
 	enc.Encode(syslogFields(e))
-
-	if h.writer == nil {
-		return errors.New("Syslog unavailable, please change the logging config")
-	}
 
 	if h.test {
 		h.mutex.Lock()
