@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 	"sync"
+	"time"
 
 	apexLog "github.com/apex/log"
 )
@@ -56,7 +57,7 @@ func (h *baseHandler) HandleLog(e *apexLog.Entry) error {
 		h.Entries = append(h.Entries, bld.String())
 	}
 
-	fmt.Fprintln(h.Writer, e.Timestamp.UTC().Format("2006-01-02 15:04:05")+" "+bld.String())
+	fmt.Fprintf(h.Writer, e.Timestamp.UTC().Format(time.UnixDate)+" "+bld.String())
 
 	return nil
 }
