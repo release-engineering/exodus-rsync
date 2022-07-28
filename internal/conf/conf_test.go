@@ -41,6 +41,7 @@ environments:
   gwpollinterval: 123
   rsyncmode: mixed
   strip: dest:/foo/bar
+  uploadthreads: 6
 
 `), 0755)
 
@@ -98,6 +99,7 @@ environments:
 	assertEqual("global gwpollinterval", cfg.GwPollInterval(), 5000)
 	assertEqual("global rsyncmode", cfg.RsyncMode(), "exodus")
 	assertEqual("global strip", cfg.Strip(), "dest:/foo")
+	assertEqual("global uploadthreads", cfg.UploadThreads(), 4)
 
 	// Values can be overridden in environment.
 	assertEqual("env gwenv", env.GwEnv(), "one-env")
@@ -105,6 +107,7 @@ environments:
 	assertEqual("env gwpollinterval", env.GwPollInterval(), 123)
 	assertEqual("env rsyncmode", env.RsyncMode(), "mixed")
 	assertEqual("env strip", env.Strip(), "dest:/foo/bar")
+	assertEqual("env uploadthreads", env.UploadThreads(), 6)
 
 	// For values which are NOT overridden, they should be equal to global.
 	assertEqual("env gwurl", env.GwURL(), cfg.GwURL())

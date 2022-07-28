@@ -19,6 +19,7 @@ type sharedConfig struct {
 	LoggerRaw         string `yaml:"logger"`
 	DiagRaw           bool   `yaml:"diag"`
 	StripRaw          string `yaml:"strip"`
+	UploadThreadsRaw  int    `yaml:"uploadthreads"`
 }
 
 type environment struct {
@@ -70,6 +71,10 @@ func (g *globalConfig) GwPollInterval() int {
 
 func (g *globalConfig) GwBatchSize() int {
 	return nonEmptyInt(g.GwBatchSizeRaw, 10000)
+}
+
+func (g *globalConfig) UploadThreads() int {
+	return nonEmptyInt(g.UploadThreadsRaw, 4)
 }
 
 func nonEmptyString(a, b string) string {
@@ -163,4 +168,8 @@ func (e *environment) Strip() string {
 	// be stripped from the destination path by default. The prefix is only stripped from the
 	// destination path if the 'strip:' key is undefined.
 	return nonEmptyString(nonEmptyString(e.StripRaw, e.parent.Strip()), e.PrefixRaw)
+}
+
+func (e *environment) UploadThreads() int {
+	return nonEmptyInt(e.UploadThreadsRaw, e.parent.UploadThreads())
 }

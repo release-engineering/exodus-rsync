@@ -12,13 +12,13 @@ import (
 type mockClientConfigurator func(*gomock.Controller, *gw.MockClient)
 
 func setupFailedUpload(_ *gomock.Controller, client *gw.MockClient) {
-	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 		Return(fmt.Errorf("simulated error"))
 }
 
 func setupFailedNewPublish(_ *gomock.Controller, client *gw.MockClient) {
 	// EnsureUploaded succeeds...
-	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 		Return(nil)
 
 	// ...then creating a publish fails
@@ -27,11 +27,13 @@ func setupFailedNewPublish(_ *gomock.Controller, client *gw.MockClient) {
 
 func setupFailedAddItems(ctrl *gomock.Controller, client *gw.MockClient) {
 	// EnsureUploaded succeeds, and (importantly) must add some items
-	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-		Do(func(_ interface{}, _ interface{}, onUploaded func(walk.SyncItem) error, _ interface{}) {
+	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		Do(func(_ interface{}, _ interface{}, onUploaded func(walk.SyncItem) error, onPresent func(walk.SyncItem) error, onDuplicate func(walk.SyncItem) error) {
 			// Simulate that a couple of items were uploaded.
 			onUploaded(walk.SyncItem{SrcPath: "file1", Key: "abc123"})
 			onUploaded(walk.SyncItem{SrcPath: "file2", Key: "aabbcc"})
+			onDuplicate(walk.SyncItem{SrcPath: "file3", Key: "abc123"})
+			onPresent(walk.SyncItem{SrcPath: "file4", Key: "a1b2c3"})
 		}).
 		Return(nil)
 
@@ -47,8 +49,8 @@ func setupFailedAddItems(ctrl *gomock.Controller, client *gw.MockClient) {
 
 func setupFailedCommit(ctrl *gomock.Controller, client *gw.MockClient) {
 	// EnsureUploaded succeeds, and (importantly) must add some items
-	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-		Do(func(_ interface{}, _ interface{}, onUploaded func(walk.SyncItem) error, _ interface{}) {
+	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		Do(func(_ interface{}, _ interface{}, onUploaded func(walk.SyncItem) error, _ interface{}, _ interface{}) {
 			// Simulate that a couple of items were uploaded.
 			onUploaded(walk.SyncItem{SrcPath: "file1", Key: "abc123"})
 			onUploaded(walk.SyncItem{SrcPath: "file2", Key: "aabbcc"})

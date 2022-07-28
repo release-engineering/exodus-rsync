@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -145,25 +146,60 @@ func (c *client) uploadBlob(ctx context.Context, item walk.SyncItem) error {
 	return nil
 }
 
+type uploadResult struct {
+	Error error
+	Item  walk.SyncItem
+}
+
+func (c *client) uploadWorker(
+	ctx context.Context,
+	items <-chan walk.SyncItem,
+	results chan<- uploadResult,
+	wg *sync.WaitGroup,
+) {
+	for item := range items {
+		if err := c.uploadBlob(ctx, item); err != nil {
+			results <- uploadResult{err, item}
+			break
+		}
+		results <- uploadResult{nil, item}
+	}
+	wg.Done()
+}
+
 func (c *client) EnsureUploaded(
 	ctx context.Context,
 	items []walk.SyncItem,
 	onUploaded func(walk.SyncItem) error,
 	onPresent func(walk.SyncItem) error,
+	onDuplicate func(walk.SyncItem) error,
 ) error {
-	// TODO: concurrency
+	// Maintain a map of items processed thus far
+	processedItems := make(map[string]walk.SyncItem)
+	// The final collection of items to upload
+
+	numThreads := c.cfg.UploadThreads()
+	var wg sync.WaitGroup
+	results := make(chan uploadResult, len(items))
+	jobs := make(chan walk.SyncItem, len(items))
+
+	for i := 0; i < numThreads; i++ {
+		wg.Add(1)
+		go c.uploadWorker(ctx, jobs, results, &wg)
+	}
+
 	for _, item := range items {
 		if item.Key == "" && item.LinkTo != "" {
 			log.FromContext(ctx).F("uri", item.SrcPath).Debug("Skipping unfollowed symlink")
 			continue
 		}
 
-		// Check if it's present
+		// Determine if the blob is already present in the bucket
 		have, err := c.haveBlob(ctx, item)
 		if err != nil {
 			return fmt.Errorf("checking for presence of %s: %w", item.Key, err)
 		}
-
+		// If so, do not include it in the final set of items to upload
 		if have {
 			if err = onPresent(item); err != nil {
 				return err
@@ -171,14 +207,32 @@ func (c *client) EnsureUploaded(
 			continue
 		}
 
-		if err = c.uploadBlob(ctx, item); err != nil {
-			return err
+		// Determine if the item already exists in the final set of items to upload
+		// If so, prevent a costly re-upload of the item
+		if _, ok := processedItems[item.Key]; ok {
+			log.FromContext(ctx).F("uri", item.SrcPath).Debug("Skipping duplicate item")
+			if err := onDuplicate(item); err != nil {
+				return err
+			}
+			continue
 		}
-		if err = onUploaded(item); err != nil {
+		processedItems[item.Key] = item
+		jobs <- item
+	}
+	close(jobs)
+	// Wait for all goroutines to complete
+	wg.Wait()
+	close(results)
+	// Check for errors
+	for result := range results {
+		if result.Error != nil {
+			return result.Error
+		}
+		err := onUploaded(result.Item)
+		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 

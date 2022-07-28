@@ -38,14 +38,16 @@ type Client interface {
 	// EnsureUploaded will process every given item for sync and ensure that the content
 	// is present in the target exodus-gw environment.
 	//
-	// For each item, onUploaded is invoked if the item was uploaded during the call,
-	// while onPresent is invoked if the item was already present prior to the call.
+	// For each item, onUploaded is invoked if the item was uploaded during the call;
+	// onPresent is invoked if the item was already present prior to the call;
+	// onDuplicate is invoked if a duplicate item is detected within the publish.
 	//
-	// In either case, returning from the callback with an error will cause EnsureUploaded
-	// to stop and return the same error.
+	// Returning from the callback with an error will cause EnsureUploaded to stop and
+	// return the same error.
 	EnsureUploaded(ctx context.Context, items []walk.SyncItem,
 		onUploaded func(walk.SyncItem) error,
 		onPresent func(walk.SyncItem) error,
+		onDuplicate func(walk.SyncItem) error,
 	) error
 
 	// NewPublish creates and returns a new publish object within exodus-gw.

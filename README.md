@@ -201,6 +201,9 @@ diag: false
 #
 # They are listed here along with their default values.
 
+# The number of threads (goroutines) used to upload blobs to S3.
+uploadthreads: 4
+
 # When awaiting an exodus-gw publish task, how long (in milliseconds) should
 # we wait between each poll of the task status.
 gwpollinterval: 5000
