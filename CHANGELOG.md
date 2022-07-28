@@ -4,6 +4,14 @@
 
 - n/a
 
+## 1.9.0 - 2022-07-28
+
+- Implement file logger
+- Fix: logging is not ASCII-safe
+- Fix: syslog causes panic when running in container
+- Add Content-Type to publish items
+- Fix: exodus-rsync invokes itself when rsync is missing from system
+
 ## 1.8.5 - 2022-06-09
 
 - Upgraded AWS SDK
