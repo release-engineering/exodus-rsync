@@ -184,23 +184,23 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	for _, item := range items {
 		gwItem := gw.ItemInput{WebURI: webURI(item.SrcPath, args.Src, destTree, srcIsDir)}
 
-		// Try to detect MIME type of file.
-		// mimetype will return "application/octet-stream" type if it
-		// can't make a determination or encounters an error.
-		mtype, err := mimetype.DetectFile(item.SrcPath)
-		logger.F(
-			"file", item.SrcPath,
-			"MIME type", mtype.String(),
-			"error", err,
-		).Debug("MIME type detection attempted")
-		gwItem.ContentType = mtype.String()
-
 		if item.LinkTo != "" {
 			linkSrcDirRelative := path.Dir(getRelPath(item.SrcPath, args.Src))
 			linkSrcDirFull := path.Join(destTree, linkSrcDirRelative)
 			gwItem.LinkTo = path.Join(linkSrcDirFull, "/", item.LinkTo)
 		} else {
+			// Try to detect MIME type of file.
+			// mimetype will return "application/octet-stream" type if it
+			// can't make a determination or encounters an error.
+			mtype, err := mimetype.DetectFile(item.SrcPath)
+			logger.F(
+				"file", item.SrcPath,
+				"MIME type", mtype.String(),
+				"error", err,
+			).Debug("MIME type detection attempted")
+
 			gwItem.ObjectKey = item.Key
+			gwItem.ContentType = mtype.String()
 		}
 
 		publishItems = append(publishItems, gwItem)
