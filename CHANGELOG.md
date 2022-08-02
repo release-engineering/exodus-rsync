@@ -4,6 +4,10 @@
 
 - n/a
 
+## 1.9.1 - 2022-08-02
+
+- Fix: exodus-rsync cannot publish with links error
+
 ## 1.9.0 - 2022-07-28
 
 - Implement file logger
