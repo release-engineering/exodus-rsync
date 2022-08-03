@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"runtime"
 	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -156,6 +157,7 @@ func (c *client) uploadWorker(
 	items <-chan walk.SyncItem,
 	results chan<- uploadResult,
 	wg *sync.WaitGroup,
+	workerID int,
 ) {
 	for item := range items {
 		if err := c.uploadBlob(ctx, item); err != nil {
@@ -163,6 +165,7 @@ func (c *client) uploadWorker(
 			break
 		}
 		results <- uploadResult{nil, item}
+		log.FromContext(ctx).F("worker", workerID, "goroutines", runtime.NumGoroutine(), "key", item.Key).Debug("upload thread")
 	}
 	wg.Done()
 }
@@ -185,7 +188,7 @@ func (c *client) EnsureUploaded(
 
 	for i := 0; i < numThreads; i++ {
 		wg.Add(1)
-		go c.uploadWorker(ctx, jobs, results, &wg)
+		go c.uploadWorker(ctx, jobs, results, &wg, i+1)
 	}
 
 	for _, item := range items {
