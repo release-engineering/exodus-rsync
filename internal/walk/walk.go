@@ -67,6 +67,8 @@ func fillItem(ctx context.Context, c chan<- syncItemPrivate, w walkItem, links b
 	}
 
 	if info.Mode().IsDir() {
+		// Log directories at Info to serve as a gradual progress indicator.
+		logger.F("directory", w.SrcPath).Info("Walking directory")
 		// Nothing to do
 		return nil
 	}
