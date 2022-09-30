@@ -4,6 +4,11 @@
 
 - n/a
 
+## 1.9.2 - 2022-09-29
+
+- Updated dependencies
+- Minor improvements to logging of concurrent uploads
+
 ## 1.9.1 - 2022-08-02
 
 - Fix: exodus-rsync cannot publish with links error
