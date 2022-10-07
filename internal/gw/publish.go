@@ -3,6 +3,7 @@ package gw
 import (
 	"context"
 	"fmt"
+	"math"
 
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
@@ -94,12 +95,15 @@ func (p *publish) AddItems(ctx context.Context, items []ItemInput) error {
 
 	count := 0
 	empty := struct{}{}
+	totalBatches := math.Ceil(float64(len(items)) / float64(batchSize))
 
 	for nextBatch(); len(batch) > 0; nextBatch() {
 		count++
+		// Log the current batch number at Info to serve as a gradual progress indicator.
+		logger.F("currentBatch", count, "totalBatches", totalBatches).Info("Preparing the next batch of items")
 
 		for _, item := range batch {
-			logger.F("item", item, "batch", count, "url", url).Debug("Adding to publish object")
+			logger.F("item", item, "url", url).Debug("Adding to publish object")
 		}
 
 		err := c.doJSONRequest(ctx, "PUT", url, batch, &empty)

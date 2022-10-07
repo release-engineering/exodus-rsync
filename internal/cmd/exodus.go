@@ -106,6 +106,7 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	}
 	srcIsDir := fileStat.IsDir()
 
+	logger.Info("Walking directory tree")
 	err = walk.Walk(ctx, args, onlyThese, func(item walk.SyncItem) error {
 		if args.IgnoreExisting {
 			// This argument is not (properly) supported, so bail out.
@@ -135,6 +136,8 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 		return 73
 	}
 
+	logger.F("items", len(items)).Info("Preparing to upload items")
+
 	uploadCount := 0
 	existingCount := 0
 	duplicateCount := 0
@@ -162,6 +165,8 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	logger.F("uploaded", uploadCount, "existing", existingCount, "duplicate", duplicateCount).Info("Completed uploads")
 
 	var publish gw.Publish
+
+	logger.F("items", len(items)).Info("Preparing to publish items")
 
 	if args.Publish == "" {
 		// No publish provided, then create a new one.
@@ -216,6 +221,7 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 
 	if args.Publish == "" {
 		// We created the publish, then we should commit it.
+		logger.F("publish", publish.ID()).Info("Preparing to commit publish")
 		err = publish.Commit(ctx)
 		if err != nil {
 			logger.F("error", err).Error("can't commit publish")

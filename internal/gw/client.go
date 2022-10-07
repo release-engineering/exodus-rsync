@@ -97,7 +97,7 @@ func (c *client) haveBlob(ctx context.Context, item walk.SyncItem) (bool, error)
 	})
 
 	if err == nil {
-		logger.F("key", item.Key).Debug("blob is present")
+		logger.F("key", item.Key).Info("Skipping upload, blob is present")
 		return true, nil
 	}
 
