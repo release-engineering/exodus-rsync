@@ -4,6 +4,12 @@
 
 - n/a
 
+## 1.9.3 - 2022-10-10
+
+- Updated dependencies
+- Minor improvements to logging of progress at `INFO` level
+- Improved upload process to perform more steps concurrently
+
 ## 1.9.2 - 2022-09-29
 
 - Updated dependencies
