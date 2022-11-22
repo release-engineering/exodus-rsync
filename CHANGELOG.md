@@ -4,6 +4,10 @@
 
 - n/a
 
+## 1.9.4 - 2022-11-21
+
+- Updated dependencies
+
 ## 1.9.3 - 2022-10-10
 
 - Updated dependencies
