@@ -1,6 +1,6 @@
 module github.com/release-engineering/exodus-rsync
 
-go 1.16
+go 1.19
 
 require (
 	github.com/adrg/xdg v0.4.0
@@ -12,4 +12,16 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/yaml.v3 v3.0.1
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/fatih/color v1.7.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/mattn/go-colorable v0.1.2 // indirect
+	github.com/mattn/go-isatty v0.0.8 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 )

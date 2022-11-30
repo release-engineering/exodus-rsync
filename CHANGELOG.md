@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- n/a
+- Updated to Go version 1.19
 
 ## 1.9.4 - 2022-11-21
 
