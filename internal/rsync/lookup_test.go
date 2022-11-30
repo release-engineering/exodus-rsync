@@ -11,18 +11,6 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
-func setPath(t *testing.T, value string) {
-	oldPath := os.Getenv("PATH")
-
-	t.Cleanup(func() {
-		os.Setenv("PATH", oldPath)
-	})
-	err := os.Setenv("PATH", value)
-	if err != nil {
-		t.Fatalf("could not set PATH, err = %v", err)
-	}
-}
-
 // If an rsync command can't be located, /usr/bin/rsync is used
 // as fallback.
 func TestCommandFallback(t *testing.T) {
@@ -59,7 +47,7 @@ func TestCommandAvoidSelf(t *testing.T) {
 
 	// Add dir containing self to path *and also* test/bin, which contains
 	// the "real" rsync in the context of this test
-	setPath(t, tempDir+":../../test/bin")
+	setPath(t, tempDir+":"+testBinPath(t))
 
 	// Sanity check: naive lookup of rsync should find self
 	foundRsync, err := exec.LookPath("rsync")
@@ -79,7 +67,7 @@ func TestCommandAvoidSelf(t *testing.T) {
 
 	// Rather than looking up ourselves as a plain LookPath did, it should be smart
 	// enough to remove self from path and find the "real" rsync
-	if cmd.Path != "../../test/bin/rsync" {
+	if cmd.Path != testBinPath(t)+"/rsync" {
 		t.Errorf("command returned unexpected path %v", cmd.Path)
 	}
 }

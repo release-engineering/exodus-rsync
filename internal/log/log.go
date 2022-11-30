@@ -78,16 +78,15 @@ type Logger struct {
 //
 // This code:
 //
-//   logger.F("a", a, "b", b, "c", c).Info(...)
+//	logger.F("a", a, "b", b, "c", c).Info(...)
 //
 // ...is equivalent to the following more cumbersome:
 //
-//   logger.WithField("a", a).WithField("b", b).WithField("c", c).Info(...)
+//	logger.WithField("a", a).WithField("b", b).WithField("c", c).Info(...)
 //
 // ...or:
 //
-//   logger.WithFields(log.Fields{"a", a, "b", b, "c", c}).Info(...)
-//
+//	logger.WithFields(log.Fields{"a", a, "b", b, "c", c}).Info(...)
 func (l *Logger) F(v ...interface{}) *apexLog.Entry {
 	fields := apexLog.Fields{}
 	for i := 0; i < len(v); i += 2 {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"reflect"
 	"testing"
 
@@ -11,14 +12,35 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
+// Like os.Getwd but fails test on error.
+func getwd(t *testing.T) string {
+	out, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Could not get working directory: %v", err)
+	}
+	return out
+}
+
+// Returns absolute path to the test/bin directory in source tree.
+func testBinPath(t *testing.T) string {
+	return path.Clean(getwd(t) + "/../../test/bin")
+}
+
+// Adjusts PATH to include the test/bin directory at the front for the
+// duration of the current test.
 func addTestBinPath(t *testing.T) {
 	oldPath := os.Getenv("PATH")
-	newPath := "../../test/bin:" + oldPath
+	setPath(t, testBinPath(t)+":"+oldPath)
+}
+
+// Sets PATH to the specified value for the duration of the current test.
+func setPath(t *testing.T, value string) {
+	oldPath := os.Getenv("PATH")
 
 	t.Cleanup(func() {
 		os.Setenv("PATH", oldPath)
 	})
-	err := os.Setenv("PATH", newPath)
+	err := os.Setenv("PATH", value)
 	if err != nil {
 		t.Fatalf("could not set PATH, err = %v", err)
 	}
@@ -28,7 +50,7 @@ func TestRawExec(t *testing.T) {
 	addTestBinPath(t)
 
 	argv := []string{"some-src", "some-dest"}
-	expectedArgv := []string{"../../test/bin/rsync", "some-src", "some-dest"}
+	expectedArgv := []string{testBinPath(t) + "/rsync", "some-src", "some-dest"}
 
 	var gotArgv0 string
 	var gotArgv []string
@@ -49,7 +71,7 @@ func TestRawExec(t *testing.T) {
 		t.Error("error not propagated from exec, got =", err)
 	}
 
-	if gotArgv0 != "../../test/bin/rsync" {
+	if gotArgv0 != testBinPath(t)+"/rsync" {
 		t.Error("invoked unexpected rsync command", gotArgv0)
 	}
 
@@ -71,7 +93,7 @@ func TestExec(t *testing.T) {
 				Src:  "some-src",
 				Dest: "some-dest",
 			},
-			[]string{"../../test/bin/rsync", "some-src", "some-dest"},
+			[]string{testBinPath(t) + "/rsync", "some-src", "some-dest"},
 		},
 
 		{"all args",
@@ -115,7 +137,7 @@ func TestExec(t *testing.T) {
 				FilesFrom:      "sources.txt",
 			},
 			[]string{
-				"../../test/bin/rsync", "-vvv",
+				testBinPath(t) + "/rsync", "-vvv",
 				"--archive", "--recursive", "--relative", "--links", "--copy-links",
 				"--keep-dirlinks", "--hard-links", "--perms", "--executability", "--acls",
 				"--xattrs", "--owner", "--group", "--devices", "--specials", "--times",
@@ -148,7 +170,7 @@ func TestExec(t *testing.T) {
 				t.Error("error not propagated from exec, got =", err)
 			}
 
-			if gotArgv0 != "../../test/bin/rsync" {
+			if gotArgv0 != testBinPath(t)+"/rsync" {
 				t.Error("invoked unexpected rsync command", gotArgv0)
 			}
 
