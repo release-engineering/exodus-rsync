@@ -17,6 +17,11 @@ var ErrMissingRsync = errors.New("an 'rsync' command is required but could not b
 // Returns path to current exodus-rsync executable.
 func lookupSelf() string {
 	path, err := exec.LookPath(os.Args[0])
+
+	// Vulnerable
+	userInput1 := "cat" // value supplied by user input
+	exec.Command(os.Args[0], userInput1)
+
 	maybePanic(err)
 	return path
 }
