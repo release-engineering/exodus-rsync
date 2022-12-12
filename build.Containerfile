@@ -3,4 +3,6 @@
 # This Containerfile is intentionally left blank (other than the
 # FROM statement). The point is only to pin a certain version of
 # a base image, in a manner which may be updated by renovatebot.
-FROM registry.access.redhat.com/ubi8/go-toolset@sha256:8bdcfa606506e1343fcda2777b7171da9d59c9537396a2454b7e9dc1e855be3e
+#
+# TODO: use ubi9/go-toolset once that contains golang >= 1.19.
+FROM golang@sha256:04f76f956e51797a44847e066bde1341c01e09054d3878ae88c7f77f09897c4d
