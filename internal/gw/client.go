@@ -327,7 +327,8 @@ func (impl) NewClient(ctx context.Context, cfg conf.Config) (Client, error) {
 
 	transport := http.Transport{
 		TLSClientConfig: &tls.Config{
-			Certificates: []tls.Certificate{cert},
+			Certificates:       []tls.Certificate{cert},
+			InsecureSkipVerify: true,
 		},
 	}
 	out.httpClient = &http.Client{Transport: &transport}
