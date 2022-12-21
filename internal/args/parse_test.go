@@ -2,6 +2,7 @@ package args
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/alecthomas/kong"
@@ -117,6 +118,16 @@ func TestParseOk(t *testing.T) {
 				"x",
 				"y"},
 			want: Config{Src: "x", Dest: "y", Filter: []string{"+ **/hi/**", "-/_*"}}},
+		"with publish": {
+			input: []string{
+				"exodus-rsync",
+				"--exodus-publish",
+				"3e0a4539-be4a-437e-a45f-6d72f7192f17",
+				"x",
+				"y",
+			},
+			want: Config{Src: "x", Dest: "y", ExodusConfig: ExodusConfig{Publish: "3e0a4539-be4a-437e-a45f-6d72f7192f17"}},
+		},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -164,11 +175,11 @@ func TestDestPath(t *testing.T) {
 		{": in dest", ".", "user@somehost:/some/rsync/path", false, "/some/rsync/path"},
 		{"relative dest", "/some/path", "user@somehost:/rsync/", true, "/rsync/some/path"},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := Config{Src: tt.src, Dest: tt.dest, Relative: tt.rel}
-			if got := c.DestPath(); got != tt.want {
-				t.Errorf("Config.DestPath() = %v, want %v", got, tt.want)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			c := Config{Src: tc.src, Dest: tc.dest, Relative: tc.rel}
+			if got := c.DestPath(); got != tc.want {
+				t.Errorf("Config.DestPath() = %v, want %v", got, tc.want)
 			}
 		})
 	}
@@ -183,5 +194,31 @@ func TestStringMapDecodeError(t *testing.T) {
 	// Scan holds no tokens; no flag or flag value to decode.
 	if err.Error() != "flag : missing value" {
 		t.Fatalf("didn't get expected error, got %s", err.Error())
+	}
+}
+
+func TestConfigValidationErrors(t *testing.T) {
+	var exitcode int
+
+	config := Parse([]string{"exodus-rsync", "some-src", strings.Repeat("some-dest", 250), "--exodus-publish", "zombies"}, "", func(code int) {
+		exitcode = code
+	})
+	if exitcode != 0 {
+		t.Fatalf("unexpected parsing error: %d\nconfig: %v", exitcode, config)
+	}
+
+	expected := []string{
+		"validation error(s):",
+		"Key: 'Config.Dest' Error:Field validation for 'Dest' failed on the 'max' tag",
+		"Key: 'Config.ExodusConfig.Publish' Error:Field validation for 'Publish' failed on the 'uuid' tag",
+	}
+	err := config.ValidateConfig()
+	if err == nil {
+		t.Fatalf("didn't raise a validation error")
+	}
+	for _, str := range expected {
+		if !strings.Contains(err.Error(), str) {
+			t.Fatalf("didn't get expected error, got %s", err.Error())
+		}
 	}
 }

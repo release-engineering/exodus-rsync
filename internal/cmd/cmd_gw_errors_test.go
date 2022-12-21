@@ -41,7 +41,7 @@ func setupFailedAddItems(ctrl *gomock.Controller, client *gw.MockClient) {
 	publish := gw.NewMockPublish(ctrl)
 	client.EXPECT().NewPublish(gomock.Any()).Return(publish, nil)
 
-	publish.EXPECT().ID().Return("test-publish").AnyTimes()
+	publish.EXPECT().ID().Return("3e0a4539-be4a-437e-a45f-6d72f7192f17").AnyTimes()
 
 	// Publish can't have items added
 	publish.EXPECT().AddItems(gomock.Any(), gomock.Any()).Return(fmt.Errorf("simulated error"))
@@ -61,7 +61,7 @@ func setupFailedCommit(ctrl *gomock.Controller, client *gw.MockClient) {
 	publish := gw.NewMockPublish(ctrl)
 	client.EXPECT().NewPublish(gomock.Any()).Return(publish, nil)
 
-	publish.EXPECT().ID().Return("test-publish").AnyTimes()
+	publish.EXPECT().ID().Return("3e0a4539-be4a-437e-a45f-6d72f7192f17").AnyTimes()
 
 	// Adding items succeeds
 	publish.EXPECT().AddItems(gomock.Any(), gomock.Any()).Return(nil)

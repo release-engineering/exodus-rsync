@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/alecthomas/kong"
+	"github.com/go-playground/validator/v10"
 )
 
 const docsURL = "https://github.com/release-engineering/exodus-rsync"
@@ -70,9 +71,9 @@ type IgnoredConfig struct {
 // by rsync. To avoid clashes with rsync, all of these are prefixed with "--exodus"
 // and there are no short flags.
 type ExodusConfig struct {
-	Conf string `help:"Force usage of this configuration file."`
+	Conf string `help:"Force usage of this configuration file." validate:"max=2000"`
 
-	Publish string `help:"ID of existing exodus-gw publish to join."`
+	Publish string `help:"ID of existing exodus-gw publish to join." validate:"omitempty,uuid"`
 
 	Diag bool `help:"Diagnostic mode, dumps various information about the environment."`
 }
@@ -95,15 +96,33 @@ type Config struct {
 	IgnoreExisting bool `hidden:"1"`
 
 	Filter    filterArguments `short:"f" placeholder:"RULE" help:"Add a file-filtering RULE"`
-	Exclude   []string        `placeholder:"PATTERN" help:"Exclude files matching this pattern"`
-	Include   []string        `placeholder:"PATTERN" help:"Don't exclude files matching this pattern"`
-	FilesFrom string          `placeholder:"FILE" help:"Read list of source-file names from FILE"`
+	Exclude   []string        `placeholder:"PATTERN" help:"Exclude files matching this pattern" validate:"dive,max=2000"`
+	Include   []string        `placeholder:"PATTERN" help:"Don't exclude files matching this pattern" validate:"dive,max=2000"`
+	FilesFrom string          `placeholder:"FILE" help:"Read list of source-file names from FILE" validate:"max=2000"`
 
-	Src  string `arg:"1" placeholder:"SRC" help:"Local path to a file or directory for sync"`
-	Dest string `arg:"1" placeholder:"[USER@]HOST:DEST" help:"Remote destination for sync"`
+	Src  string `arg:"1" placeholder:"SRC" help:"Local path to a file or directory for sync" validate:"max=2000"`
+	Dest string `arg:"1" placeholder:"[USER@]HOST:DEST" help:"Remote destination for sync" validate:"max=2000"`
 
 	IgnoredConfig `embed:"1" group:"ignored"`
-	ExodusConfig  `embed:"1" prefix:"exodus-"`
+	ExodusConfig  `embed:"1" prefix:"exodus-" validate:"dive"`
+}
+
+// ValidateConfig enforces constraints defined by the "validate" tag on
+// each attribute.
+//
+// The name "Validate" is avoided so Config structs are not validated
+// automatically upon creation.
+func (c *Config) ValidateConfig() (retErr error) {
+	var errors []string
+
+	err := validator.New().Struct(c)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			errors = append(errors, err.Error())
+		}
+		retErr = fmt.Errorf("validation error(s):\n%s", strings.Join(errors, "\n"))
+	}
+	return retErr
 }
 
 // processFilterArgs is a helper function that appends the appropriate patterns
@@ -117,12 +136,12 @@ func (c *Config) processFilterArgs(rule string, slice []string) []string {
 	return slice
 }
 
-// Excluded exctracts the pattern from Filter arguments and appends it onto Exclude.
+// Excluded extracts the pattern from Filter arguments and appends it onto Exclude.
 func (c *Config) Excluded() []string {
 	return c.processFilterArgs("-", c.Exclude)
 }
 
-// Included exctracts the pattern from Filter arguments and appends it onto Include.
+// Included extracts the pattern from Filter arguments and appends it onto Include.
 func (c *Config) Included() []string {
 	return c.processFilterArgs("+", c.Include)
 
