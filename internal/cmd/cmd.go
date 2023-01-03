@@ -57,6 +57,12 @@ func Main(rawArgs []string) int {
 
 	logger := ext.log.NewLogger(parsedArgs)
 
+	err := parsedArgs.ValidateConfig()
+	if err != nil {
+		logger.WithField("error", err).Error("argument validation failed")
+		return 23
+	}
+
 	ctx = log.NewContext(ctx, logger)
 
 	cfg, err := ext.conf.Load(ctx, parsedArgs)

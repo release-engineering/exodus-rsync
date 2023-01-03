@@ -58,3 +58,20 @@ environments:
 		t.Error("unexpected exit code", got)
 	}
 }
+
+func TestMainBadArgs(t *testing.T) {
+	logs := CaptureLogger(t)
+
+	// Invalid publish ID (should be UUID) raises validation error and returns code 23.
+	args := []string{"exodus-rsync", "-vvv", "src", "exodus:dest", "--exodus-publish", "tacos"}
+	if got := Main(args); got != 23 {
+		t.Fatalf("unexpected exit code: %d", got)
+	}
+
+	expectedErr := "argument validation failed"
+	entry := FindEntry(logs, expectedErr)
+
+	if entry == nil {
+		t.Fatal("missing expected log message")
+	}
+}

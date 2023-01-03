@@ -90,7 +90,7 @@ func (c *FakeClient) EnsureUploaded(ctx context.Context, items []walk.SyncItem,
 }
 
 func (c *FakeClient) NewPublish(ctx context.Context) (gw.Publish, error) {
-	c.publishes = append(c.publishes, FakePublish{id: "some-publish"})
+	c.publishes = append(c.publishes, FakePublish{id: "3e0a4539-be4a-437e-a45f-6d72f7192f17"})
 	return &c.publishes[len(c.publishes)-1], nil
 }
 
@@ -735,14 +735,14 @@ func TestMainSyncJoinPublish(t *testing.T) {
 	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
 	// Set up that this publish already exists.
-	client.publishes = []FakePublish{{items: make([]gw.ItemInput, 0), id: "abc123"}}
+	client.publishes = []FakePublish{{items: make([]gw.ItemInput, 0), id: "3e0a4539-be4a-437e-a45f-6d72f7192f17"}}
 
 	srcPath := path.Clean(wd + "/../../test/data/srctrees/just-files")
 
 	args := []string{
 		"rsync",
 		"-vvv",
-		"--exodus-publish", "abc123",
+		"--exodus-publish", "3e0a4539-be4a-437e-a45f-6d72f7192f17",
 		srcPath,
 		"exodus:/dest",
 	}
