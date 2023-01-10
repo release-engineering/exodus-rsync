@@ -23,6 +23,14 @@ import (
 	"github.com/release-engineering/exodus-rsync/internal/walk"
 )
 
+func logConnectionOpen(ctx context.Context, url string) {
+	log.FromContext(ctx).F("url", url).Info("Initializing connection")
+}
+
+func logConnectionClose(ctx context.Context, url string) {
+	log.FromContext(ctx).F("url", url).Info("Closing connection")
+}
+
 type client struct {
 	cfg        conf.Config
 	httpClient *http.Client
@@ -53,6 +61,9 @@ func (c *client) doJSONRequest(ctx context.Context, method string, url string, b
 
 	req.Header["Accept"] = []string{"application/json"}
 	req.Header["Content-Type"] = []string{"application/json"}
+
+	logConnectionOpen(ctx, fullURL)
+	defer logConnectionClose(ctx, fullURL)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -90,6 +101,10 @@ func (c *client) WhoAmI(ctx context.Context) (map[string]interface{}, error) {
 
 func (c *client) haveBlob(ctx context.Context, item walk.SyncItem) (bool, error) {
 	logger := log.FromContext(ctx)
+
+	fullURL := c.s3.Endpoint + item.Key
+	logConnectionOpen(ctx, fullURL)
+	defer logConnectionClose(ctx, fullURL)
 
 	_, err := c.s3.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(c.cfg.GwEnv()),
@@ -131,6 +146,10 @@ func (c *client) uploadBlob(ctx context.Context, item walk.SyncItem) error {
 		return err
 	}
 	defer file.Close()
+
+	fullURL := c.s3.Endpoint + item.Key
+	logConnectionOpen(ctx, fullURL)
+	defer logConnectionClose(ctx, fullURL)
 
 	res, err := c.uploader.UploadWithContext(ctx, &s3manager.UploadInput{
 		Bucket: aws.String(c.cfg.GwEnv()),
