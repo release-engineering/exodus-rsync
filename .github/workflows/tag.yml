@@ -1,11 +1,6 @@
 name: Make tag
 
 on:
-  push:
-    paths:
-    - "CHANGELOG.md"
-    branches:
-    - main
   workflow_dispatch: {}
   release:
     types: [published]
