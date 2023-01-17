@@ -67,7 +67,11 @@ func TestDryRunPublish(t *testing.T) {
 
 		{"get publish",
 			func(t *testing.T) Publish {
-				return c.GetPublish("whatever-id")
+				p, err := c.GetPublish(ctx, "whatever-id")
+				if err != nil {
+					t.Fatalf("GetPublish failed in dry-run mode, err = %v", err)
+				}
+				return p
 			},
 		},
 	}

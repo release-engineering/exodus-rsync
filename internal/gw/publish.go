@@ -45,9 +45,9 @@ func (c *client) NewPublish(ctx context.Context) (Publish, error) {
 	return out, nil
 }
 
-func (c *client) GetPublish(id string) Publish {
+func (c *client) GetPublish(ctx context.Context, id string) (Publish, error) {
 	if c.dryRun {
-		return &dryRunPublish{}
+		return &dryRunPublish{}, nil
 	}
 
 	url := "/" + c.cfg.GwEnv() + "/publish/" + id
@@ -65,7 +65,13 @@ func (c *client) GetPublish(id string) Publish {
 	out.raw.Links["self"] = url
 	out.raw.Links["commit"] = url + "/commit"
 
-	return out
+	// Verify that the publish ID is valid before uploading blobs.
+	empty := struct{}{}
+	if err := c.doJSONRequest(ctx, "GET", url, nil, &empty, nil); err != nil {
+		return nil, err
+	}
+
+	return out, nil
 }
 
 func (p *publish) ID() string {

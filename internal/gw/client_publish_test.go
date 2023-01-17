@@ -89,7 +89,11 @@ func TestClientGetPublish(t *testing.T) {
 	gw.publishes["some-id"] = &fakePublish{id: "some-id"}
 
 	// It should be able to get a publish
-	p := clientIface.GetPublish("some-id")
+	var p Publish
+	p, err = clientIface.GetPublish(ctx, "some-id")
+	if err != nil {
+		t.Errorf("failed to get publish, err = %v", err)
+	}
 
 	// It should have an ID
 	id := p.ID()

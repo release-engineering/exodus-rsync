@@ -11,17 +11,18 @@ import (
 
 type mockClientConfigurator func(*gomock.Controller, *gw.MockClient)
 
-func setupFailedUpload(_ *gomock.Controller, client *gw.MockClient) {
+func setupFailedUpload(ctrl *gomock.Controller, client *gw.MockClient) {
+	// Creating a publish succeeds
+	publish := gw.NewMockPublish(ctrl)
+	client.EXPECT().NewPublish(gomock.Any()).Return(publish, nil)
+
+	publish.EXPECT().ID().Return("3e0a4539-be4a-437e-a45f-6d72f7192f17").AnyTimes()
+
 	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 		Return(fmt.Errorf("simulated error"))
 }
 
 func setupFailedNewPublish(_ *gomock.Controller, client *gw.MockClient) {
-	// EnsureUploaded succeeds...
-	client.EXPECT().EnsureUploaded(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
-		Return(nil)
-
-	// ...then creating a publish fails
 	client.EXPECT().NewPublish(gomock.Any()).Return(nil, fmt.Errorf("simulated error"))
 }
 
@@ -68,6 +69,12 @@ func setupFailedCommit(ctrl *gomock.Controller, client *gw.MockClient) {
 
 	// Committing fails
 	publish.EXPECT().Commit(gomock.Any()).Return(fmt.Errorf("simulated error"))
+}
+
+func setupFailedJoinPublish(ctrl *gomock.Controller, client *gw.MockClient) {
+	publish := gw.NewMockPublish(ctrl)
+
+	client.EXPECT().GetPublish(gomock.Any(), gomock.Any()).Return(publish, fmt.Errorf("simulated error"))
 }
 
 func TestMainUploadFailed(t *testing.T) {
@@ -125,4 +132,54 @@ environments:
 			}
 		})
 	}
+}
+
+func TestMainJoinPublishFailed(t *testing.T) {
+	test := struct {
+		message   string
+		setupMock mockClientConfigurator
+		exitCode  int
+	}{"can't join publish", setupFailedJoinPublish, 67}
+
+	t.Run(test.message, func(t *testing.T) {
+
+		logs := CaptureLogger(t)
+		ctrl := MockController(t)
+
+		mockGw := gw.NewMockInterface(ctrl)
+		ext.gw = mockGw
+
+		mockClient := gw.NewMockClient(ctrl)
+
+		SetConfig(t, `
+gwcert: $HOME/certs/$USER.crt
+gwkey: $HOME/certs/$USER.key
+gwurl: https://exodus-gw.example.com/
+environments:
+- prefix: some-dest
+  gwenv: test
+`)
+
+		mockGw.EXPECT().NewClient(gomock.Any(), gomock.Any()).Return(mockClient, nil)
+
+		test.setupMock(ctrl, mockClient)
+
+		exitCode := Main([]string{
+			"exodus-rsync", ".", "some-dest:/foo/bar", "--exodus-publish", "3e0a4539-be4a-437e-a45f-6d72f7192f17",
+		})
+
+		// It should exit with error.
+		if exitCode != test.exitCode {
+			t.Error("returned incorrect exit code", exitCode)
+		}
+
+		entry := FindEntry(logs, test.message)
+		if entry == nil {
+			t.Fatal("missing expected log message")
+		}
+
+		if fmt.Sprint(entry.Fields["error"]) != "simulated error" {
+			t.Errorf("unexpected error %v", entry.Fields["error"])
+		}
+	})
 }

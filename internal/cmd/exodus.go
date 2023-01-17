@@ -136,6 +136,27 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 		return 73
 	}
 
+	var publish gw.Publish
+
+	logger.F("items", len(items)).Info("Preparing to publish items")
+
+	if args.Publish == "" {
+		// No publish provided, then create a new one.
+		publish, err = gwClient.NewPublish(ctx)
+		if err != nil {
+			logger.F("error", err).Error("can't create publish")
+			return 62
+		}
+		logger.F("publish", publish.ID()).Info("Created publish")
+	} else {
+		publish, err = gwClient.GetPublish(ctx, args.Publish)
+		if err != nil {
+			logger.F("error", err).Error("can't join publish")
+			return 67
+		}
+		logger.F("publish", publish.ID()).Info("Joining publish")
+	}
+
 	logger.F("items", len(items)).Info("Preparing to upload items")
 
 	uploadCount := 0
@@ -163,23 +184,6 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	}
 
 	logger.F("uploaded", uploadCount, "existing", existingCount, "duplicate", duplicateCount).Info("Completed uploads")
-
-	var publish gw.Publish
-
-	logger.F("items", len(items)).Info("Preparing to publish items")
-
-	if args.Publish == "" {
-		// No publish provided, then create a new one.
-		publish, err = gwClient.NewPublish(ctx)
-		if err != nil {
-			logger.F("error", err).Error("can't create publish")
-			return 62
-		}
-		logger.F("publish", publish.ID()).Info("Created publish")
-	} else {
-		publish = gwClient.GetPublish(args.Publish)
-		logger.F("publish", publish.ID()).Info("Joining publish")
-	}
 
 	publishItems := []gw.ItemInput{}
 

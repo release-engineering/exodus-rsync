@@ -106,6 +106,19 @@ func TestClientPublishErrors(t *testing.T) {
 		}
 	})
 
+	t.Run("get request fails", func(t *testing.T) {
+		gw.nextHTTPResponse = &http.Response{
+			Status:     "404 Publish not found",
+			StatusCode: 404,
+			Body:       io.NopCloser(strings.NewReader("'oops', publish not found")),
+		}
+
+		_, err := clientIface.GetPublish(ctx, "3e0a4539-be4a-437e-a45f-6d72f7192f17")
+		if err == nil {
+			t.Error("Unexpectedly failed to return an error")
+		}
+	})
+
 	t.Run("missing link for commit", func(t *testing.T) {
 		// Create a publish object directly without filling in any Links.
 		publish := publish{client: clientIface.(*client)}

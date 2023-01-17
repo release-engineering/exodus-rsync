@@ -86,6 +86,10 @@ func (f *fakeGw) RoundTrip(r *http.Request) (*http.Response, error) {
 		return f.createPublish(), nil
 	}
 
+	if len(route) == 2 && route[0] == "publish" && r.Method == "GET" {
+		return f.getPublish(route[1]), nil
+	}
+
 	if len(route) == 2 && route[0] == "publish" && r.Method == "PUT" {
 		return f.addPublishItems(r, route[1]), nil
 	}
@@ -245,5 +249,33 @@ func (f *fakeGw) getTask(id string) *http.Response {
 	out.Status = "200 OK"
 	out.StatusCode = 200
 	out.Body = io.NopCloser(strings.NewReader(content))
+	return out
+}
+
+func (f *fakeGw) getPublish(id string) *http.Response {
+	out := &http.Response{}
+
+	_, havePublish := f.publishes[id]
+	if !havePublish {
+		f.t.Logf("requested nonexistent publish %s", id)
+		out.Status = "404 Not Found"
+		out.StatusCode = 404
+		return out
+	}
+
+	content := fmt.Sprintf(`{
+		"id": "%s",
+		"env": "env",
+		"links": {
+			"self": "/env/publish/%[1]s",
+			"commit": "/env/publish/%[1]s/commit"
+		},
+		"items": []
+	}`, id)
+
+	out.Status = "200 OK"
+	out.StatusCode = 200
+	out.Body = io.NopCloser(strings.NewReader(content))
+
 	return out
 }
