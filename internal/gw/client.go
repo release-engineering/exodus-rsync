@@ -39,7 +39,7 @@ type client struct {
 	dryRun     bool
 }
 
-func (c *client) doJSONRequest(ctx context.Context, method string, url string, body interface{}, target interface{}) error {
+func (c *client) doJSONRequest(ctx context.Context, method string, url string, body interface{}, target interface{}, headers map[string][]string) error {
 	var bodyReader io.Reader
 	if body == nil {
 		bodyReader = nil
@@ -61,6 +61,11 @@ func (c *client) doJSONRequest(ctx context.Context, method string, url string, b
 
 	req.Header["Accept"] = []string{"application/json"}
 	req.Header["Content-Type"] = []string{"application/json"}
+	// Adding provided headers after setting Accept and Content-Type
+	// headers allows caller to overwrite them if necessary.
+	for key, value := range headers {
+		req.Header[key] = value
+	}
 
 	logConnectionOpen(ctx, fullURL)
 	defer logConnectionClose(ctx, fullURL)
@@ -95,7 +100,7 @@ func (c *client) doJSONRequest(ctx context.Context, method string, url string, b
 
 func (c *client) WhoAmI(ctx context.Context) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
-	err := c.doJSONRequest(ctx, "GET", "/whoami", nil, &out)
+	err := c.doJSONRequest(ctx, "GET", "/whoami", nil, &out, nil)
 	return out, err
 }
 

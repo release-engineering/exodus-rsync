@@ -35,7 +35,8 @@ func (c *client) NewPublish(ctx context.Context) (Publish, error) {
 	url := "/" + c.cfg.GwEnv() + "/publish"
 
 	out := &publish{}
-	if err := c.doJSONRequest(ctx, "POST", url, nil, &out.raw); err != nil {
+	headers := map[string][]string{"X-Idempotency-Key": {}}
+	if err := c.doJSONRequest(ctx, "POST", url, nil, &out.raw, headers); err != nil {
 		return out, err
 	}
 
@@ -106,7 +107,8 @@ func (p *publish) AddItems(ctx context.Context, items []ItemInput) error {
 			logger.F("item", item, "url", url).Debug("Adding to publish object")
 		}
 
-		err := c.doJSONRequest(ctx, "PUT", url, batch, &empty)
+		headers := map[string][]string{"X-Idempotency-Key": {}}
+		err := c.doJSONRequest(ctx, "PUT", url, batch, &empty, headers)
 		if err != nil {
 			return err
 		}
@@ -135,7 +137,8 @@ func (p *publish) Commit(ctx context.Context) error {
 	}
 
 	task := task{}
-	if err := c.doJSONRequest(ctx, "POST", url, nil, &task.raw); err != nil {
+	headers := map[string][]string{"X-Idempotency-Key": {}}
+	if err := c.doJSONRequest(ctx, "POST", url, nil, &task.raw, headers); err != nil {
 		return err
 	}
 
