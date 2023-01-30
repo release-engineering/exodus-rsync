@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- n/a
+
+## 1.9.5 - 2023-01-30
+
+- Logging: add connection open/close messages
+- Fix: version tagging bug
+- Add string input validation
+- Updated base build image for Go version 1.19
+- Updated dependencies
 - Updated to Go version 1.19
 
 ## 1.9.4 - 2022-11-21
