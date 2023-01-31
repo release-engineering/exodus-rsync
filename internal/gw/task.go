@@ -28,7 +28,7 @@ func (t *task) refresh(ctx context.Context) error {
 
 	logger.F("url", url).Debug("polling task")
 
-	return t.client.doJSONRequest(ctx, "GET", url, nil, &t.raw)
+	return t.client.doJSONRequest(ctx, "GET", url, nil, &t.raw, nil)
 }
 
 func (t *task) ID() string {

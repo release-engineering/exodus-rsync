@@ -15,7 +15,7 @@ func TestClientEncodeError(t *testing.T) {
 	// This could be any unmarshallable object
 	x := func() {}
 
-	err := client.doJSONRequest(context.TODO(), "POST", "https://example.com/", x, nil)
+	err := client.doJSONRequest(context.TODO(), "POST", "https://example.com/", x, nil, nil)
 	if err == nil {
 		t.Error("unexpectedly did not fail")
 	}
