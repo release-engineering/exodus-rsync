@@ -94,14 +94,14 @@ func (c *FakeClient) NewPublish(ctx context.Context) (gw.Publish, error) {
 	return &c.publishes[len(c.publishes)-1], nil
 }
 
-func (c *FakeClient) GetPublish(id string) gw.Publish {
+func (c *FakeClient) GetPublish(ctx context.Context, id string) (gw.Publish, error) {
 	for idx := range c.publishes {
 		if c.publishes[idx].id == id {
-			return &c.publishes[idx]
+			return &c.publishes[idx], nil
 		}
 	}
-	// Didn't find any, then return a broken one
-	return &BrokenPublish{id: id}
+	// Didn't find any, then return nil
+	return nil, fmt.Errorf("publish not found: '%s'", id)
 }
 
 func (c *FakeClient) WhoAmI(context.Context) (map[string]interface{}, error) {

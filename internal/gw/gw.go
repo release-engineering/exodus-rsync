@@ -54,11 +54,7 @@ type Client interface {
 	NewPublish(context.Context) (Publish, error)
 
 	// GetPublish returns a handle to an existing publish object within exodus-gw.
-	//
-	// This function never fails, but it is not guaranteed that the publish object
-	// is valid. If an invalid publish ID is given, an error will occur the next
-	// time any write operation is attempted on the publish.
-	GetPublish(string) Publish
+	GetPublish(ctx context.Context, id string) (Publish, error)
 
 	// WhoAmI returns raw authentication & authorization info for this exodus-gw client
 	// in the format provided by the "/whoami" endpoint.
