@@ -4,6 +4,12 @@
 
 - n/a
 
+## 1.9.6 - 2023-03-13
+
+- Added Publish ID validation
+- Added X-Idempotency-Key header to idempotent requests
+- Updated dependencies
+
 ## 1.9.5 - 2023-01-30
 
 - Logging: add connection open/close messages
