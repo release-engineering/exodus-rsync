@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.194
 	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/gabriel-vasile/mimetype v1.4.1
-	github.com/go-playground/validator/v10 v10.11.1
+	github.com/go-playground/validator/v10 v10.12.0
 	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.8.2
 	gopkg.in/yaml.v3 v3.0.1
@@ -26,7 +26,7 @@ require (
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
+	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
