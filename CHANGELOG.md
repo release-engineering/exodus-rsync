@@ -4,6 +4,10 @@
 
 - n/a
 
+## 1.9.7 - 2023-04-24
+
+- Updated dependencies
+
 ## 1.9.6 - 2023-03-13
 
 - Added Publish ID validation
