@@ -107,7 +107,7 @@ func (c *client) WhoAmI(ctx context.Context) (map[string]interface{}, error) {
 func (c *client) haveBlob(ctx context.Context, item walk.SyncItem) (bool, error) {
 	logger := log.FromContext(ctx)
 
-	fullURL := c.s3.Endpoint + item.Key
+	fullURL := c.s3.Endpoint + "/" + c.cfg.GwEnv() + "/" + item.Key
 	logConnectionOpen(ctx, fullURL)
 	defer logConnectionClose(ctx, fullURL)
 
@@ -152,7 +152,7 @@ func (c *client) uploadBlob(ctx context.Context, item walk.SyncItem) error {
 	}
 	defer file.Close()
 
-	fullURL := c.s3.Endpoint + item.Key
+	fullURL := c.s3.Endpoint + "/" + c.cfg.GwEnv() + "/" + item.Key
 	logConnectionOpen(ctx, fullURL)
 	defer logConnectionClose(ctx, fullURL)
 
