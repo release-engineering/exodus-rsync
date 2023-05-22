@@ -11,7 +11,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/go-playground/validator/v10 v10.13.0
 	github.com/golang/mock v1.6.0
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	gopkg.in/yaml.v3 v3.0.1
 )
 
