@@ -123,7 +123,7 @@ func TestClientPublishErrors(t *testing.T) {
 		// Create a publish object directly without filling in any Links.
 		publish := publish{client: clientIface.(*client)}
 
-		err := publish.Commit(ctx)
+		err := publish.Commit(ctx, "")
 
 		if err == nil {
 			t.Error("Unexpectedly failed to return an error")
@@ -177,7 +177,7 @@ func TestClientPublishErrors(t *testing.T) {
 		publish.raw.Links = make(map[string]string)
 		publish.raw.Links["commit"] = "/some/invalid/url"
 
-		err := publish.Commit(ctx)
+		err := publish.Commit(ctx, "")
 
 		if err == nil {
 			t.Error("Unexpectedly failed to return an error")

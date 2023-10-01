@@ -10,10 +10,10 @@ exodus-aware drop-in replacement for rsync.
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
-  - [Differences from rsync](#differences-from-rsync)
-  - [Publish modes](#publish-modes)
-    - [Standalone publish](#standalone-publish)
-    - [Joined publish](#joined-publish)
+    - [Differences from rsync](#differences-from-rsync)
+    - [Publish modes](#publish-modes)
+        - [Standalone publish](#standalone-publish)
+        - [Joined publish](#joined-publish)
 - [License](#license)
 
 <!-- /TOC -->
@@ -86,6 +86,25 @@ gwurl: https://exodus-gw.example.com
 #
 # The exodus-gw environment may be set using an environment variable.
 gwenv: prod
+
+# The commit mode for exodus-gw publish objects, one of the following:
+#
+# "" or "auto" (default):
+#    Commit occurs only if exodus-rsync created the publish (i.e. is operating
+#    in "standalone publish" mode). A phase2 (full) commit will be used.
+#
+# "none":
+#    Commit never occurs, regardless of whether exodus-rsync created
+#    the publish.
+#
+# "phase1", "phase2", <other>...:
+#    A commit of this type occurs, regardless of whether exodus-rsync created
+#    the publish. See exodus-gw documentation for details on the behavior
+#    of each mode:
+#    https://release-engineering.github.io/exodus-gw/api.html#operation/commit_publish__env__publish__publish_id__commit_post
+#
+# The `--exodus-commit=MODE` option overrides this value.
+gwcommit: auto
 
 ###############################################################################
 # Environment configuration
@@ -254,6 +273,7 @@ is a summary of the differences:
   | -------- | ----- |
   | --exodus-conf=PATH | use this configuration file |
   | --exodus-publish=ID | join content to an existing publish (see "Publish modes") |
+  | --exodus-commit=MODE | commit mode for publish (see `gwcommit` in config file) |
   | --exodus-diag | diagnostic mode, outputs various info for troubleshooting |
 
 - exodus-rsync supports only the following rsync arguments, most of which do not have any
@@ -362,9 +382,11 @@ exposed from the CDN or that *none* of them are exposed at all, even if we are i
 in the middle of publishing.  None of the published content becomes visible from the CDN until
 the "commit" operation occurs, which exposes all content at once.
 
+More complex scenarios are possible when specifying a custom commit mode via
+the `gwcommit` config file option or the `--exodus-commit` argument.
 See [the exodus-gw documentation](https://release-engineering.github.io/exodus-gw/api.html#section/Atomicity)
-for more information on the atomicity guarantees when publishing with
-exodus-rsync and exodus-gw.
+for more information on the supported commit modes and the atomicity
+guarantees when publishing with exodus-rsync and exodus-gw.
 
 ## License
 

@@ -14,6 +14,7 @@ type sharedConfig struct {
 	GwURLRaw          string `yaml:"gwurl"`
 	GwPollIntervalRaw int    `yaml:"gwpollinterval"`
 	GwBatchSizeRaw    int    `yaml:"gwbatchsize"`
+	GwCommitRaw       string `yaml:"gwcommit"`
 	RsyncModeRaw      string `yaml:"rsyncmode"`
 	LogLevelRaw       string `yaml:"loglevel"`
 	LoggerRaw         string `yaml:"logger"`
@@ -71,6 +72,10 @@ func (g *globalConfig) GwPollInterval() int {
 
 func (g *globalConfig) GwBatchSize() int {
 	return nonEmptyInt(g.GwBatchSizeRaw, 10000)
+}
+
+func (g *globalConfig) GwCommit() string {
+	return g.GwCommitRaw
 }
 
 func (g *globalConfig) UploadThreads() int {
@@ -137,6 +142,10 @@ func (e *environment) GwPollInterval() int {
 
 func (e *environment) GwBatchSize() int {
 	return nonEmptyInt(e.GwBatchSizeRaw, e.parent.GwBatchSize())
+}
+
+func (e *environment) GwCommit() string {
+	return nonEmptyString(e.GwCommitRaw, e.parent.GwCommit())
 }
 
 func (e *environment) RsyncMode() string {

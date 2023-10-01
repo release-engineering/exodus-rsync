@@ -32,6 +32,7 @@ gwurl: $TEST_EXODUS_GW_URL
 gwcert: global-cert
 gwkey: global-key
 gwbatchsize: 100
+gwcommit: abc
 strip: dest:/foo
 
 environments:
@@ -39,6 +40,7 @@ environments:
   gwenv: $TEST_EXODUS_GW_ENV
   gwkey: override-key
   gwpollinterval: 123
+  gwcommit: cba
   rsyncmode: mixed
   strip: dest:/foo/bar
   uploadthreads: 6
@@ -97,6 +99,7 @@ environments:
 	assertEqual("global gwkey", cfg.GwKey(), "global-key")
 	assertEqual("global gwenv", cfg.GwEnv(), "global-env")
 	assertEqual("global gwpollinterval", cfg.GwPollInterval(), 5000)
+	assertEqual("global gwcommit", cfg.GwCommit(), "abc")
 	assertEqual("global rsyncmode", cfg.RsyncMode(), "exodus")
 	assertEqual("global strip", cfg.Strip(), "dest:/foo")
 	assertEqual("global uploadthreads", cfg.UploadThreads(), 4)
@@ -105,6 +108,7 @@ environments:
 	assertEqual("env gwenv", env.GwEnv(), "one-env")
 	assertEqual("env gwkey", env.GwKey(), "override-key")
 	assertEqual("env gwpollinterval", env.GwPollInterval(), 123)
+	assertEqual("env gwcommit", env.GwCommit(), "cba")
 	assertEqual("env rsyncmode", env.RsyncMode(), "mixed")
 	assertEqual("env strip", env.Strip(), "dest:/foo/bar")
 	assertEqual("env uploadthreads", env.UploadThreads(), 6)

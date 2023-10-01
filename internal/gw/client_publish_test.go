@@ -56,7 +56,7 @@ func TestClientPublish(t *testing.T) {
 	gw.publishes[publish.ID()].taskStates = []string{"NOT_STARTED", "IN_PROGRESS", "FAILED"}
 
 	// ...then a request to commit should return an error
-	err = publish.Commit(ctx)
+	err = publish.Commit(ctx, "")
 	if err == nil {
 		t.Errorf("unexpectedly failed to get an error from commit")
 	}
@@ -68,9 +68,26 @@ func TestClientPublish(t *testing.T) {
 	gw.publishes[publish.ID()].taskStates = []string{"NOT_STARTED", "IN_PROGRESS", "COMPLETE"}
 
 	// We should be able to commit the result
-	err = publish.Commit(ctx)
+	err = publish.Commit(ctx, "")
 	if err != nil {
 		t.Errorf("unexpected error from commit: %v", err)
+	}
+
+	// And it should have used no specific commit mode
+	if gw.publishes[publish.ID()].lastCommit != "" {
+		t.Errorf("unexpected commit mode: %s", gw.publishes[publish.ID()].lastCommit)
+	}
+
+	// Let's do it again, this time with a non-blank commit mode...
+	gw.publishes[publish.ID()].taskStates = []string{"NOT_STARTED", "IN_PROGRESS", "COMPLETE"}
+	err = publish.Commit(ctx, "xyz")
+	if err != nil {
+		t.Errorf("unexpected error from commit: %v", err)
+	}
+
+	// Our commit mode should have made it into the endpoint
+	if gw.publishes[publish.ID()].lastCommit != "xyz" {
+		t.Errorf("unexpected commit mode: %s", gw.publishes[publish.ID()].lastCommit)
 	}
 }
 

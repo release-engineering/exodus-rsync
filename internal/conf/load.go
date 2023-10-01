@@ -46,6 +46,11 @@ func loadFromPath(path string, args args.Config) (*globalConfig, error) {
 	out.GwURLRaw = normalizeURL(os.ExpandEnv(out.GwURLRaw))
 	out.GwEnvRaw = os.ExpandEnv(out.GwEnvRaw)
 
+	// Command-line arg overrides config from file
+	if args.Commit != "" {
+		out.GwCommitRaw = args.Commit
+	}
+
 	// Fill in the Environment parent references
 	prefs := map[string]bool{}
 	for i := range out.EnvironmentsRaw {
@@ -56,6 +61,11 @@ func loadFromPath(path string, args args.Config) (*globalConfig, error) {
 		env.GwKeyRaw = os.ExpandEnv(env.GwKeyRaw)
 		env.GwURLRaw = normalizeURL(os.ExpandEnv(env.GwURLRaw))
 		env.GwEnvRaw = os.ExpandEnv(env.GwEnvRaw)
+
+		// Command-line arg overrides config from file
+		if args.Commit != "" {
+			env.GwCommitRaw = args.Commit
+		}
 
 		if !strings.HasPrefix(env.Prefix(), out.Strip()) {
 			return nil, fmt.Errorf("cannot strip '%s' prefix from '%s'", out.Strip(), env.Prefix())

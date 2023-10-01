@@ -30,8 +30,9 @@ type fakeGw struct {
 type publishMap map[string]*fakePublish
 
 type fakePublish struct {
-	id    string
-	items []ItemInput
+	id         string
+	items      []ItemInput
+	lastCommit string
 
 	// If publish is committed, then each time the task state is polled,
 	// we'll pop the next state from here.
@@ -95,7 +96,7 @@ func (f *fakeGw) RoundTrip(r *http.Request) (*http.Response, error) {
 	}
 
 	if len(route) == 3 && route[0] == "publish" && route[2] == "commit" && r.Method == "POST" {
-		return f.commitPublish(route[1]), nil
+		return f.commitPublish(route[1], r.URL.Query().Get("commit_mode")), nil
 	}
 
 	return out, nil
@@ -183,7 +184,7 @@ func (f *fakeGw) addPublishItems(r *http.Request, id string) *http.Response {
 	return out
 }
 
-func (f *fakeGw) commitPublish(id string) *http.Response {
+func (f *fakeGw) commitPublish(id string, mode string) *http.Response {
 	out := &http.Response{}
 
 	publish, havePublish := f.publishes[id]
@@ -200,6 +201,8 @@ func (f *fakeGw) commitPublish(id string) *http.Response {
 		out.StatusCode = 500
 		return out
 	}
+
+	publish.lastCommit = mode
 
 	state := publish.nextState()
 	taskID := "task-" + publish.id

@@ -26,6 +26,6 @@ func (*dryRunPublish) AddItems(ctx context.Context, _ []ItemInput) error {
 	return ctx.Err()
 }
 
-func (*dryRunPublish) Commit(ctx context.Context) error {
+func (*dryRunPublish) Commit(ctx context.Context, _ string) error {
 	return ctx.Err()
 }
