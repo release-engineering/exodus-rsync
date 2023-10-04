@@ -4,6 +4,11 @@
 
 - n/a
 
+## 1.10.0 - 2023-10-04
+
+- Introduced `--exodus-commit` and `gwcommit` for configuring the commit mode
+- Updated dependencies
+
 ## 1.9.7 - 2023-04-24
 
 - Updated dependencies
