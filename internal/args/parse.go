@@ -75,6 +75,8 @@ type ExodusConfig struct {
 
 	Publish string `help:"ID of existing exodus-gw publish to join." validate:"omitempty,uuid"`
 
+	Commit string `help:"Commit publish using this mode" validate:"omitempty,max=20"`
+
 	Diag bool `help:"Diagnostic mode, dumps various information about the environment."`
 }
 

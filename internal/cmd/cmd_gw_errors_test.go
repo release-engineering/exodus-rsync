@@ -68,7 +68,7 @@ func setupFailedCommit(ctrl *gomock.Controller, client *gw.MockClient) {
 	publish.EXPECT().AddItems(gomock.Any(), gomock.Any()).Return(nil)
 
 	// Committing fails
-	publish.EXPECT().Commit(gomock.Any()).Return(fmt.Errorf("simulated error"))
+	publish.EXPECT().Commit(gomock.Any(), gomock.Any()).Return(fmt.Errorf("simulated error"))
 }
 
 func setupFailedJoinPublish(ctrl *gomock.Controller, client *gw.MockClient) {

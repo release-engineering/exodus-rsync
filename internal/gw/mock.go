@@ -186,17 +186,17 @@ func (mr *MockPublishMockRecorder) AddItems(arg0, arg1 interface{}) *gomock.Call
 }
 
 // Commit mocks base method.
-func (m *MockPublish) Commit(ctx context.Context) error {
+func (m *MockPublish) Commit(ctx context.Context, mode string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Commit", ctx)
+	ret := m.ctrl.Call(m, "Commit", ctx, mode)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Commit indicates an expected call of Commit.
-func (mr *MockPublishMockRecorder) Commit(ctx interface{}) *gomock.Call {
+func (mr *MockPublishMockRecorder) Commit(ctx, mode interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockPublish)(nil).Commit), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockPublish)(nil).Commit), ctx, mode)
 }
 
 // ID mocks base method.

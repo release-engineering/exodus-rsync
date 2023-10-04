@@ -115,6 +115,20 @@ func (mr *MockConfigMockRecorder) GwCert() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwCert", reflect.TypeOf((*MockConfig)(nil).GwCert))
 }
 
+// GwCommit mocks base method.
+func (m *MockConfig) GwCommit() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwCommit")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwCommit indicates an expected call of GwCommit.
+func (mr *MockConfigMockRecorder) GwCommit() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwCommit", reflect.TypeOf((*MockConfig)(nil).GwCommit))
+}
+
 // GwEnv mocks base method.
 func (m *MockConfig) GwEnv() string {
 	m.ctrl.T.Helper()
@@ -318,6 +332,20 @@ func (m *MockEnvironmentConfig) GwCert() string {
 func (mr *MockEnvironmentConfigMockRecorder) GwCert() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwCert", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwCert))
+}
+
+// GwCommit mocks base method.
+func (m *MockEnvironmentConfig) GwCommit() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwCommit")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwCommit indicates an expected call of GwCommit.
+func (mr *MockEnvironmentConfigMockRecorder) GwCommit() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwCommit", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwCommit))
 }
 
 // GwEnv mocks base method.
@@ -551,6 +579,20 @@ func (m *MockGlobalConfig) GwCert() string {
 func (mr *MockGlobalConfigMockRecorder) GwCert() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwCert", reflect.TypeOf((*MockGlobalConfig)(nil).GwCert))
+}
+
+// GwCommit mocks base method.
+func (m *MockGlobalConfig) GwCommit() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwCommit")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GwCommit indicates an expected call of GwCommit.
+func (mr *MockGlobalConfigMockRecorder) GwCommit() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwCommit", reflect.TypeOf((*MockGlobalConfig)(nil).GwCommit))
 }
 
 // GwEnv mocks base method.

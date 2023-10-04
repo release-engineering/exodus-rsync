@@ -58,6 +58,28 @@ func webURI(srcPath string, srcTree string, destTree string, srcIsDir bool) stri
 	return path.Join(destTree, relPath)
 }
 
+func commitMode(cfg conf.Config, args args.Config) (bool, string) {
+	// Calculates effective commit mode for current run, given arguments and config.
+	//
+	// Returns:
+	//   bool:   true if commit should happen at all
+	//   string: the commit_mode argument which should be passed to exodus-gw
+	//           (can be empty if no argument should be passed)
+	mode := cfg.GwCommit()
+	if mode == "" || mode == "auto" {
+		// 'auto' means commit with server-default mode if and only if we
+		// created the publish object during this run, which we did if no
+		// publish ID was passed in args.
+		return args.Publish == "", ""
+	}
+	if mode == "none" {
+		// 'none' means don't ever commit
+		return false, ""
+	}
+	// Anything else means commit, using the given value as the commit mode
+	return true, mode
+}
+
 func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 	logger := log.FromContext(ctx)
 
@@ -223,10 +245,10 @@ func exodusMain(ctx context.Context, cfg conf.Config, args args.Config) int {
 
 	logger.F("publish", publish.ID(), "items", len(publishItems)).Info("Added publish items")
 
-	if args.Publish == "" {
-		// We created the publish, then we should commit it.
-		logger.F("publish", publish.ID()).Info("Preparing to commit publish")
-		err = publish.Commit(ctx)
+	shouldCommit, mode := commitMode(cfg, args)
+	if shouldCommit {
+		logger.F("publish", publish.ID(), "mode", mode).Info("Preparing to commit publish")
+		err = publish.Commit(ctx, mode)
 		if err != nil {
 			logger.F("error", err).Error("can't commit publish")
 			return 71

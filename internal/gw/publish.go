@@ -129,17 +129,21 @@ func (p *publish) AddItems(ctx context.Context, items []ItemInput) error {
 // The commit operation within exodus-gw is asynchronous. This method will
 // wait for the commit to complete fully and will return nil only if the
 // commit has succeeded.
-func (p *publish) Commit(ctx context.Context) error {
+func (p *publish) Commit(ctx context.Context, mode string) error {
 	var err error
 
 	logger := log.FromContext(ctx)
-	defer logger.F("publish", p.ID()).Trace("Committing publish").Stop(&err)
+	defer logger.F("publish", p.ID(), "mode", mode).Trace("Committing publish").Stop(&err)
 
 	c := p.client
 	url, ok := p.raw.Links["commit"]
 	if !ok {
 		err = fmt.Errorf("publish not eligible for commit: %+v", p.raw)
 		return err
+	}
+
+	if mode != "" {
+		url = url + "?commit_mode=" + mode
 	}
 
 	task := task{}

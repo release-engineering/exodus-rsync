@@ -55,9 +55,11 @@ type FakeClient struct {
 }
 
 type FakePublish struct {
-	items     []gw.ItemInput
-	committed int
-	id        string
+	items       []gw.ItemInput
+	committed   int
+	commitmodes []string
+	frozen      bool
+	id          string
 }
 
 type BrokenPublish struct {
@@ -111,7 +113,7 @@ func (c *FakeClient) WhoAmI(context.Context) (map[string]interface{}, error) {
 }
 
 func (p *FakePublish) AddItems(ctx context.Context, items []gw.ItemInput) error {
-	if p.committed != 0 {
+	if p.frozen {
 		return fmt.Errorf("attempted to modify committed publish")
 	}
 	p.items = append(p.items, items...)
@@ -122,12 +124,16 @@ func (p *BrokenPublish) AddItems(_ context.Context, _ []gw.ItemInput) error {
 	return fmt.Errorf("invalid publish")
 }
 
-func (p *BrokenPublish) Commit(_ context.Context) error {
+func (p *BrokenPublish) Commit(_ context.Context, _ string) error {
 	return fmt.Errorf("invalid publish")
 }
 
-func (p *FakePublish) Commit(ctx context.Context) error {
+func (p *FakePublish) Commit(ctx context.Context, mode string) error {
+	if mode == "" || mode == "phase2" {
+		p.frozen = true
+	}
 	p.committed++
+	p.commitmodes = append(p.commitmodes, mode)
 	return nil
 }
 
@@ -148,72 +154,102 @@ func TestMainTypicalSync(t *testing.T) {
 	SetConfig(t, CONFIG)
 	ctrl := MockController(t)
 
-	mockGw := gw.NewMockInterface(ctrl)
-	ext.gw = mockGw
+	tests := []struct {
+		name               string
+		commitArg          string
+		expectedCommits    int
+		expectedCommitMode string
+	}{
+		{"typical", "", 1, ""},
 
-	client := FakeClient{blobs: make(map[string]string)}
-	mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
+		{"explicit autocommit", "--exodus-commit=auto", 1, ""},
 
-	srcPath := path.Clean(wd + "/../../test/data/srctrees/just-files")
+		{"no commit", "--exodus-commit=none", 0, ""},
 
-	args := []string{
-		"rsync",
-		srcPath + "/",
-		"exodus:/some/target",
+		{"commit specified mode", "--exodus-commit=xyz", 1, "xyz"},
 	}
 
-	got := Main(args)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockGw := gw.NewMockInterface(ctrl)
+			ext.gw = mockGw
 
-	// It should complete successfully.
-	if got != 0 {
-		t.Error("returned incorrect exit code", got)
-	}
+			client := FakeClient{blobs: make(map[string]string)}
+			mockGw.EXPECT().NewClient(gomock.Any(), EnvMatcher{"best-env"}).Return(&client, nil)
 
-	// Check paths of some blobs we expected to deal with.
-	binPath := client.blobs["c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6"]
-	helloPath := client.blobs["5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"]
+			srcPath := path.Clean(wd + "/../../test/data/srctrees/just-files")
 
-	// It should have uploaded the binary from here
-	if binPath != srcPath+"/subdir/some-binary" {
-		t.Error("binary uploaded from unexpected path", binPath)
-	}
+			args := []string{
+				"rsync",
+				srcPath + "/",
+			}
 
-	// For the hello file, since there were two copies, it's undefined which one of them
-	// was used for the upload - but should be one of them.
-	if helloPath != srcPath+"/hello-copy-one" && helloPath != srcPath+"/hello-copy-two" {
-		t.Error("hello uploaded from unexpected path", helloPath)
-	}
+			if tt.commitArg != "" {
+				args = append(args, tt.commitArg)
+			}
+			args = append(args, "exodus:/some/target")
 
-	// It should have created one publish.
-	if len(client.publishes) != 1 {
-		t.Error("expected to create 1 publish, instead created", len(client.publishes))
-	}
+			got := Main(args)
 
-	p := client.publishes[0]
+			// It should complete successfully.
+			if got != 0 {
+				t.Error("returned incorrect exit code", got)
+			}
 
-	// Build up a URI => Key mapping of what was published
-	itemMap := make(map[string]string)
-	for _, item := range p.items {
-		if _, ok := itemMap[item.WebURI]; ok {
-			t.Error("tried to publish this URI more than once:", item.WebURI)
-		}
-		itemMap[item.WebURI] = item.ObjectKey
-	}
+			// Check paths of some blobs we expected to deal with.
+			binPath := client.blobs["c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6"]
+			helloPath := client.blobs["5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"]
 
-	// It should have been exactly this
-	expectedItems := map[string]string{
-		"/some/target/subdir/some-binary": "c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6",
-		"/some/target/hello-copy-one":     "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
-		"/some/target/hello-copy-two":     "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
-	}
+			// It should have uploaded the binary from here
+			if binPath != srcPath+"/subdir/some-binary" {
+				t.Error("binary uploaded from unexpected path", binPath)
+			}
 
-	if !reflect.DeepEqual(itemMap, expectedItems) {
-		t.Error("did not publish expected items, published:", itemMap)
-	}
+			// For the hello file, since there were two copies, it's undefined which one of them
+			// was used for the upload - but should be one of them.
+			if helloPath != srcPath+"/hello-copy-one" && helloPath != srcPath+"/hello-copy-two" {
+				t.Error("hello uploaded from unexpected path", helloPath)
+			}
 
-	// It should have committed the publish (once)
-	if p.committed != 1 {
-		t.Error("expected to commit publish (once), instead p.committed ==", p.committed)
+			// It should have created one publish.
+			if len(client.publishes) != 1 {
+				t.Error("expected to create 1 publish, instead created", len(client.publishes))
+			}
+
+			p := client.publishes[0]
+
+			// Build up a URI => Key mapping of what was published
+			itemMap := make(map[string]string)
+			for _, item := range p.items {
+				if _, ok := itemMap[item.WebURI]; ok {
+					t.Error("tried to publish this URI more than once:", item.WebURI)
+				}
+				itemMap[item.WebURI] = item.ObjectKey
+			}
+
+			// It should have been exactly this
+			expectedItems := map[string]string{
+				"/some/target/subdir/some-binary": "c66f610d98b2c9fe0175a3e99ba64d7fc7de45046515ff325be56329a9347dd6",
+				"/some/target/hello-copy-one":     "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+				"/some/target/hello-copy-two":     "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03",
+			}
+
+			if !reflect.DeepEqual(itemMap, expectedItems) {
+				t.Error("did not publish expected items, published:", itemMap)
+			}
+
+			// It should have committed (or not) as expected
+			if p.committed != tt.expectedCommits {
+				t.Error("expected ", tt.expectedCommits, " commits, got ", p.committed)
+			}
+
+			// If a commit happened at all, it should have used the mode we expect.
+			if tt.expectedCommits != 0 {
+				if p.commitmodes[0] != tt.expectedCommitMode {
+					t.Error("expected ", tt.expectedCommitMode, " commit mode, got ", p.commitmodes[0])
+				}
+			}
+		})
 	}
 }
 

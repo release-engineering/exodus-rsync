@@ -40,6 +40,9 @@ type Config interface {
 	// Max number of items to include in a single HTTP request to exodus-gw.
 	GwBatchSize() int
 
+	// Commit mode for publishes.
+	GwCommit() string
+
 	// Execution mode for rsync.
 	RsyncMode() string
 

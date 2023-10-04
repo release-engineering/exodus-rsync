@@ -88,7 +88,7 @@ func TestDryRunPublish(t *testing.T) {
 				t.Errorf("AddItems failed in dry-run mode, err = %v", err)
 			}
 
-			err = p.Commit(ctx)
+			err = p.Commit(ctx, "")
 			if err != nil {
 				t.Errorf("Commit failed in dry-run mode, err = %v", err)
 			}

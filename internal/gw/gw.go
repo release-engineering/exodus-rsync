@@ -78,7 +78,10 @@ type Publish interface {
 	// The commit operation within exodus-gw is asynchronous. This method will
 	// wait for the commit to complete fully and will return nil only if the
 	// commit has succeeded.
-	Commit(ctx context.Context) error
+	//
+	// 'mode' is the desired commit mode (see exodus-gw docs). It can be empty
+	// to not request any particular mode.
+	Commit(ctx context.Context, mode string) error
 }
 
 // Task represents a single task object within exodus-gw.
