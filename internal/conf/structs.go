@@ -15,6 +15,8 @@ type sharedConfig struct {
 	GwPollIntervalRaw int    `yaml:"gwpollinterval"`
 	GwBatchSizeRaw    int    `yaml:"gwbatchsize"`
 	GwCommitRaw       string `yaml:"gwcommit"`
+	GwMaxAttemptsRaw  int    `yaml:"gwmaxattempts"`
+	GwMaxBackoffRaw   int    `yaml:"gwmaxbackoff"`
 	RsyncModeRaw      string `yaml:"rsyncmode"`
 	LogLevelRaw       string `yaml:"loglevel"`
 	LoggerRaw         string `yaml:"logger"`
@@ -76,6 +78,14 @@ func (g *globalConfig) GwBatchSize() int {
 
 func (g *globalConfig) GwCommit() string {
 	return g.GwCommitRaw
+}
+
+func (g *globalConfig) GwMaxAttempts() int {
+	return nonEmptyInt(g.GwMaxAttemptsRaw, 3)
+}
+
+func (g *globalConfig) GwMaxBackoff() int {
+	return nonEmptyInt(g.GwMaxBackoffRaw, 20000)
 }
 
 func (g *globalConfig) UploadThreads() int {
@@ -146,6 +156,14 @@ func (e *environment) GwBatchSize() int {
 
 func (e *environment) GwCommit() string {
 	return nonEmptyString(e.GwCommitRaw, e.parent.GwCommit())
+}
+
+func (e *environment) GwMaxAttempts() int {
+	return nonEmptyInt(e.GwMaxAttemptsRaw, e.parent.GwMaxAttempts())
+}
+
+func (e *environment) GwMaxBackoff() int {
+	return nonEmptyInt(e.GwMaxBackoffRaw, e.parent.GwMaxBackoff())
 }
 
 func (e *environment) RsyncMode() string {

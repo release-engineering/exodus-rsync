@@ -41,6 +41,8 @@ environments:
   gwkey: override-key
   gwpollinterval: 123
   gwcommit: cba
+  gwmaxattempts: 50
+  gwmaxbackoff: 60
   rsyncmode: mixed
   strip: dest:/foo/bar
   uploadthreads: 6
@@ -100,6 +102,8 @@ environments:
 	assertEqual("global gwenv", cfg.GwEnv(), "global-env")
 	assertEqual("global gwpollinterval", cfg.GwPollInterval(), 5000)
 	assertEqual("global gwcommit", cfg.GwCommit(), "abc")
+	assertEqual("global gwmaxattempts", cfg.GwMaxAttempts(), 3)
+	assertEqual("global gwmaxbackoff", cfg.GwMaxBackoff(), 20000)
 	assertEqual("global rsyncmode", cfg.RsyncMode(), "exodus")
 	assertEqual("global strip", cfg.Strip(), "dest:/foo")
 	assertEqual("global uploadthreads", cfg.UploadThreads(), 4)
@@ -109,6 +113,8 @@ environments:
 	assertEqual("env gwkey", env.GwKey(), "override-key")
 	assertEqual("env gwpollinterval", env.GwPollInterval(), 123)
 	assertEqual("env gwcommit", env.GwCommit(), "cba")
+	assertEqual("env gwmaxattempts", env.GwMaxAttempts(), 50)
+	assertEqual("env gwmaxbackoff", env.GwMaxBackoff(), 60)
 	assertEqual("env rsyncmode", env.RsyncMode(), "mixed")
 	assertEqual("env strip", env.Strip(), "dest:/foo/bar")
 	assertEqual("env uploadthreads", env.UploadThreads(), 6)

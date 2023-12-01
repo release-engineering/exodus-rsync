@@ -157,6 +157,34 @@ func (mr *MockConfigMockRecorder) GwKey() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwKey", reflect.TypeOf((*MockConfig)(nil).GwKey))
 }
 
+// GwMaxAttempts mocks base method.
+func (m *MockConfig) GwMaxAttempts() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwMaxAttempts")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwMaxAttempts indicates an expected call of GwMaxAttempts.
+func (mr *MockConfigMockRecorder) GwMaxAttempts() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwMaxAttempts", reflect.TypeOf((*MockConfig)(nil).GwMaxAttempts))
+}
+
+// GwMaxBackoff mocks base method.
+func (m *MockConfig) GwMaxBackoff() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwMaxBackoff")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwMaxBackoff indicates an expected call of GwMaxBackoff.
+func (mr *MockConfigMockRecorder) GwMaxBackoff() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwMaxBackoff", reflect.TypeOf((*MockConfig)(nil).GwMaxBackoff))
+}
+
 // GwPollInterval mocks base method.
 func (m *MockConfig) GwPollInterval() int {
 	m.ctrl.T.Helper()
@@ -374,6 +402,34 @@ func (m *MockEnvironmentConfig) GwKey() string {
 func (mr *MockEnvironmentConfigMockRecorder) GwKey() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwKey", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwKey))
+}
+
+// GwMaxAttempts mocks base method.
+func (m *MockEnvironmentConfig) GwMaxAttempts() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwMaxAttempts")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwMaxAttempts indicates an expected call of GwMaxAttempts.
+func (mr *MockEnvironmentConfigMockRecorder) GwMaxAttempts() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwMaxAttempts", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwMaxAttempts))
+}
+
+// GwMaxBackoff mocks base method.
+func (m *MockEnvironmentConfig) GwMaxBackoff() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwMaxBackoff")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwMaxBackoff indicates an expected call of GwMaxBackoff.
+func (mr *MockEnvironmentConfigMockRecorder) GwMaxBackoff() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwMaxBackoff", reflect.TypeOf((*MockEnvironmentConfig)(nil).GwMaxBackoff))
 }
 
 // GwPollInterval mocks base method.
@@ -621,6 +677,34 @@ func (m *MockGlobalConfig) GwKey() string {
 func (mr *MockGlobalConfigMockRecorder) GwKey() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwKey", reflect.TypeOf((*MockGlobalConfig)(nil).GwKey))
+}
+
+// GwMaxAttempts mocks base method.
+func (m *MockGlobalConfig) GwMaxAttempts() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwMaxAttempts")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwMaxAttempts indicates an expected call of GwMaxAttempts.
+func (mr *MockGlobalConfigMockRecorder) GwMaxAttempts() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwMaxAttempts", reflect.TypeOf((*MockGlobalConfig)(nil).GwMaxAttempts))
+}
+
+// GwMaxBackoff mocks base method.
+func (m *MockGlobalConfig) GwMaxBackoff() int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GwMaxBackoff")
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// GwMaxBackoff indicates an expected call of GwMaxBackoff.
+func (mr *MockGlobalConfigMockRecorder) GwMaxBackoff() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GwMaxBackoff", reflect.TypeOf((*MockGlobalConfig)(nil).GwMaxBackoff))
 }
 
 // GwPollInterval mocks base method.

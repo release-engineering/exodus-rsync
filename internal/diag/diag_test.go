@@ -24,6 +24,8 @@ func mockConfig(ctrl *gomock.Controller) conf.Config {
 	e.GwEnv().Return("test-env").AnyTimes()
 	e.GwPollInterval().Return(123).AnyTimes()
 	e.GwBatchSize().Return(234).AnyTimes()
+	e.GwMaxAttempts().Return(345).AnyTimes()
+	e.GwMaxBackoff().Return(456).AnyTimes()
 	e.RsyncMode().Return("mixed").AnyTimes()
 	e.LogLevel().Return("debug").AnyTimes()
 	e.Logger().Return("syslog").AnyTimes()

@@ -11,7 +11,9 @@ import (
 	"os"
 	"runtime"
 	"sync"
+	"time"
 
+	"github.com/PuerkitoBio/rehttp"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -341,6 +343,64 @@ func (c *client) EnsureUploaded(
 	return <-out
 }
 
+func retryWithLogging(logger *log.Logger, fn rehttp.RetryFn) rehttp.RetryFn {
+	// Wraps a rehttp.RetryFn to add warnings on retries.
+	return func(attempt rehttp.Attempt) bool {
+		willRetry := fn(attempt)
+		status := "<none>"
+		if attempt.Response != nil {
+			// status is the HTTP response status and that
+			// sometimes won't be present.
+			status = attempt.Response.Status
+		}
+
+		entry := logger.F(
+			"url", attempt.Request.URL,
+			"index", attempt.Index,
+			"method", attempt.Request.Method,
+			"status", status,
+			"error", attempt.Error,
+		)
+
+		if willRetry {
+			entry.Warn("Retrying failed request")
+		} else {
+			// This is Debug because we get here even for successful
+			// requests, so it's not normally worth logging.
+			// But if we don't log at all, it's hard to find out which
+			// errors are not getting retried in order to tune it.
+			entry.Debug("Not retrying request")
+		}
+
+		return willRetry
+	}
+}
+
+func retryTransport(ctx context.Context, cfg conf.Config, rt http.RoundTripper) http.RoundTripper {
+	// Wrap a roundtripper with retries.
+	logger := log.FromContext(ctx)
+
+	retryFn := rehttp.RetryAll(
+		rehttp.RetryMaxRetries(cfg.GwMaxAttempts()),
+		rehttp.RetryAny(
+			rehttp.RetryStatuses(500, 502, 503, 504),
+			rehttp.RetryTimeoutErr(),
+			rehttp.RetryIsErr(func(err error) bool {
+				return err == io.EOF
+			}),
+		),
+	)
+	retryFn = retryWithLogging(logger, retryFn)
+
+	return rehttp.NewTransport(rt,
+		retryFn,
+		rehttp.ExpJitterDelay(
+			time.Duration(2)*time.Second,
+			time.Duration(cfg.GwMaxBackoff())*time.Millisecond,
+		),
+	)
+}
+
 func (impl) NewClient(ctx context.Context, cfg conf.Config) (Client, error) {
 	cert, err := tls.LoadX509KeyPair(cfg.GwCert(), cfg.GwKey())
 	if err != nil {
@@ -354,7 +414,15 @@ func (impl) NewClient(ctx context.Context, cfg conf.Config) (Client, error) {
 			Certificates: []tls.Certificate{cert},
 		},
 	}
-	out.httpClient = &http.Client{Transport: &transport}
+
+	// This client is passed into AWS SDK and it should not add any
+	// retry logic because the AWS SDK already does that:
+	s3HttpClient := &http.Client{Transport: &transport}
+
+	// This client is used outside of the AWS SDK (i.e. for requests
+	// to "publish" API) and it should wrap the transport to enable
+	// retries for certain types of error.
+	out.httpClient = &http.Client{Transport: retryTransport(ctx, cfg, &transport)}
 
 	awsLogLevel := aws.LogOff
 	if cfg.Verbosity() > 2 || cfg.LogLevel() == "trace" {
@@ -368,7 +436,7 @@ func (impl) NewClient(ctx context.Context, cfg conf.Config) (Client, error) {
 			S3ForcePathStyle: aws.Bool(true),
 			Region:           aws.String("us-east-1"),
 			Credentials:      credentials.AnonymousCredentials,
-			HTTPClient:       out.httpClient,
+			HTTPClient:       s3HttpClient,
 			Logger:           log.FromContext(ctx),
 			LogLevel:         aws.LogLevel(awsLogLevel),
 		},

@@ -230,6 +230,12 @@ gwpollinterval: 5000
 # When adding items onto an exodus-gw publish, what is the maximum number of
 # items we'll include in a single HTTP request.
 gwbatchsize: 10000
+
+# How many times to retry failing HTTP requests.
+gwmaxattempts: 3
+
+# Maximum duration (in milliseconds) between retries of HTTP requests.
+gwmaxbackoff: 20000
 ```
 
 In order to publish to exodus CDN it is necessary to configure all of the

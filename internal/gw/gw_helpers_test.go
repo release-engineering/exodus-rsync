@@ -1,12 +1,16 @@
 package gw
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/release-engineering/exodus-rsync/internal/args"
+	"github.com/release-engineering/exodus-rsync/internal/log"
 )
 
 // A fake for the exodus-gw service.
@@ -67,6 +71,8 @@ func (f *fakeGw) RoundTrip(r *http.Request) (*http.Response, error) {
 
 	out.Status = "404 Not Found"
 	out.StatusCode = 404
+	// Body must not be nil, even for empty response.
+	out.Body = io.NopCloser(strings.NewReader(""))
 
 	path := strings.TrimPrefix(r.URL.Path, "/")
 	route := strings.Split(path, "/")
@@ -109,7 +115,8 @@ func newFakeGw(t *testing.T, c *client) *fakeGw {
 }
 
 func (f *fakeGw) install(c *client) {
-	c.httpClient.Transport = f
+	ctx := log.NewContext(context.Background(), log.Package.NewLogger(args.Config{}))
+	c.httpClient.Transport = retryTransport(ctx, c.cfg, f)
 }
 
 func (f *fakeGw) createPublish() *http.Response {

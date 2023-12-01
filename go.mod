@@ -16,6 +16,7 @@ require (
 )
 
 require (
+	github.com/PuerkitoBio/rehttp v1.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect

@@ -36,6 +36,9 @@ func testConfig(t *testing.T) conf.Config {
 	cfg.EXPECT().GwPollInterval().AnyTimes().Return(1)
 	cfg.EXPECT().GwEnv().AnyTimes().Return("env")
 	cfg.EXPECT().GwBatchSize().AnyTimes().Return(3)
+	cfg.EXPECT().GwMaxAttempts().AnyTimes().Return(3)
+	// Fast backoff (1ms) to not slow down tests
+	cfg.EXPECT().GwMaxBackoff().AnyTimes().Return(1)
 	cfg.EXPECT().LogLevel().AnyTimes().Return("info")
 	cfg.EXPECT().Verbosity().AnyTimes().Return(3)
 	cfg.EXPECT().UploadThreads().AnyTimes().Return(4)

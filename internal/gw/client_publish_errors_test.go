@@ -119,6 +119,28 @@ func TestClientPublishErrors(t *testing.T) {
 		}
 	})
 
+	t.Run("can recover by retrying", func(t *testing.T) {
+		// Force an EOF, then a 500 error, and finally a successful
+		// response. The caller should only see the success.
+		gw.nextHTTPError = io.EOF
+		gw.nextHTTPResponse = &http.Response{
+			Status:     "500 Internal Server Error",
+			StatusCode: 500,
+			Body:       io.NopCloser(strings.NewReader("some error")),
+		}
+
+		gw.publishes["some-id"] = &fakePublish{id: "some-id"}
+
+		p, err := clientIface.GetPublish(ctx, "some-id")
+		if err != nil {
+			t.Errorf("failed to get publish, err = %v", err)
+		}
+		id := p.ID()
+		if id != "some-id" {
+			t.Errorf("got unexpected id %s", id)
+		}
+	})
+
 	t.Run("missing link for commit", func(t *testing.T) {
 		// Create a publish object directly without filling in any Links.
 		publish := publish{client: clientIface.(*client)}

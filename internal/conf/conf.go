@@ -43,6 +43,12 @@ type Config interface {
 	// Commit mode for publishes.
 	GwCommit() string
 
+	// Maximum attempts for any HTTP request to exodus-gw.
+	GwMaxAttempts() int
+
+	// Maximum backoff between retried HTTP requests, in milliseconds.
+	GwMaxBackoff() int
+
 	// Execution mode for rsync.
 	RsyncMode() string
 

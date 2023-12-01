@@ -64,6 +64,8 @@ func logConfig(ctx context.Context, cfg conf.Config) {
 		"gwenv", cfg.GwEnv(),
 		"gwpollinterval", cfg.GwPollInterval(),
 		"gwbatchsize", cfg.GwBatchSize(),
+		"gwmaxattempts", cfg.GwMaxAttempts(),
+		"gwmaxbackoff", cfg.GwMaxBackoff(),
 	).Warn("exodus-gw")
 
 	logger.F(
