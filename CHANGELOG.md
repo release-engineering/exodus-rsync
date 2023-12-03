@@ -4,6 +4,11 @@
 
 - n/a
 
+## 1.11.0 - 2023-12-04
+
+- Introduced `gwmaxattempts`, `gwmaxbackoff` configuration for retrying failed
+  HTTP requests
+
 ## 1.10.0 - 2023-10-04
 
 - Introduced `--exodus-commit` and `gwcommit` for configuring the commit mode
