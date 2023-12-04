@@ -3,6 +3,7 @@ module github.com/release-engineering/exodus-rsync
 go 1.19
 
 require (
+	github.com/PuerkitoBio/rehttp v1.3.0
 	github.com/adrg/xdg v0.4.0
 	github.com/alecthomas/kong v0.8.1
 	github.com/apex/log v1.9.0
@@ -16,7 +17,6 @@ require (
 )
 
 require (
-	github.com/PuerkitoBio/rehttp v1.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -29,6 +29,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/crypto v0.15.0 // indirect
 	golang.org/x/net v0.18.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
