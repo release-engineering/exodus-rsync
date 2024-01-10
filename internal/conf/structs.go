@@ -81,7 +81,7 @@ func (g *globalConfig) GwCommit() string {
 }
 
 func (g *globalConfig) GwMaxAttempts() int {
-	return nonEmptyInt(g.GwMaxAttemptsRaw, 3)
+	return nonEmptyInt(g.GwMaxAttemptsRaw, 10)
 }
 
 func (g *globalConfig) GwMaxBackoff() int {
