@@ -2,7 +2,12 @@
 
 ## Unreleased
 
+- n/a
+
+## 1.11.1 - 2024-01-11
+
 - Increased default value of `gwmaxattempts`
+- Updated dependencies
 
 ## 1.11.0 - 2023-12-04
 
