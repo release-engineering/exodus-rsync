@@ -232,7 +232,7 @@ gwpollinterval: 5000
 gwbatchsize: 10000
 
 # How many times to retry failing HTTP requests.
-gwmaxattempts: 3
+gwmaxattempts: 10
 
 # Maximum duration (in milliseconds) between retries of HTTP requests.
 gwmaxbackoff: 20000

@@ -102,7 +102,7 @@ environments:
 	assertEqual("global gwenv", cfg.GwEnv(), "global-env")
 	assertEqual("global gwpollinterval", cfg.GwPollInterval(), 5000)
 	assertEqual("global gwcommit", cfg.GwCommit(), "abc")
-	assertEqual("global gwmaxattempts", cfg.GwMaxAttempts(), 3)
+	assertEqual("global gwmaxattempts", cfg.GwMaxAttempts(), 10)
 	assertEqual("global gwmaxbackoff", cfg.GwMaxBackoff(), 20000)
 	assertEqual("global rsyncmode", cfg.RsyncMode(), "exodus")
 	assertEqual("global strip", cfg.Strip(), "dest:/foo")
