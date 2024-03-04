@@ -3,7 +3,7 @@ module github.com/release-engineering/exodus-rsync
 go 1.19
 
 require (
-	github.com/PuerkitoBio/rehttp v1.3.0
+	github.com/PuerkitoBio/rehttp v1.4.0
 	github.com/adrg/xdg v0.4.0
 	github.com/alecthomas/kong v0.8.1
 	github.com/apex/log v1.9.0
