@@ -1,5 +1,5 @@
-github.com/PuerkitoBio/rehttp v1.3.0 h1:w54Pb72MQn2eJrSdPsvGqXlAfiK1+NMTGDrOJJ4YvSU=
-github.com/PuerkitoBio/rehttp v1.3.0/go.mod h1:LUwKPoDbDIA2RL5wYZCNsQ90cx4OJ4AWBmq6KzWZL1s=
+github.com/PuerkitoBio/rehttp v1.4.0 h1:rIN7A2s+O9fmHUM1vUcInvlHj9Ysql4hE+Y0wcl/xk8=
+github.com/PuerkitoBio/rehttp v1.4.0/go.mod h1:LUwKPoDbDIA2RL5wYZCNsQ90cx4OJ4AWBmq6KzWZL1s=
 github.com/adrg/xdg v0.4.0 h1:RzRqFcjH4nE5C6oTAxhBtoE2IRyjBSa62SCbyPidvls=
 github.com/adrg/xdg v0.4.0/go.mod h1:N6ag73EX4wyxeaoeHctc1mas01KZgsj5tYiAIwqJE/E=
 github.com/alecthomas/assert/v2 v2.1.0 h1:tbredtNcQnoSd3QBhQWI7QZ3XHOVkw1Moklp2ojoH/0=
