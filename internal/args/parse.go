@@ -106,7 +106,7 @@ type Config struct {
 	Dest string `arg:"1" placeholder:"[USER@]HOST:DEST" help:"Remote destination for sync" validate:"max=2000"`
 
 	IgnoredConfig `embed:"1" group:"ignored"`
-	ExodusConfig  `embed:"1" prefix:"exodus-" validate:"dive"`
+	ExodusConfig  `embed:"1" prefix:"exodus-"`
 }
 
 // ValidateConfig enforces constraints defined by the "validate" tag on
