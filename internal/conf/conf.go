@@ -31,7 +31,7 @@ type Config interface {
 	// Base URL of exodus-gw service in use.
 	GwURL() string
 
-	// exodus-gw environment in use (e.g. "prod").
+	// exodus-gw environment in use (e.g. "live").
 	GwEnv() string
 
 	// How often to poll for task updates, in milliseconds.
