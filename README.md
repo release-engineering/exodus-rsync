@@ -68,12 +68,12 @@ are documented in the example below:
 ###############################################################################
 #
 # X509 PEM-format certificate and key for authentication to exodus-gw.
-# Environment variables may be used with these paths.
+# Environment variable substitution is supported.
 gwcert: $HOME/certs/$USER.crt
 gwkey: $HOME/certs/$USER.key
 
 # Base URL of the exodus-gw service to be used.
-# The base URL may be set using an environment variable.
+# Environment variable substitution is supported.
 gwurl: https://exodus-gw.example.com
 
 # Defines the exodus-gw "environment" for use.
@@ -82,16 +82,22 @@ gwurl: https://exodus-gw.example.com
 # https://release-engineering.github.io/exodus-gw/deployment.html#settings
 #
 # Additionally, the `gwcert` in use must grant the necessary roles for writing to
-# this environment, such as `prod-blob-uploader`, `prod-publisher`.
+# this environment, such as `live-blob-uploader`, `live-publisher`.
 #
-# The exodus-gw environment may be set using an environment variable.
-gwenv: prod
+# A typical deployment of exodus-gw will use a `pre` environment for the
+# publishing of internal/pre-release content and a `live` environment for
+# the publishing of live content.
+#
+# Environment variable substitution is supported.
+gwenv: live
 
 # The commit mode for exodus-gw publish objects, one of the following:
 #
 # "" or "auto" (default):
 #    Commit occurs only if exodus-rsync created the publish (i.e. is operating
 #    in "standalone publish" mode). A phase2 (full) commit will be used.
+#
+#    The default value is appropriate for most scenarios.
 #
 # "none":
 #    Commit never occurs, regardless of whether exodus-rsync created
@@ -148,7 +154,7 @@ environments:
   # All top-level configuration keys can also be overridden per environment;
   # for example, to use a different exodus-gw service & environment:
   gwurl: https://other-exodus-gw.example.com/
-  gwenv: stage
+  gwenv: pre
 
 ###############################################################################
 # Rsync configuration
@@ -310,7 +316,7 @@ is a summary of the differences:
   | --omit-dir-times, -O | ignored; there are no directories on exodus CDN |
   | --dry-run, -n | dry-run mode, don't upload or publish anything |
   | --rsh, -e | ignored; ssh is not used |
-  | --ignore-existing | ignored; exodus-rsync always skips existing files |
+  | --ignore-existing | ignored |
   | --delete | ignored; deleting content is not supported |
   | --prune-empty-dirs, -m | ignored; there are no directories on exodus CDN |
   | --timeout | ignored |
