@@ -439,6 +439,7 @@ func (impl) NewClient(ctx context.Context, cfg conf.Config) (Client, error) {
 			HTTPClient:       s3HttpClient,
 			Logger:           log.FromContext(ctx),
 			LogLevel:         aws.LogLevel(awsLogLevel),
+			MaxRetries:       aws.Int(cfg.GwMaxAttempts()),
 		},
 	})
 	if err != nil {
