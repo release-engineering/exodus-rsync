@@ -4,6 +4,11 @@
 
 - n/a
 
+## 1.11.2 - 2024-04-03
+
+- HTTP requests made via S3 client now support `gwmaxattempts`
+- Updated dependencies
+
 ## 1.11.1 - 2024-01-11
 
 - Increased default value of `gwmaxattempts`
