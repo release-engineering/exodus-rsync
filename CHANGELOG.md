@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- n/a
+- Updated base build image for Go version 1.21
+- Updated to Go version 1.21
 
 ## 1.11.2 - 2024-04-03
 
