@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/PuerkitoBio/rehttp v1.4.0
-	github.com/adrg/xdg v0.5.0
+	github.com/adrg/xdg v0.5.3
 	github.com/alecthomas/kong v1.3.0
 	github.com/apex/log v1.9.0
 	github.com/aws/aws-sdk-go v1.55.5
