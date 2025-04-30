@@ -10,8 +10,10 @@ BUILDVERSION := $$(git describe HEAD)
 BUILDFLAGS := -ldflags "-X github.com/release-engineering/exodus-rsync/internal/cmd.version=$(BUILDVERSION)"
 
 # Build the main binary for this project.
+# CGO is disabled as it is problematic for cross compiling and we do not
+# currently use C dependencies. Enable if necessary.
 exodus-rsync: generate
-	go build $(BUILDFLAGS) ./cmd/exodus-rsync
+	CGO_ENABLED=0 go build $(BUILDFLAGS) ./cmd/exodus-rsync
 
 # Run automated tests while gathering coverage info.
 # Generated mocks are excluded from coverage report.
