@@ -21,6 +21,7 @@ check: generate
 
 # Run generate.
 generate:
+	go mod tidy
 	go generate ./...
 
 # Run linter.
