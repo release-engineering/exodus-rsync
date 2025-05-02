@@ -15,7 +15,7 @@ GLIBC2_MAXVER=12
 SUBJECT=exodus-rsync
 
 glibc_symvers_present(){
-  nm -uD $SUBJECT | { egrep --only-matching 'GLIBC_2\.[0-9.]+' || :; } | sort | uniq
+  nm -uD $SUBJECT | { grep -E --only-matching 'GLIBC_2\.[0-9.]+' || :; } | sort | uniq
 }
 
 check_glibc_symver(){
@@ -26,7 +26,7 @@ check_glibc_symver(){
   if test $ver_ok != 1; then
     echo "ERROR: $SUBJECT is linked against too new glibc symbols:" 1>&2
     # Output the symbols to make it clearer
-    nm -uD $SUBJECT | fgrep "GLIBC_2.$ver" 1>&2
+    nm -uD $SUBJECT | grep -F "GLIBC_2.$ver" 1>&2
     exit 5
   fi
 }
