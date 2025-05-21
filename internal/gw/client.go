@@ -190,14 +190,14 @@ type uploadResult struct {
 
 func (c *client) uploadWorker(
 	ctx context.Context,
-	items <-chan walk.SyncItem,
+	items []walk.SyncItem,
 	results chan<- uploadResult,
 	wg *sync.WaitGroup,
 	workerID int,
 ) {
 	defer wg.Done()
 
-	for item := range items {
+	for _, item := range items {
 		// Determine if the blob is already present in the bucket
 		have, err := c.haveBlob(ctx, item)
 		if err != nil {
@@ -284,31 +284,13 @@ func (c *client) EnsureUploaded(
 	numThreads := c.cfg.UploadThreads()
 	var wg sync.WaitGroup
 	results := make(chan uploadResult, len(items))
-	jobs := make(chan walk.SyncItem, len(items))
+	jobs := make([]walk.SyncItem, 0)
 
 	// Make a child context so we can cancel all uploads at once if an error occurs
 	// in any of them.
 	uploadCtx, uploadCancel := context.WithCancel(ctx)
 
-	// These goroutines are responsible for handling each item by reading
-	// from 'jobs' and writing a result per item to 'results'.
-	for i := 0; i < numThreads; i++ {
-		wg.Add(1)
-		go c.uploadWorker(uploadCtx, jobs, results, &wg, i+1)
-	}
-
-	// This goroutine is responsible for reading all the results as they come into
-	// 'results' channel and executing callbacks as needed, as well as calculating
-	// the final error state.
-	//
-	// Ensures that callbacks are invoked as quickly as possible, but only
-	// from a single goroutine.
-	out := make(chan error, 1)
-	go readUploadResults(
-		out, uploadCancel, results,
-		onUploaded, onPresent, onDuplicate)
-
-	// Now send all the items
+	// Filter items into jobs
 	for _, item := range items {
 		if item.Key == "" && item.LinkTo != "" {
 			log.FromContext(ctx).F("uri", item.SrcPath).Debug("Skipping unfollowed symlink")
@@ -326,11 +308,30 @@ func (c *client) EnsureUploaded(
 		}
 
 		processedItems[item.Key] = item
-		jobs <- item
+		jobs = append(jobs, item)
 	}
 
-	// Let the uploaders know there are no more items to process.
-	close(jobs)
+	// These goroutines are responsible for handling a subset of jobs and
+	// writing a result per item to 'results'.
+	for i := range numThreads {
+		wg.Add(1)
+		// Batch jobs so worker doesn't process the same job(s) as another,
+		// avoiding duplicate uploads.
+		min := (i * len(jobs) / numThreads)
+		max := ((i + 1) * len(jobs)) / numThreads
+		go c.uploadWorker(uploadCtx, jobs[min:max], results, &wg, i+1)
+	}
+
+	// This goroutine is responsible for reading all the results as they come into
+	// 'results' channel and executing callbacks as needed, as well as calculating
+	// the final error state.
+	//
+	// Ensures that callbacks are invoked as quickly as possible, but only
+	// from a single goroutine.
+	out := make(chan error, 1)
+	go readUploadResults(
+		out, uploadCancel, results,
+		onUploaded, onPresent, onDuplicate)
 
 	// Wait for uploaders to complete.
 	wg.Wait()
