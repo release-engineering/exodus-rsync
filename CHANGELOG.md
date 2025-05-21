@@ -4,6 +4,14 @@
 
 - n/a
 
+## 1.12.1 - 2025-05-20
+
+- Updated Go dependencies
+- Disabled cgo
+- Modernized `test/symver-check` script to use `grep -E` and `grep -F` in place of `egrep` and `fgrep` respectively
+- Updated GitHub Actions CI to use the `ubuntu-latest` image for runners
+- Updated `.github/CODEOWNERS` to reflect recent team changes
+
 ## 1.12.0 - 2024-09-19
 
 - Updated base build image for Go version 1.23
