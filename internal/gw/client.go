@@ -192,12 +192,19 @@ func (c *client) uploadWorker(
 	ctx context.Context,
 	items <-chan walk.SyncItem,
 	results chan<- uploadResult,
+	takenItems *sync.Map,
 	wg *sync.WaitGroup,
 	workerID int,
 ) {
 	defer wg.Done()
 
 	for item := range items {
+		// Skip item if upload has already begun (by another worker)
+		if _, taken := takenItems.LoadOrStore(item.Key, true); taken {
+			log.FromContext(ctx).F("key", item.Key).Debug("Item is already being uploaded")
+			continue
+		}
+
 		// Determine if the blob is already present in the bucket
 		have, err := c.haveBlob(ctx, item)
 		if err != nil {
@@ -286,6 +293,13 @@ func (c *client) EnsureUploaded(
 	results := make(chan uploadResult, len(items))
 	jobs := make(chan walk.SyncItem, len(items))
 
+	// Maintain a safe map of taken jobs to help reduce duplicate uploads.
+	//
+	// While all `jobs` are unique, all workers share that structure. So it is
+	// possible for multiple workers to upload the same object. This map is
+	// checked by `uploadWorker` prior to uploading.
+	takenJobs := sync.Map{}
+
 	// Make a child context so we can cancel all uploads at once if an error occurs
 	// in any of them.
 	uploadCtx, uploadCancel := context.WithCancel(ctx)
@@ -294,7 +308,7 @@ func (c *client) EnsureUploaded(
 	// from 'jobs' and writing a result per item to 'results'.
 	for i := 0; i < numThreads; i++ {
 		wg.Add(1)
-		go c.uploadWorker(uploadCtx, jobs, results, &wg, i+1)
+		go c.uploadWorker(uploadCtx, jobs, results, &takenJobs, &wg, i+1)
 	}
 
 	// This goroutine is responsible for reading all the results as they come into
