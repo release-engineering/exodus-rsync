@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 	"github.com/release-engineering/exodus-rsync/internal/walk"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClientTypicalUpload(t *testing.T) {
@@ -236,4 +238,63 @@ func TestClientUploadDuplicateCallbackError(t *testing.T) {
 	if err.Error() != "error from callback" {
 		t.Errorf("did not get expected error, got: %v", err)
 	}
+}
+
+func TestUploadWorkerDuplicates(t *testing.T) {
+	// This test copies much of EnsureUploaded to replicate and test worker behavior.
+	//
+	// Ensure UploadWorkers do not duplicate uploads.
+
+	client, _ := newClientWithFakeS3(t)
+
+	chdirInTest(t, "../../test/data/srctrees/just-files")
+
+	ctx := context.Background()
+	ctx = log.NewContext(ctx, log.Package.NewLogger(args.Config{Verbose: 2}))
+
+	items := []walk.SyncItem{
+		{SrcPath: "hello-copy-one", Key: "abc123"},
+		{SrcPath: "hello-copy-two", Key: "abc123"},
+		{SrcPath: "subdir/some-binary", Key: "aabbcc"},
+	}
+
+	processedItems := make(map[string]walk.SyncItem)
+
+	numThreads := 4
+	var wg sync.WaitGroup
+	results := make(chan uploadResult, len(items))
+	jobs := make(chan walk.SyncItem, len(items))
+
+	takenJobs := sync.Map{}
+
+	for i := 0; i < numThreads; i++ {
+		wg.Add(1)
+		go client.uploadWorker(ctx, jobs, results, &takenJobs, &wg, i+1)
+	}
+
+	// Now send all the items.
+	// NO FILTERING, keep duplicates because fakeS3 allows for no delay
+	for _, item := range items {
+		processedItems[item.Key] = item
+		jobs <- item
+	}
+
+	close(jobs)
+	wg.Wait()
+	close(results)
+
+	// takenItems should match jobs, excluding duplicate
+	actual := map[string]interface{}{}
+	takenJobs.Range(func(key, value interface{}) bool {
+		actual[fmt.Sprint(key)] = value
+		return true
+	})
+	expected := map[string]interface{}{
+		"abc123": true,
+		"aabbcc": true,
+	}
+	assert.Equal(t, expected, actual)
+
+	// This also produces the expected log message,
+	// "Item is already being uploaded", but is is impractical to test
 }
