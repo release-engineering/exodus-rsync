@@ -7,7 +7,7 @@ require (
 	github.com/adrg/xdg v0.5.3
 	github.com/alecthomas/kong v1.12.1
 	github.com/apex/log v1.9.0
-	github.com/aws/aws-sdk-go v1.55.7
+	github.com/aws/aws-sdk-go v1.55.8
 	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/gabriel-vasile/mimetype v1.4.9
 	github.com/go-playground/validator/v10 v10.27.0
