@@ -4,6 +4,11 @@
 
 - n/a
 
+## 1.12.2 - 2025-08-26
+
+- Address duplicate uploads [RHELDST-30656]
+- Updated Go dependencies (golang.org/x/net, golang.org/x/crypto, github.com/aws/aws-sdk-go, github.com/alecthomas/kong, github.com/go-playground/validator/v10, github.com/stretchr/testify, github.com/coreos/go-systemd/v22)
+
 ## 1.12.1 - 2025-05-20
 
 - Updated Go dependencies
