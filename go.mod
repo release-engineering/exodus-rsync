@@ -12,7 +12,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.9
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/golang/mock v1.6.0
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
