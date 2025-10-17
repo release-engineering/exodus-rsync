@@ -57,7 +57,7 @@ func (h *baseHandler) HandleLog(e *apexLog.Entry) error {
 		h.Entries = append(h.Entries, bld.String())
 	}
 
-	fmt.Fprintf(h.Writer, e.Timestamp.UTC().Format(time.UnixDate)+" "+bld.String())
+	fmt.Fprintf(h.Writer, "%s %s", e.Timestamp.UTC().Format(time.UnixDate), bld.String())
 
 	return nil
 }
