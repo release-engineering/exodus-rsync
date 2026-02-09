@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/PuerkitoBio/rehttp v1.4.0
 	github.com/adrg/xdg v0.5.3
-	github.com/alecthomas/kong v1.13.0
+	github.com/alecthomas/kong v1.14.0
 	github.com/apex/log v1.9.0
 	github.com/aws/aws-sdk-go v1.55.8
 	github.com/coreos/go-systemd/v22 v22.7.0
