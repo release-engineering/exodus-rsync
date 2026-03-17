@@ -1,6 +1,6 @@
 module github.com/release-engineering/exodus-rsync
 
-go 1.24.0
+go 1.26.1
 
 require (
 	github.com/PuerkitoBio/rehttp v1.4.0
