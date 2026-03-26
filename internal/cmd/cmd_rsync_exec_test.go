@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/rsync"
+	"go.uber.org/mock/gomock"
 )
 
 func TestMainRawExecRsync(t *testing.T) {

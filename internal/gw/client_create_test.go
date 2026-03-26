@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
+	"go.uber.org/mock/gomock"
 )
 
 func TestNewClientCertError(t *testing.T) {

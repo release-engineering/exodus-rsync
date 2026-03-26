@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 	"github.com/release-engineering/exodus-rsync/internal/walk"
+	"go.uber.org/mock/gomock"
 )
 
 type mockClientConfigurator func(*gomock.Controller, *gw.MockClient)

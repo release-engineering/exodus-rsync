@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
+	"go.uber.org/mock/gomock"
 )
 
 func chdirInTest(t *testing.T, path string) {

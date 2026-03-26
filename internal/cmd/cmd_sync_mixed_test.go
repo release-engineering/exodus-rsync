@@ -10,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 	"github.com/release-engineering/exodus-rsync/internal/rsync"
+	"go.uber.org/mock/gomock"
 )
 
 type fakeRsync struct {

@@ -16,7 +16,7 @@ import (
 // This package thinly wraps apex/log with some helpers to make logger
 // usage a little less cumbersome.
 
-//go:generate go run -modfile ../../go.tools.mod github.com/golang/mock/mockgen -package $GOPACKAGE -destination mock.go -source $GOFILE
+//go:generate go run -modfile ../../go.tools.mod go.uber.org/mock/mockgen -package $GOPACKAGE -destination mock.go -source $GOFILE
 
 // Interface defines the public interface of this package.
 type Interface interface {

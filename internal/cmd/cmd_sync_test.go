@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 	"github.com/release-engineering/exodus-rsync/internal/walk"
+	"go.uber.org/mock/gomock"
 )
 
 const CONFIG string = `

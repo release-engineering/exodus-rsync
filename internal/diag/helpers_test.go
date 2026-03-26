@@ -3,7 +3,7 @@ package diag
 import (
 	"testing"
 
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 func MockController(t *testing.T) *gomock.Controller {

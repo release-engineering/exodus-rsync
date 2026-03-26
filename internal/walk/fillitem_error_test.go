@@ -8,10 +8,10 @@ import (
 	"path"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 )
 
-//go:generate go run -modfile ../../go.tools.mod github.com/golang/mock/mockgen -package $GOPACKAGE -destination fs_mock.go io/fs DirEntry,FileInfo
+//go:generate go run -modfile ../../go.tools.mod go.uber.org/mock/mockgen -package $GOPACKAGE -destination fs_mock.go io/fs DirEntry,FileInfo
 
 func TestFillItemInfoError(t *testing.T) {
 	ctrl := gomock.NewController(t)
