@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 )
 
 // Mock hash.Hash.
-//go:generate go run -modfile ../../go.tools.mod github.com/golang/mock/mockgen -package $GOPACKAGE -destination hash_mock.go hash Hash
+//go:generate go run -modfile ../../go.tools.mod go.uber.org/mock/mockgen -package $GOPACKAGE -destination hash_mock.go hash Hash
 
 func TestHashError(t *testing.T) {
 	ctrl := gomock.NewController(t)

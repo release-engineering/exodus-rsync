@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/apex/log"
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
+	"go.uber.org/mock/gomock"
 )
 
 func TestExodusFailsFirst(t *testing.T) {

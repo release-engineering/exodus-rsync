@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/log"
+	"go.uber.org/mock/gomock"
 )
 
 func MockController(t *testing.T) *gomock.Controller {

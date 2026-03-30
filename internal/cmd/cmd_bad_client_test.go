@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
+	"go.uber.org/mock/gomock"
 )
 
 // Command fails if exodus-gw client can't be initialized.

@@ -7,11 +7,11 @@ import (
 	"path"
 	"testing"
 
-	gomock "github.com/golang/mock/gomock"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/gw"
 	"github.com/release-engineering/exodus-rsync/internal/log"
+	gomock "go.uber.org/mock/gomock"
 )
 
 func mockConfig(ctrl *gomock.Controller) conf.Config {
