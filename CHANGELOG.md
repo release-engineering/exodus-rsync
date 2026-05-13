@@ -4,6 +4,13 @@
 
 - n/a
 
+## 1.12.3 - 2026-05-13
+
+- Upgraded to Go version 1.26
+- Replaced `golang/mock` with `uber-go/mock` [RHELDST-38102]
+- Fixed build error caused by a non-constant format string
+- Updated Go dependencies (`golang.org/x/crypto`, `golang.org/x/sys`, `golang.org/x/text`, `github.com/mattn/go-isatty`, `github.com/alecthomas/kong`, `github.com/go-playground/validator/v10`, `github.com/fatih/color`, `github.com/gabriel-vasile/mimetype`, `github.com/coreos/go-systemd/v22`, `github.com/stretchr/testify`)
+
 ## 1.12.2 - 2025-08-26
 
 - Address duplicate uploads [RHELDST-30656]
