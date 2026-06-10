@@ -1,0 +1,131 @@
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'release-engineering/exodus-rsync' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        # we don't want a shallow clone because we want to use "git describe"
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+        check-latest: true
+
+    - name: Determine release version
+      id: release
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        git fetch --force --tags origin '+refs/tags/*:refs/tags/*'
+
+        semver_tags="$(git tag --list 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V || true)"
+        head_tag="$(git tag --points-at HEAD --list 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1 || true)"
+
+        if [[ -n "${head_tag}" ]]; then
+          tag="${head_tag}"
+          version="${tag#v}"
+          previous_tag="$(printf '%s\n' "${semver_tags}" | grep -vx "${tag}" | tail -n 1 || true)"
+          should_tag=false
+        else
+          latest_tag="$(printf '%s\n' "${semver_tags}" | tail -n 1)"
+          if [[ -z "${latest_tag}" ]]; then
+            echo "No vX.Y.Z release tag found; refusing to guess the first automated version." >&2
+            exit 1
+          fi
+
+          version="${latest_tag#v}"
+          IFS=. read -r major minor patch <<< "${version}"
+          version="${major}.${minor}.$((patch + 1))"
+          tag="v${version}"
+          previous_tag="${latest_tag}"
+          should_tag=true
+        fi
+
+        if gh release view "${tag}" >/dev/null 2>&1; then
+          skip=true
+        else
+          skip=false
+        fi
+
+        echo "version=${version}" >> "${GITHUB_OUTPUT}"
+        echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+        echo "previous_tag=${previous_tag}" >> "${GITHUB_OUTPUT}"
+        echo "should_tag=${should_tag}" >> "${GITHUB_OUTPUT}"
+        echo "skip=${skip}" >> "${GITHUB_OUTPUT}"
+
+    - name: Run checks
+      if: steps.release.outputs.skip != 'true'
+      run: make all
+
+    - name: Build release binary
+      if: steps.release.outputs.skip != 'true'
+      run: |
+        make clean
+        make BUILDVERSION=${{ steps.release.outputs.tag }}
+        sha256sum exodus-rsync > exodus-rsync.sha256
+
+    - name: Generate release notes
+      if: steps.release.outputs.skip != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        previous_tag="${{ steps.release.outputs.previous_tag }}"
+
+        if [[ -n "${previous_tag}" ]]; then
+          git log --first-parent --format='- %s (%h)' "${previous_tag}..HEAD" > changes.txt
+        else
+          git log --first-parent --format='- %s (%h)' HEAD > changes.txt
+        fi
+
+        {
+          echo "## Changes"
+          echo
+          if [[ -s changes.txt ]]; then
+            cat changes.txt
+          else
+            echo "- Rebuilt from ${GITHUB_SHA}."
+          fi
+          echo
+          echo "## Assets"
+          echo
+          echo "- \`exodus-rsync\`: Linux amd64 binary built with \`BUILDVERSION=${{ steps.release.outputs.tag }}\`."
+          echo "- \`exodus-rsync.sha256\`: SHA-256 checksum for the binary."
+        } > release-notes.md
+
+    - name: Create tag
+      if: steps.release.outputs.skip != 'true' && steps.release.outputs.should_tag == 'true'
+      run: |
+        git config user.name 'github-actions[bot]'
+        git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        git tag -a ${{ steps.release.outputs.tag }} -m 'Release ${{ steps.release.outputs.tag }}'
+        git push origin refs/tags/${{ steps.release.outputs.tag }}
+
+    - name: Create GitHub release
+      if: steps.release.outputs.skip != 'true'
+      run: |
+        gh release create ${{ steps.release.outputs.tag }} \
+          --title '${{ steps.release.outputs.tag }}' \
+          --notes-file release-notes.md \
+          exodus-rsync \
+          exodus-rsync.sha256
