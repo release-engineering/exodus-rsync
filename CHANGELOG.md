@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-- n/a
+- Releases are now created automatically for every change merged to `main`.
+  Version numbers are assigned by bumping the latest release tag's patch
+  version, and the release changelog is generated from commits merged since
+  the previous release.
 
 ## 1.12.3 - 2026-05-13
 

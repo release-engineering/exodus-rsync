@@ -19,7 +19,8 @@ exodus-rsync: generate
 # Generated mocks are excluded from coverage report.
 check: generate
 	go test -coverprofile=coverage.out -coverpkg=./... ./...
-	sed -e '/[\/_]mock.go/ d' -i coverage.out
+	awk '!/[\/_]mock\.go/' coverage.out > coverage.out.tmp
+	mv coverage.out.tmp coverage.out
 
 # Run generate.
 generate:
@@ -47,7 +48,7 @@ htmlcov: check
 
 # Delete generated files.
 clean:
-	rm -f exodus-rsync coverage.out
+	rm -f exodus-rsync coverage.out coverage.out.tmp
 
 # Build exodus-rsync in a container image.
 # If you have a working 'podman', this can be used as an alternative
