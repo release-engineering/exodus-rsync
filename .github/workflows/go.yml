@@ -11,6 +11,9 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    # Required for OIDC: https://github.com/codecov/codecov-action?tab=readme-ov-file#using-oidc
+    permissions:
+      id-token: write
     steps:
     - uses: actions/checkout@v2
       with:
@@ -25,7 +28,10 @@ jobs:
     - name: Run all checks
       run: make all
 
-    - name: Send coverage
-      uses: shogo82148/actions-goveralls@v1
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
       with:
-        path-to-profile: coverage.out
+        use_oidc: true
+        flags: unit-tests
+        files: coverage.out
+        fail_ci_if_error: false
