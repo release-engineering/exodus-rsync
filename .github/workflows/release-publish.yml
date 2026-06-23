@@ -1,0 +1,172 @@
+name: Release Publishing
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ closed ]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >
+      github.repository == 'release-engineering/exodus-rsync' &&
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release-preparation/')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: main
+        fetch-depth: 0
+
+    - name: Fetch release refs
+      run: git fetch --force origin '+refs/tags/*:refs/tags/*'
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+        check-latest: true
+
+    - name: Read release metadata and notes
+      id: release
+      run: go run ./tools/releaseprep notes --output=release-notes.md
+
+    - name: Validate release target
+      run: |
+        set -euo pipefail
+
+        tag="${{ steps.release.outputs.tag }}"
+        if git rev-parse --verify --quiet "refs/tags/${tag}" >/dev/null; then
+          echo "Tag ${tag} already exists; refusing to publish over an existing release." >&2
+          exit 1
+        fi
+
+        if gh release view "${tag}" >/dev/null 2>&1; then
+          echo "GitHub Release ${tag} already exists; refusing to publish over it." >&2
+          exit 1
+        fi
+
+    - name: Run checks
+      run: make all
+
+    - name: Build release binary
+      run: |
+        set -euo pipefail
+
+        make clean
+        make BUILDVERSION=${{ steps.release.outputs.tag }}
+        sha256sum exodus-rsync > exodus-rsync.sha256
+
+    - name: Create tag and GitHub Release
+      run: |
+        set -euo pipefail
+
+        tag="${{ steps.release.outputs.tag }}"
+        release_created=false
+        tag_pushed=false
+
+        cleanup() {
+          if [[ "${release_created}" != "true" ]]; then
+            echo "Release creation failed; attempting cleanup for ${tag}." >&2
+            if gh release view "${tag}" >/dev/null 2>&1; then
+              gh release delete "${tag}" --yes || true
+            fi
+            if [[ "${tag_pushed}" == "true" ]]; then
+              git push --delete origin "${tag}" || true
+            fi
+            git tag -d "${tag}" || true
+          fi
+        }
+        trap cleanup ERR
+
+        git config user.name 'github-actions[bot]'
+        git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+        git tag -a "${tag}" -m "Release ${tag}"
+        git push origin "refs/tags/${tag}"
+        tag_pushed=true
+
+        gh release create "${tag}" \
+          --verify-tag \
+          --target "${GITHUB_SHA}" \
+          --title "${tag}" \
+          --notes-file release-notes.md \
+          exodus-rsync \
+          exodus-rsync.sha256
+        release_created=true
+
+    - name: Trigger downstream update flows
+      env:
+        VERSION: ${{ steps.release.outputs.version }}
+        TAG: ${{ steps.release.outputs.tag }}
+        GITLAB_API_URL: ${{ vars.GITLAB_API_URL || 'https://gitlab.cee.redhat.com/api/v4' }}
+        RHSM_PULP_GITLAB_PROJECT: ${{ vars.RHSM_PULP_GITLAB_PROJECT }}
+        RHSM_PULP_GITLAB_REF: ${{ vars.RHSM_PULP_GITLAB_REF || 'main' }}
+        RHSM_PULP_GITLAB_TRIGGER_TOKEN: ${{ secrets.RHSM_PULP_GITLAB_TRIGGER_TOKEN }}
+        PUB_GITLAB_PROJECT: ${{ vars.PUB_GITLAB_PROJECT }}
+        PUB_GITLAB_REF: ${{ vars.PUB_GITLAB_REF || 'main' }}
+        PUB_GITLAB_TRIGGER_TOKEN: ${{ secrets.PUB_GITLAB_TRIGGER_TOKEN }}
+        CONTAINER_IMAGES_GITLAB_PROJECT: ${{ vars.CONTAINER_IMAGES_GITLAB_PROJECT || 'exd-guild-distribution/container-images' }}
+        CONTAINER_IMAGES_GITLAB_REF: ${{ vars.CONTAINER_IMAGES_GITLAB_REF || 'main' }}
+        CONTAINER_IMAGES_GITLAB_TRIGGER_TOKEN: ${{ secrets.CONTAINER_IMAGES_GITLAB_TRIGGER_TOKEN }}
+      run: |
+        set -euo pipefail
+
+        checksum="$(cut -d ' ' -f1 exodus-rsync.sha256)"
+        release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+        binary_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/exodus-rsync"
+        checksum_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/exodus-rsync.sha256"
+
+        trigger_gitlab_pipeline() {
+          local name="$1"
+          local project="$2"
+          local ref="$3"
+          local token="$4"
+
+          if [[ -z "${project}" || -z "${token}" ]]; then
+            echo "::warning::Skipping ${name}; configure project variable and trigger token secret to enable this downstream flow."
+            return 0
+          fi
+
+          local encoded_project
+          encoded_project="$(jq -rn --arg value "${project}" '$value|@uri')"
+
+          echo "Triggering ${name} downstream update flow for ${TAG}."
+          curl --fail-with-body --request POST \
+            "${GITLAB_API_URL}/projects/${encoded_project}/trigger/pipeline" \
+            --form "token=${token}" \
+            --form "ref=${ref}" \
+            --form "variables[EXODUS_RSYNC_VERSION]=${VERSION}" \
+            --form "variables[EXODUS_RSYNC_TAG]=${TAG}" \
+            --form "variables[EXODUS_RSYNC_RELEASE_URL]=${release_url}" \
+            --form "variables[EXODUS_RSYNC_BINARY_URL]=${binary_url}" \
+            --form "variables[EXODUS_RSYNC_SHA256_URL]=${checksum_url}" \
+            --form "variables[EXODUS_RSYNC_SHA256]=${checksum}"
+        }
+
+        trigger_gitlab_pipeline \
+          "rhsm-pulp" \
+          "${RHSM_PULP_GITLAB_PROJECT}" \
+          "${RHSM_PULP_GITLAB_REF}" \
+          "${RHSM_PULP_GITLAB_TRIGGER_TOKEN}"
+
+        trigger_gitlab_pipeline \
+          "pub" \
+          "${PUB_GITLAB_PROJECT}" \
+          "${PUB_GITLAB_REF}" \
+          "${PUB_GITLAB_TRIGGER_TOKEN}"
+
+        trigger_gitlab_pipeline \
+          "Pipeline-as-a-Service container-images" \
+          "${CONTAINER_IMAGES_GITLAB_PROJECT}" \
+          "${CONTAINER_IMAGES_GITLAB_REF}" \
+          "${CONTAINER_IMAGES_GITLAB_TRIGGER_TOKEN}"

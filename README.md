@@ -14,6 +14,7 @@ exodus-aware drop-in replacement for rsync.
     - [Publish modes](#publish-modes)
         - [Standalone publish](#standalone-publish)
         - [Joined publish](#joined-publish)
+- [Release process](#release-process)
 - [License](#license)
 
 <!-- /TOC -->
@@ -42,9 +43,16 @@ It is designed to be installed as the `rsync` command in `$PATH`, ahead of the r
 
 ```
 curl -LO https://github.com/release-engineering/exodus-rsync/releases/latest/download/exodus-rsync
+curl -LO https://github.com/release-engineering/exodus-rsync/releases/latest/download/exodus-rsync.sha256
+sha256sum --check exodus-rsync.sha256
 chmod +x exodus-rsync
 mv exodus-rsync /usr/local/bin/rsync
 ```
+
+The checksum file is published with each release and should be verified before
+installing or consuming the binary. Downstream automation should also verify the
+downloaded binary against `exodus-rsync.sha256` before opening or merging version
+bump requests.
 
 In order for exodus-rsync to do anything useful, it's necessary to first deploy a
 configuration file; see the next section.
@@ -399,6 +407,38 @@ the `gwcommit` config file option or the `--exodus-commit` argument.
 See [the exodus-gw documentation](https://release-engineering.github.io/exodus-gw/api.html#section/Atomicity)
 for more information on the supported commit modes and the atomicity
 guarantees when publishing with exodus-rsync and exodus-gw.
+
+## Release process
+
+exodus-rsync uses a two-stage release process.
+
+Release preparation runs monthly and can also be started manually from the
+`Release Preparation` GitHub Actions workflow. Manual runs accept a `bump` input
+of `auto`, `patch`, `minor`, or `major`, plus a `dry_run` option. The `auto`
+selection uses a pinned `modver` run as a suggestion for Go API compatibility, but
+any non-empty commit batch is treated as at least a patch release. Larger CLI or
+behavior changes should use the manual `minor` or `major` inputs.
+
+If there are no commits since the latest `vX.Y.Z` tag, preparation exits
+successfully without opening a pull request. Otherwise it updates `CHANGELOG.md`,
+writes `.release/next-release.json`, and opens or updates the deterministic
+`release-preparation/next` pull request. Curated `Unreleased` changelog content is
+preferred; if `Unreleased` contains only `- n/a`, entries are generated from
+first-parent commits since the previous release tag.
+
+Release publishing runs only after a `release-preparation/*` pull request is
+merged to `main`. It reads `.release/next-release.json`, validates that the tag
+and GitHub Release do not already exist, runs checks, builds the binary with
+`BUILDVERSION=<tag>`, creates `exodus-rsync.sha256`, creates the annotated tag,
+and publishes the GitHub Release using the matching `CHANGELOG.md` section as
+release notes.
+
+After publishing, configured downstream GitLab pipeline triggers receive the
+release version, tag, release URL, binary URL, checksum URL, and checksum value.
+The supported downstream consumers are the existing `rhsm-pulp` and `pub` bump MR
+flows, plus Pipeline-as-a-Service via
+`exd-guild-distribution/container-images`. The old `c3i-images` consumer is no
+longer targeted unless maintainers explicitly decide to keep it.
 
 ## License
 
