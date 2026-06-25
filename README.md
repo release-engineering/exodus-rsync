@@ -2,7 +2,7 @@
 
 exodus-aware drop-in replacement for rsync.
 
-[![Coverage Status](https://coveralls.io/repos/github/release-engineering/exodus-rsync/badge.svg?branch=main)](https://coveralls.io/github/release-engineering/exodus-rsync?branch=main)
+[![Coverage Status](https://app.codecov.io/gh/release-engineering/exodus-rsync)](https://app.codecov.io/gh/release-engineering/exodus-rsync)
 
 <!-- TOC -->
 
