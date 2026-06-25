@@ -1,0 +1,123 @@
+name: Release Preparation
+
+on:
+  schedule:
+  - cron: '0 9 1 * *'
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Release bump to prepare.
+        required: true
+        default: auto
+        type: choice
+        options:
+        - auto
+        - patch
+        - minor
+        - major
+      dry_run:
+        description: Compute the release plan without changing files or opening a PR.
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-prepare
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.repository == 'release-engineering/exodus-rsync'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PREP_BRANCH: release-preparation/next
+      BUMP: ${{ github.event.inputs.bump || 'auto' }}
+      DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: main
+        fetch-depth: 0
+
+    - name: Fetch release refs
+      run: |
+        git fetch --force origin \
+          '+refs/heads/main:refs/remotes/origin/main' \
+          '+refs/tags/*:refs/tags/*'
+        git fetch origin \
+          '+refs/heads/release-preparation/next:refs/remotes/origin/release-preparation/next' \
+          || true
+
+    - name: Create preparation branch
+      run: git checkout -B "${PREP_BRANCH}" origin/main
+
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
+        check-latest: true
+
+    - name: Prepare release metadata
+      id: prep
+      run: |
+        go run ./tools/releaseprep prepare \
+          --bump="${BUMP}" \
+          --dry-run="${DRY_RUN}" \
+          --base-ref=origin/main
+
+    - name: Show dry-run result
+      if: steps.prep.outputs.has_changes == 'true' && steps.prep.outputs.dry_run == 'true'
+      run: |
+        echo "Dry-run release preparation completed."
+        echo "Next tag: ${{ steps.prep.outputs.tag }}"
+        echo "Bump: ${{ steps.prep.outputs.bump }}"
+        echo "modver suggestion: ${{ steps.prep.outputs.modver_suggestion }}"
+
+    - name: Commit release preparation
+      if: steps.prep.outputs.has_changes == 'true' && steps.prep.outputs.dry_run != 'true'
+      run: |
+        set -euo pipefail
+
+        git config user.name 'github-actions[bot]'
+        git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+        git add CHANGELOG.md .release/next-release.json
+        if git diff --cached --quiet; then
+          echo "No release preparation changes to commit."
+          exit 0
+        fi
+
+        git commit -m "Prepare release ${{ steps.prep.outputs.tag }}"
+        git push --force-with-lease origin "HEAD:${PREP_BRANCH}"
+
+    - name: Open or update release-preparation PR
+      if: steps.prep.outputs.has_changes == 'true' && steps.prep.outputs.dry_run != 'true'
+      run: |
+        set -euo pipefail
+
+        title="Prepare release ${{ steps.prep.outputs.tag }}"
+        existing_pr="$(
+          gh pr list \
+            --state open \
+            --head "${PREP_BRANCH}" \
+            --json number \
+            --jq '.[0].number // empty'
+        )"
+
+        if [[ -n "${existing_pr}" ]]; then
+          gh pr edit "${existing_pr}" \
+            --title "${title}" \
+            --body-file .release/release-pr.md \
+            --base main
+        else
+          gh pr create \
+            --base main \
+            --head "${PREP_BRANCH}" \
+            --title "${title}" \
+            --body-file .release/release-pr.md
+        fi

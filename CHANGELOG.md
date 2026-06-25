@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- n/a
+- Reworked release automation into a two-stage release preparation and
+  publishing flow.
 
 ## 1.12.3 - 2026-05-13
 

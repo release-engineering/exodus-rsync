@@ -14,6 +14,11 @@ GLIBC2_MAXVER=12
 
 SUBJECT=exodus-rsync
 
+if test "$(uname -s)" != Linux; then
+  echo "Skipping glibc symbol version check on non-Linux platform."
+  exit 0
+fi
+
 glibc_symvers_present(){
   nm -uD $SUBJECT | { grep -E --only-matching 'GLIBC_2\.[0-9.]+' || :; } | sort | uniq
 }
