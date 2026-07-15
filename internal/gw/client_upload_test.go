@@ -106,7 +106,7 @@ func TestClientUploadWithLinks(t *testing.T) {
 }
 
 func TestClientPresentItem(t *testing.T) {
-	client, s3 := newClientWithFakeS3(t)
+	client, srv := newClientWithFakeS3(t)
 
 	chdirInTest(t, "../../test/data/srctrees/just-files")
 
@@ -124,7 +124,7 @@ func TestClientPresentItem(t *testing.T) {
 	present := make([]walk.SyncItem, 0)
 	duplicate := make([]walk.SyncItem, 0)
 
-	s3.blobs = blobMap{"a1b2c3": []error{nil}}
+	srv.Blobs()["a1b2c3"] = []error{nil}
 
 	err := client.EnsureUploaded(ctx, items, func(item walk.SyncItem) error {
 		uploaded = append(uploaded, item)
@@ -184,7 +184,7 @@ func TestClientUploadCallbackError(t *testing.T) {
 }
 
 func TestClientUploadPresentCallbackError(t *testing.T) {
-	client, s3 := newClientWithFakeS3(t)
+	client, srv := newClientWithFakeS3(t)
 
 	chdirInTest(t, "../../test/data/srctrees/just-files")
 
@@ -197,7 +197,7 @@ func TestClientUploadPresentCallbackError(t *testing.T) {
 		{SrcPath: "subdir/some-binary", Key: "aabbcc"},
 	}
 
-	s3.blobs = blobMap{"aabbcc": []error{nil}}
+	srv.Blobs()["aabbcc"] = []error{nil}
 
 	err := client.EnsureUploaded(ctx, items, func(item walk.SyncItem) error {
 		return nil

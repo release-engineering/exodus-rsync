@@ -65,6 +65,7 @@ func (h *syslogHandler) HandleLog(e *apexLog.Entry) error {
 		defer h.mutex.Unlock()
 
 		h.Entries = append(h.Entries, bld.String())
+		return nil
 	}
 
 	return h.writerForLevel(e.Level)(bld.String())

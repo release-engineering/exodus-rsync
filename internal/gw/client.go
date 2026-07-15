@@ -14,12 +14,9 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/rehttp"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 	"github.com/release-engineering/exodus-rsync/internal/walk"
@@ -36,8 +33,8 @@ func logConnectionClose(ctx context.Context, url string) {
 type client struct {
 	cfg        conf.Config
 	httpClient *http.Client
-	s3         *s3.S3
-	uploader   *s3manager.Uploader
+	s3         *s3.Client
+	uploader   *transfermanager.Client
 	dryRun     bool
 }
 
@@ -109,11 +106,11 @@ func (c *client) WhoAmI(ctx context.Context) (map[string]interface{}, error) {
 func (c *client) haveBlob(ctx context.Context, item walk.SyncItem) (bool, error) {
 	logger := log.FromContext(ctx)
 
-	fullURL := c.s3.Endpoint + "/" + c.cfg.GwEnv() + "/" + item.Key
+	fullURL := c.cfg.GwURL() + "/upload/" + c.cfg.GwEnv() + "/" + item.Key
 	logConnectionOpen(ctx, fullURL)
 	defer logConnectionClose(ctx, fullURL)
 
-	_, err := c.s3.HeadObject(&s3.HeadObjectInput{
+	_, err := c.s3.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(c.cfg.GwEnv()),
 		Key:    aws.String(item.Key),
 	})
@@ -123,10 +120,7 @@ func (c *client) haveBlob(ctx context.Context, item walk.SyncItem) (bool, error)
 		return true, nil
 	}
 
-	awsErr, isAwsErr := err.(awserr.Error)
-
-	if isAwsErr && awsErr.Code() == "NotFound" {
-		// Fine, object doesn't exist yet
+	if isNotFound(err) {
 		logger.F("key", item.Key).Debug("blob is not present")
 		return false, nil
 	}
@@ -154,13 +148,13 @@ func (c *client) uploadBlob(ctx context.Context, item walk.SyncItem) error {
 	}
 	defer file.Close()
 
-	fullURL := c.s3.Endpoint + "/" + c.cfg.GwEnv() + "/" + item.Key
+	fullURL := c.cfg.GwURL() + "/upload/" + c.cfg.GwEnv() + "/" + item.Key
 	logConnectionOpen(ctx, fullURL)
 	defer logConnectionClose(ctx, fullURL)
 
-	res, err := c.uploader.UploadWithContext(ctx, &s3manager.UploadInput{
+	res, err := c.uploader.UploadObject(ctx, &transfermanager.UploadObjectInput{
 		Bucket: aws.String(c.cfg.GwEnv()),
-		Key:    &item.Key,
+		Key:    aws.String(item.Key),
 		Body:   file,
 	})
 
@@ -438,30 +432,27 @@ func (impl) NewClient(ctx context.Context, cfg conf.Config) (Client, error) {
 	// retries for certain types of error.
 	out.httpClient = &http.Client{Transport: retryTransport(ctx, cfg, &transport)}
 
-	awsLogLevel := aws.LogOff
+	awsCfg := aws.Config{
+		Region:      "us-east-1",
+		Credentials: aws.AnonymousCredentials{},
+		HTTPClient:  s3HttpClient,
+		// GwMaxAttempts counts retries only (v1 MaxRetries / rehttp.RetryMaxRetries);
+		// SDK v2 RetryMaxAttempts counts the initial attempt too.
+		RetryMaxAttempts: cfg.GwMaxAttempts() + 1,
+	}
+	exodusGWChecksumConfig(&awsCfg)
+
+	appLogger := log.FromContext(ctx)
 	if cfg.Verbosity() > 2 || cfg.LogLevel() == "trace" {
-		awsLogLevel = aws.LogDebug
+		awsCfg.ClientLogMode = aws.LogRequest | aws.LogResponse
+		awsCfg.Logger = &log.SDKLogger{Logger: appLogger}
 	}
 
-	sess, err := ext.awsSessionProvider(session.Options{
-		SharedConfigState: session.SharedConfigDisable,
-		Config: aws.Config{
-			Endpoint:         aws.String(cfg.GwURL() + "/upload"),
-			S3ForcePathStyle: aws.Bool(true),
-			Region:           aws.String("us-east-1"),
-			Credentials:      credentials.AnonymousCredentials,
-			HTTPClient:       s3HttpClient,
-			Logger:           log.FromContext(ctx),
-			LogLevel:         aws.LogLevel(awsLogLevel),
-			MaxRetries:       aws.Int(cfg.GwMaxAttempts()),
-		},
+	out.s3 = s3.NewFromConfig(awsCfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(cfg.GwURL() + "/upload")
+		o.UsePathStyle = true
 	})
-	if err != nil {
-		return nil, fmt.Errorf("create AWS session: %w", err)
-	}
-
-	out.s3 = s3.New(sess)
-	out.uploader = s3manager.NewUploaderWithClient(out.s3)
+	out.uploader = newS3Uploader(out.s3)
 
 	return out, nil
 }

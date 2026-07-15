@@ -156,15 +156,20 @@ func TestBadFileBaseHandler(t *testing.T) {
 	f.Close()
 }
 
-func TestLogFunc(t *testing.T) {
-	// Ensure Log can be used and contains the "aws" field.
+func TestSDKLogger(t *testing.T) {
+	// Ensure SDKLogger routes through the application logger with aws/sdk fields.
 	h := memory.New()
 	logger := Package.NewLogger(args.Config{})
 	logger.Handler = h
 
-	logger.Log("hello")
+	(&SDKLogger{Logger: logger}).Logf("DEBUG", "hello %s", "world")
 
 	e := h.Entries[0]
-	assert.Equal(t, e.Message, "hello")
-	assert.Equal(t, apexLog.Fields{"aws": 1}, e.Fields)
+	assert.Equal(t, "hello world", e.Message)
+	assert.Equal(t, apexLog.Fields{"aws": 1, "sdk": "DEBUG"}, e.Fields)
+}
+
+func TestSDKLoggerNil(t *testing.T) {
+	// Nil logger is a no-op (e.g. when log context is unset during SDK debug logging).
+	(&SDKLogger{}).Logf("DEBUG", "ignored")
 }

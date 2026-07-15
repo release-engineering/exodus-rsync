@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 
@@ -169,10 +168,4 @@ func (l *Logger) StartPlatformLogger(cfg ConfigProvider) {
 		l.Handler,
 		handler,
 	)
-}
-
-// Log is intended for use by the AWS SDK logger and is necessary for
-// compatiblity with said package. Will log messages at debug level.
-func (l *Logger) Log(v ...interface{}) {
-	l.F("aws", 1).Debug(fmt.Sprint(v...))
 }
