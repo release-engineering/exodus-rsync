@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/release-engineering/exodus-rsync/internal/args"
 	"github.com/release-engineering/exodus-rsync/internal/log"
 	"github.com/release-engineering/exodus-rsync/internal/walk"
@@ -24,13 +23,13 @@ func typicalError(blobs blobMap) {
 func putError(blobs blobMap) {
 	// Querying this blob says it doesn't exist, but then uploading it fails.
 	blobs["abc123"] = []error{
-		awserr.New("NotFound", "not found", nil), // HEAD succeeds and says object doesn't exist
-		fmt.Errorf("simulated error"),            // PUT fails
+		errFakeObjectMissing,
+		fmt.Errorf("simulated error"),
 	}
 }
 
 func TestClientUploadErrors(t *testing.T) {
-	client, s3 := newClientWithFakeS3(t)
+	client, srv := newClientWithFakeS3(t)
 
 	chdirInTest(t, "../../test/data/srctrees/just-files")
 
@@ -47,7 +46,7 @@ func TestClientUploadErrors(t *testing.T) {
 		{"error checking blob",
 			[]walk.SyncItem{{SrcPath: "some-file", Key: "abc123"}},
 			typicalError,
-			"checking for presence of abc123: simulated error"},
+			"api error InternalServerError: Internal Server Error"},
 		{"nonexistent file",
 			[]walk.SyncItem{{SrcPath: "nonexistent-file", Key: "abc123"}},
 			defaultBlobs,
@@ -55,13 +54,13 @@ func TestClientUploadErrors(t *testing.T) {
 		{"PUT fails",
 			[]walk.SyncItem{{SrcPath: "hello-copy-one", Key: "abc123"}},
 			putError,
-			"upload hello-copy-one: simulated error"},
+			"api error InternalError: simulated error"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s3.reset()
-			tt.setup(s3.blobs)
+			srv.Reset()
+			tt.setup(srv.Blobs())
 
 			err := client.EnsureUploaded(ctx, tt.items, func(item walk.SyncItem) error {
 				t.Fatal("unexpectedly uploaded something", item)

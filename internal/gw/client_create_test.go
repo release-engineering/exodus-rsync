@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/release-engineering/exodus-rsync/internal/conf"
 	"go.uber.org/mock/gomock"
 )
@@ -22,24 +21,6 @@ func TestNewClientCertError(t *testing.T) {
 
 	// Should have given us this error
 	if !strings.Contains(fmt.Sprint(err), "can't load cert/key") {
-		t.Error("did not get expected error, err =", err)
-	}
-}
-
-func TestNewClientSessionError(t *testing.T) {
-	cfg := testConfig(t)
-
-	oldProvider := ext.awsSessionProvider
-	defer func() { ext.awsSessionProvider = oldProvider }()
-
-	ext.awsSessionProvider = func(_ session.Options) (*session.Session, error) {
-		return nil, fmt.Errorf("simulated error")
-	}
-
-	_, err := Package.NewClient(context.Background(), cfg)
-
-	// Should have given us this error
-	if err.Error() != "create AWS session: simulated error" {
 		t.Error("did not get expected error, err =", err)
 	}
 }

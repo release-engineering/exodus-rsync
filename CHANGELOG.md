@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- n/a
+- Migrated exodus-gw S3 client from AWS SDK for Go v1 to v2 [RHELDST-40101]
+- Removed `github.com/aws/aws-sdk-go` v1 dependency; S3 uploads use `aws-sdk-go-v2` with anonymous credentials and path-style endpoints
 
 ## 1.12.3 - 2026-05-13
 

@@ -1,5 +1,8 @@
 default: exodus-rsync
 
+# go.mod requires 1.26.1; override GOTOOLCHAIN=local when set in the shell.
+GO := GOTOOLCHAIN=go1.26.1 go
+
 # Helper macros.
 
 # Wrap an autoformatter like gofmt with a failure message
@@ -13,21 +16,21 @@ BUILDFLAGS := -ldflags "-X github.com/release-engineering/exodus-rsync/internal/
 # CGO is disabled as it is problematic for cross compiling and we do not
 # currently use C dependencies. Enable if necessary.
 exodus-rsync: generate
-	CGO_ENABLED=0 go build $(BUILDFLAGS) ./cmd/exodus-rsync
+	CGO_ENABLED=0 $(GO) build $(BUILDFLAGS) ./cmd/exodus-rsync
 
 # Run automated tests while gathering coverage info.
 # Generated mocks are excluded from coverage report.
 check: generate
-	go test -covermode=atomic -coverprofile=coverage.out -coverpkg=./... ./...
+	$(GO) test -count=1 -covermode=atomic -coverprofile=coverage.out -coverpkg=./... ./...
 	sed -e '/[\/_]mock.go/ d' -i coverage.out
 
 # Run generate.
 generate:
-	go generate ./...
+	$(GO) generate ./...
 
 # Run linter.
 lint:
-	go run -modfile=go.tools.mod golang.org/x/lint/golint -set_exit_status ./...
+	$(GO) run -modfile=go.tools.mod golang.org/x/lint/golint -set_exit_status ./...
 
 # Reformat code, failing if any code was rewritten.
 fmt:
@@ -35,7 +38,7 @@ fmt:
 
 # Tidy imports, failing if any code was rewritten.
 imports:
-	@$(call fmt-cmd, go run -modfile=go.tools.mod golang.org/x/tools/cmd/goimports -l -w ., files were rewritten by goimports)
+	@$(call fmt-cmd, $(GO) run -modfile=go.tools.mod golang.org/x/tools/cmd/goimports -l -w ., files were rewritten by goimports)
 
 # Check for glibc symbol versioning problems.
 symver-check: exodus-rsync
@@ -43,7 +46,7 @@ symver-check: exodus-rsync
 
 # Run tests and open coverage report in browser.
 htmlcov: check
-	go tool cover -html=coverage.out
+	$(GO) tool cover -html=coverage.out
 
 # Delete generated files.
 clean:
