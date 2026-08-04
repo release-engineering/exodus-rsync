@@ -2,8 +2,14 @@
 
 ## Unreleased
 
+- n/a
+
+## 1.12.4 - 2026-08-04
+
 - Migrated exodus-gw S3 client from AWS SDK for Go v1 to v2 [RHELDST-40101]
 - Removed `github.com/aws/aws-sdk-go` v1 dependency; S3 uploads use `aws-sdk-go-v2` with anonymous credentials and path-style endpoints
+- Onboarded test coverage reporting to Codecov
+- Updated Go dependencies (`golang.org/x/crypto`, `golang.org/x/sys`, `golang.org/x/text`, `github.com/mattn/go-colorable`, `github.com/mattn/go-isatty`, `github.com/alecthomas/kong`, `github.com/go-playground/validator/v10`, `github.com/aws/aws-sdk-go-v2`, `github.com/aws/aws-sdk-go-v2/service/s3`, `github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager`, `github.com/aws/smithy-go`)
 
 ## 1.12.3 - 2026-05-13
 
