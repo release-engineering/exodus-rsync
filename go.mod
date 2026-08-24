@@ -5,7 +5,7 @@ go 1.26.1
 require (
 	github.com/PuerkitoBio/rehttp v1.4.0
 	github.com/adrg/xdg v0.5.3
-	github.com/alecthomas/kong v1.16.0
+	github.com/alecthomas/kong v1.16.1
 	github.com/apex/log v1.9.0
 	github.com/aws/aws-sdk-go-v2 v1.43.7
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.34
