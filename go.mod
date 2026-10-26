@@ -13,7 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 	github.com/aws/smithy-go v1.28.5
 	github.com/coreos/go-systemd/v22 v22.7.0
-	github.com/gabriel-vasile/mimetype v1.4.15
+	github.com/gabriel-vasile/mimetype v1.4.16
 	github.com/go-playground/validator/v10 v10.30.3
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/mock v0.6.0
